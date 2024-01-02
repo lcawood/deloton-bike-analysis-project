@@ -31,9 +31,9 @@ resource "aws_security_group" "c9_velo_securitygroup" {
   }
 }
 
-resource "aws_db_instance" "c9_velo_deloton_db" {
+resource "aws_db_instance" "c9_velo_deloton" {
   allocated_storage = 10
-  identifier = "c9_velo_deloton_db"
+  identifier = "c9-velo-deloton"
   publicly_accessible = true
   engine = "postgres"
   engine_version = "15.3"
