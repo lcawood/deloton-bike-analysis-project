@@ -62,7 +62,7 @@ CREATE TABLE Reading(
     power SMALLINT NOT NULL,
     rpm SMALLINT NOT NULL,
     resistance SMALLINT NOT NULL,
-    elapsed_time SMALLINT NOT NULL,
+    elapsed_time INT NOT NULL,
     UNIQUE (ride_id,elapsed_time)
 );
 
