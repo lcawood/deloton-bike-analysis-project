@@ -15,6 +15,8 @@ These are:
 
 from datetime import datetime
 
+# TODO assume birthdate is in date format.
+
 
 def calculate_age(birthdate: str) -> int:
     """
@@ -48,3 +50,23 @@ def calculate_max_heart_rate(user_details: dict) -> int:
     elif gender == "male" and age >= 40:
         return round(208 - (0.7 * age))
     return 0
+
+
+def calculate_max_heart_rate(user_details: dict) -> int:
+    """Returns the maximum heart rate for the given user based on their age and gender."""
+    birthdate = user_details.get('birthdate')
+    age = calculate_age(birthdate)
+    gender = user_details.get('gender')
+
+    if gender == "female":
+        return round(206 - (0.88 * age))
+    elif gender == "male" and age < 40:
+        return round(220 - age)
+    elif gender == "male" and age >= 40:
+        return round(208 - (0.7 * age))
+    return 0
+
+
+def send_email() -> None:
+    """Sends an email to the relevant email address using AWS SES."""
+    pass
