@@ -19,6 +19,30 @@ def get_database_connection() -> extensions.connection:
                             )
 
 
+def load_address_into_database(db_connection : extensions.connection, address : dict) -> int:
+    """Loads an Address into the database using SQL"""
+
+    with db_connection.cursor() as db_cur:
+       
+            query = """INSERT INTO Address(first_line,second_line,city,postcode) 
+            VALUES (%s,%s,%s,%s) RETURNING address_id;"""
+
+            parameters = (address["first_line"],address["second_line"],address["city"],
+                          address["postcode"])
+
+            db_cur.execute(query,parameters)
+
+            address_id = db_cur.fetchone()
+
+            db_connection.commit()
+
+            return address_id
+
+def select_address_from_database(db_connection : extensions.connection, address : dict) -> int:
+      """Selects a address id from the database using the address dict passed in and a SQL Select Query"""
+
+      
+
 def load_user_into_database(db_connection : extensions.connection, user : dict) -> int:
     """Loads a user into the database using SQL."""
 
