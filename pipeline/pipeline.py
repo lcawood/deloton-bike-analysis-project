@@ -8,11 +8,12 @@ from dotenv import load_dotenv
 
 import transform
 import load
-import database_functions
+import validate_heart_rate
 
 
 load_dotenv()
 GROUP_ID = "testing"
+EXTREME_HR_COUNT_THRESHOLD = 3
 
 
 
@@ -52,22 +53,41 @@ def pipeline():
 
         if "beginning of a new ride" in log_line:
             new_ride = True
-            count = 0
+            reading_count = 0
 
         elif ('[SYSTEM]' in log_line) and new_ride:
             user = transform.get_user_from_log_line(log_line)
-            if not database_functions.get_user_by_id(user['user_id']):
-                load.add_user(user)
+            address = transform.get_address_from_log_line(log_line)
+            user['address_id'] = load.add_address(address)
+            load.add_user(user)
+
+            user['max_heart_rate'] = validate_heart_rate.calculate_max_heart_rate(user)
+            user['min_heart_rate'] = validate_heart_rate.calculate_min_heart_rate(user)
+            consecutive_extreme_hrs = 0
+
+            bike_id = transform.get_bike_id_from_log_line(log_line)
+            load.add_bike(bike_id)
 
             ride_info = transform.get_ride_data_from_log_line(log_line)
+            ride_info['bike_id'] = bike_id
+
             ride_id = load.add_ride(ride_info)
             reading = {'ride_id': ride_id}
             new_ride = False
         
         elif ('[INFO]' in log_line) and (not new_ride):
             reading = transform.get_reading_data_from_log_line(reading, log_line)
-            count = (count + 1) % 2  # Readings come in pairs
-            if count == 0:
+            reading_count = (reading_count + 1) % 2  # Readings come in pairs
+
+            if reading_count == 0:
+                if user['min_heart_rate'] <= reading['heart_rate'] <= user['max_heart_rate']:
+                    consecutive_extreme_hrs = 0
+                else:
+                    consecutive_extreme_hrs += 1
+
+                if consecutive_extreme_hrs >= EXTREME_HR_COUNT_THRESHOLD:
+                    validate_heart_rate.send_email()
+
                 load.add_reading(reading)
                 reading = {'ride_id': ride_id}
 
