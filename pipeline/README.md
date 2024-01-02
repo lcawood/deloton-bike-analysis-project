@@ -9,12 +9,12 @@ Python script to establish connection to Kafka stream, retrieve log lines, and t
     - confluent-kafka
     - python-dotenv
  - Enviroment variables (in `.env` file or otherwise):
-    - KAFKA_TOPIC=deloton
-    - BOOTSTRAP_SERVERS=pkc-l6wr6.europe-west2.gcp.confluent.cloud:9092r
-    - SECURITY_PROTOCOL=SASL_SSL
-    - SASL_MECHANISM=PLAIN
-    - USERNAME=RK2BFUEPXKGZN3VL
-    - PASSWORD=XFkrzeHVBwPcsFaSPEaFvc00zdvJKGS8e3v/Uxpb/YvzJmW/tG9lNMuofhiZD43D
+    - KAFKA_TOPIC
+    - BOOTSTRAP_SERVERS
+    - SECURITY_PROTOCOL
+    - SASL_MECHANISM
+    - USERNAME
+    - PASSWORD
 
 ### Dependencies:
  - `transform.py`
