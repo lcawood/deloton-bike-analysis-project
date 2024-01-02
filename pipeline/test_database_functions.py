@@ -24,9 +24,9 @@ def test_load_address_into_database():
     
     mock_fetch.return_value = (1,)
 
-    result = load_address_into_database(mock_conn, EXAMPLE_ADDRESS)
+    address_id = load_address_into_database(mock_conn, EXAMPLE_ADDRESS)
 
     mock_execute.assert_called_once()
     mock_fetch.assert_called_once()
 
-    assert result == 1
+    assert address_id == 1
