@@ -73,10 +73,8 @@ def calculate_min_heart_rate(user_details: dict) -> int:
 
         if 18 <= age <= 39:
             return 45
-
         elif 40 <= age <= 64:
             return 52
-
         elif age >= 65:
             return 57
 
@@ -84,10 +82,8 @@ def calculate_min_heart_rate(user_details: dict) -> int:
 
         if 18 <= age <= 39:
             return 40
-
         elif 40 <= age <= 64:
             return 47
-
         elif age >= 65:
             return 52
 
