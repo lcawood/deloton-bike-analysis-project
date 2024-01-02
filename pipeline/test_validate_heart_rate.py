@@ -5,11 +5,8 @@ The global constant ages are valid as of January 2024.
 """
 
 from datetime import datetime
-import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-import boto3
-from botocore.stub import Stubber
 import pytest
 
 from validate_heart_rate import (calculate_max_heart_rate, calculate_min_heart_rate,
@@ -30,6 +27,7 @@ BIRTHDATE_AGE_65 = datetime.strptime('1959-01-01', "%Y-%m-%d")
     (BIRTHDATE_AGE_65, 65)
 ])
 def test_calculate_age_valid(birthdate: str, age: int):
+    """Test that the expected ages are returned for the given datetime objects."""
     assert calculate_age(birthdate) == age
 
 
@@ -44,6 +42,7 @@ def test_calculate_age_valid(birthdate: str, age: int):
     ({"birthdate": BIRTHDATE_AGE_45, "gender": 'female'}, 166)  # age = 45
 ])
 def test_calculate_max_heart_rate_valid(user_details: dict, threshold: int):
+    """Test that the expected maximum heart rates are returned for the given users."""
     assert calculate_max_heart_rate(user_details) == threshold
 
 
@@ -60,6 +59,7 @@ def test_calculate_max_heart_rate_valid(user_details: dict, threshold: int):
     ({"birthdate": BIRTHDATE_AGE_65, "gender": 'female'}, 57)  # age = 65
 ])
 def test_calculate_min_heart_rate_valid(user_details: dict, threshold: int):
+    """Test that the expected minimum heart rates are returned for the given users."""
     assert calculate_min_heart_rate(user_details) == threshold
 
 
