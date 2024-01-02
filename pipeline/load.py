@@ -17,4 +17,4 @@ def add_reading(reading: dict):
 
 
 def add_bike(bike_serial_number: int):
-    """adds bike id as record in Bike table in the db."""
+    """adds bike serial number as record in Bike table in the db."""
