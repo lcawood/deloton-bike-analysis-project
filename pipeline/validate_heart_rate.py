@@ -22,8 +22,11 @@ def calculate_age(birthdate: str) -> int:
     milliseconds since the Unix epoch (January 1, 1970, 00:00:00 UTC).
     """
     birthdate_in_seconds = int(birthdate)/1000
+    print(birthdate_in_seconds)
     birth_date = datetime.utcfromtimestamp(birthdate_in_seconds)
+    print(birth_date)
     current_date = datetime.utcnow()
+    print(current_date)
 
     age = current_date.year - birth_date.year - \
         ((current_date.month, current_date.day)
@@ -34,4 +37,14 @@ def calculate_age(birthdate: str) -> int:
 
 def calculate_max_heart_rate(user_details: dict) -> int:
     """Returns the maximum heart rate for the given user based on their age and gender."""
-    pass
+    birthdate = user_details.get('birthdate')
+    age = calculate_age(birthdate)
+    gender = user_details.get('gender')
+
+    if gender == "female":
+        return round(206 - (0.88 * age))
+    elif gender == "male" and age < 40:
+        return round(220 - age)
+    elif gender == "male" and age >= 40:
+        return round(208 - (0.7 * age))
+    return 0
