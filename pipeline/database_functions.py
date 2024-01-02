@@ -40,6 +40,7 @@ def load_address_into_database(db_connection : extensions.connection, address : 
 
 def select_address_from_database(db_connection : extensions.connection, address : dict) -> int:
       """Selects a address id from the database using the address dict passed in and a SQL Select Query"""
+      pass
 
       
 
