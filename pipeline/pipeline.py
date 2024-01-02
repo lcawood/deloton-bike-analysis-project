@@ -69,7 +69,7 @@ def pipeline():
             bike_id = load.add_bike(bike_serial_number)
 
             ride_info = transform.get_ride_data_from_log_line(log_line)
-            ride_info['bike'] = bike_serial_number
+            ride_info['bike_id'] = bike_id
 
             ride_id = load.add_ride(ride_info)
             reading = {'ride_id': ride_id}
