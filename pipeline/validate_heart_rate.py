@@ -8,11 +8,12 @@ This script contains functions that:
 The thresholds are set based on the maximum heart rate for the user based on their age and gender.
 Several formulas are used to ensure accuracy for different categories of users.
 These are:
-- Tanaka Formula (women over age 40 and men of all ages): 208 - (0.7 x age)
-- Gulati Formula (women only): 206 - (0.88 x age)
+- Gulati Formula (women): 206 - (0.88 x age)
+- Tanaka Formula (men over age 40): 208 - (0.7 x age)
+- Fox formula (men under age 40): 220 - age
 """
 
 
-def calculate_maximum_heart_rate(user_details: dict) -> int:
+def calculate_max_heart_rate(user_details: dict) -> int:
     """Returns the maximum heart rate for the given user based on their age and gender."""
     pass
