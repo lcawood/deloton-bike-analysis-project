@@ -11,3 +11,8 @@ These are:
 - Tanaka Formula (women over age 40 and men of all ages): 208 - (0.7 x age)
 - Gulati Formula (women only): 206 - (0.88 x age)
 """
+
+
+def calculate_maximum_heart_rate(user_details: dict) -> int:
+    """Returns the maximum heart rate for the given user based on their age and gender."""
+    pass
