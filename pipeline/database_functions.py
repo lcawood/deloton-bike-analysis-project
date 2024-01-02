@@ -111,3 +111,77 @@ def select_ride_from_database(db_connection : extensions.connection, ride : dict
             db_connection.commit()
 
             return ride_id[0]
+      
+
+def load_reading_into_database(db_connection : extensions.connection, reading : dict) -> int:
+    """Loads an Reading into the database using SQL"""
+
+    with db_connection.cursor() as db_cur:
+       
+            query = """INSERT INTO Reading(ride_id,heart_rate,power,rpm,resistance,elapsed_time) 
+            VALUES (%s,%s,%s,%s,%s,%s) RETURNING reading_id;"""
+
+            parameters = (reading["ride_id"],reading["heart_rate"],reading["power"],
+                          reading["rpm"],reading["resistance"],reading["elapsed_time"])
+
+            db_cur.execute(query,parameters)
+
+            reading_id = db_cur.fetchone()
+
+            db_connection.commit()
+
+            return reading_id[0]
+
+def select_reading_from_database(db_connection : extensions.connection, reading : dict) -> int:
+      """Selects a reading id from the database using the reading dict passed in and a SQL Select Query"""
+      
+      with db_connection.cursor() as db_cur:
+            
+            query = """SELECT reading_id FROM Reading WHERE ride_id=%s 
+            AND elapsed_time=%s"""
+
+            parameters = (reading["ride_id"],reading["elapsed_time"])
+
+            db_cur.execute(query,parameters)
+
+            reading_id = db_cur.fetchone()
+
+            db_connection.commit()
+
+            return reading_id[0]
+      
+
+def load_bike_into_database(db_connection : extensions.connection, bike_serial_number : int) -> int:
+    """Loads an Bike into the database using SQL"""
+
+    with db_connection.cursor() as db_cur:
+       
+            query = """INSERT INTO Bike(serial_number) 
+            VALUES (%s) RETURNING reading_id;"""
+
+            parameters = (bike_serial_number)
+
+            db_cur.execute(query,parameters)
+
+            bike_id = db_cur.fetchone()
+
+            db_connection.commit()
+
+            return bike_id[0]
+
+def select_bike_from_database(db_connection : extensions.connection, bike_serial_number : int) -> int:
+      """Selects a bike id from the database using the bike serial number passed in and a SQL Select Query"""
+      
+      with db_connection.cursor() as db_cur:
+            
+            query = """SELECT bike_id FROM Bike WHERE serial_number=%s"""
+
+            parameters = (bike_serial_number)
+
+            db_cur.execute(query,parameters)
+
+            bike_id = db_cur.fetchone()
+
+            db_connection.commit()
+
+            return bike_id[0]
