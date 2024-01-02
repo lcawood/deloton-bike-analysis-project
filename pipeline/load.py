@@ -1,9 +1,11 @@
 """Module to add the transformed data extracted from the kafka stream to the db."""
-
+from database_functions import get_database_connection
 
 def add_user(user: dict):
     """adds user dictionary as a record in the Rider table in the db."""
-    pass
+    connection = get_database_connection()
+
+    
 
 
 def add_ride(ride: dict) -> int:
