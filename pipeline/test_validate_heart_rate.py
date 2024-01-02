@@ -5,10 +5,15 @@ The global constant ages are valid as of January 2024.
 """
 
 from datetime import datetime
+import unittest
+from unittest.mock import patch, MagicMock
 
+import boto3
+from botocore.stub import Stubber
 import pytest
 
-from validate_heart_rate import calculate_max_heart_rate, calculate_min_heart_rate, calculate_age
+from validate_heart_rate import (calculate_max_heart_rate, calculate_min_heart_rate,
+                                 calculate_age, send_email)
 
 BIRTHDATE_AGE_64 = datetime.strptime('1960-01-01', "%Y-%m-%d")
 BIRTHDATE_AGE_45 = datetime.strptime('1979-01-01', "%Y-%m-%d")
@@ -27,8 +32,6 @@ BIRTHDATE_AGE_65 = datetime.strptime('1959-01-01', "%Y-%m-%d")
 def test_calculate_age_valid(birthdate: str, age: int):
     assert calculate_age(birthdate) == age
 
-# calculate_max_heart_rate()
-
 
 @pytest.mark.parametrize('user_details, threshold', [
     ({"birthdate": BIRTHDATE_AGE_18, "gender": 'male'}, 202),  # age = 18
@@ -44,7 +47,6 @@ def test_calculate_max_heart_rate_valid(user_details: dict, threshold: int):
     assert calculate_max_heart_rate(user_details) == threshold
 
 
-# calculate_min_heart_rate()
 @pytest.mark.parametrize('user_details, threshold', [
     ({"birthdate": BIRTHDATE_AGE_18, "gender": 'male'}, 40),  # age = 18
     ({"birthdate": BIRTHDATE_AGE_35, "gender": 'male'}, 40),  # age = 35
@@ -59,3 +61,23 @@ def test_calculate_max_heart_rate_valid(user_details: dict, threshold: int):
 ])
 def test_calculate_min_heart_rate_valid(user_details: dict, threshold: int):
     assert calculate_min_heart_rate(user_details) == threshold
+
+
+@patch('boto3.client')
+def test_ses_send_email(mock_boto_client):
+    """send_email() should call .send_email once to send an SES email."""
+
+    mock_boto_client.return_value = mock_boto_client
+    mock_boto_client.get_parameter.return_value = {}
+
+    fake_user_details = {
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "fake_email@hotmail.com"
+    }
+
+    fake_hr_counts = [200, 200, 200]
+
+    send_email(fake_user_details, fake_hr_counts)
+
+    mock_boto_client.send_email.assert_called_once()
