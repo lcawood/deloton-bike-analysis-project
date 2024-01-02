@@ -13,6 +13,7 @@ def add_address(address : dict) -> int:
         address_id = load_address_into_database(connection,address)
         return address_id
     except errors.UniqueViolation:
+        connection.commit()
         address_id = select_address_from_database(connection,address)
         return address_id
 
@@ -21,9 +22,11 @@ def add_user(user: dict) -> int:
     """adds user dictionary as a record in the Rider table in the db."""
     connection = get_database_connection()
 
-    rider_id = load_user_into_database(connection,user)
-
-    return rider_id
+    try:
+        rider_id = load_user_into_database(connection,user)
+        return rider_id
+    except errors.UniqueViolation:
+        return user["user_id"]
 
 
 def add_ride(ride: dict) -> int:
