@@ -23,3 +23,5 @@ Run the database creation with `bash reset_db.sh`
     - A sql schema that contains all the tables required in the database to store the deloton data.
 - `reset_db.sh`
     - A bash script to reset the database. This drops all tables currently in the database and creates them again.
+- `connect_db.sh`
+    - A bash script to connect to the database.
