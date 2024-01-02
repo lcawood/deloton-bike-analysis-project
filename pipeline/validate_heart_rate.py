@@ -13,10 +13,23 @@ These are:
 - Fox formula (men under age 40): 220 - age
 """
 
+from datetime import datetime
+
 
 def calculate_age(birthdate: str) -> int:
-    """Returns the age in years for the given date."""
-    pass
+    """
+    Returns the age in years for the given date in
+    milliseconds since the Unix epoch (January 1, 1970, 00:00:00 UTC).
+    """
+    birthdate_in_seconds = int(birthdate)/1000
+    birth_date = datetime.utcfromtimestamp(birthdate_in_seconds)
+    current_date = datetime.utcnow()
+
+    age = current_date.year - birth_date.year - \
+        ((current_date.month, current_date.day)
+         < (birth_date.month, birth_date.day))
+
+    return age
 
 
 def calculate_max_heart_rate(user_details: dict) -> int:
