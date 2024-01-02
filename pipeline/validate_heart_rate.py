@@ -36,6 +36,7 @@ def calculate_age(birthdate: datetime) -> int:
     """
     Returns the age in years for the given date as a datetime object
     in the format YYYY-MM-DD.
+    'birthdate' is assumed to be cleaned and always as a datetime type.
     """
     current_date = datetime.utcnow()
 
@@ -47,22 +48,31 @@ def calculate_age(birthdate: datetime) -> int:
 
 
 def calculate_max_heart_rate(user_details: dict) -> int:
-    """Returns the maximum heart rate for the given user based on their age and gender."""
+    """
+    Returns the maximum heart rate for the given user based on their age and gender.
+
+    'birthdate' and 'gender' are assumed to be cleaned and
+    always as datetime and str types, respectively.
+    """
     birthdate = user_details.get('birthdate')
     age = calculate_age(birthdate)
     gender = user_details.get('gender')
 
     if gender == "female":
         return round(206 - (0.88 * age))
-    elif gender == "male" and age < 40:
+    if gender == "male" and age < 40:
         return round(220 - age)
-    elif gender == "male" and age >= 40:
-        return round(208 - (0.7 * age))
-    return 0
+
+    return round(208 - (0.7 * age))
 
 
 def calculate_min_heart_rate(user_details: dict) -> int:
-    """Returns the minimum heart rate for the given user based on their age and gender."""
+    """
+    Returns the minimum heart rate for the given user based on their age and gender.
+
+    'birthdate' and 'gender' are assumed to be cleaned and
+    always as datetime and str types, respectively.
+    """
     birthdate = user_details.get('birthdate')
     age = calculate_age(birthdate)
     gender = user_details.get('gender')
@@ -71,21 +81,17 @@ def calculate_min_heart_rate(user_details: dict) -> int:
 
         if 18 <= age <= 39:
             return 45
-        elif 40 <= age <= 64:
+        if 40 <= age <= 64:
             return 52
-        elif age >= 65:
-            return 57
+        return 57
 
-    elif gender == "male":
+    # male
+    if 18 <= age <= 39:
+        return 40
+    if 40 <= age <= 64:
+        return 47
 
-        if 18 <= age <= 39:
-            return 40
-        elif 40 <= age <= 64:
-            return 47
-        elif age >= 65:
-            return 52
-
-    return 0
+    return 52
 
 
 def send_email(user_details: dict, extreme_hr_counts: list[int]) -> None:
@@ -99,7 +105,7 @@ def send_email(user_details: dict, extreme_hr_counts: list[int]) -> None:
     first_name = user_details.get("first_name")
     last_name = user_details.get("last_name")
 
-    response = ses_client.send_email(
+    ses_client.send_email(
         Destination={
             "ToAddresses": [
                 user_email,
