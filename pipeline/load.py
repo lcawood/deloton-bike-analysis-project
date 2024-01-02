@@ -16,5 +16,5 @@ def add_reading(reading: dict):
     pass
 
 
-def add_bike(bike_id: int):
+def add_bike(bike_serial_number: int):
     """adds bike id as record in Bike table in the db."""
