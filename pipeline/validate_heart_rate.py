@@ -88,14 +88,6 @@ def calculate_min_heart_rate(user_details: dict) -> int:
     return 0
 
 
-def verify_email_identity():
-    """Verifies email to send email using SES, resulting in an email being sent to the users email address."""
-    ses_client = boto3.client("ses", region_name="eu-west-2")
-    response = ses_client.verify_email_identity(
-        EmailAddress="trainee.dawid.dawidowski@sigmalabs.co.uk"
-    )
-
-
 def send_email(user_details: dict, extreme_hr_counts: list[int]) -> None:
     """
     Sends an email to the relevant email address using AWS SES,
@@ -117,9 +109,9 @@ def send_email(user_details: dict, extreme_hr_counts: list[int]) -> None:
             "Body": {
                 "Text": {
                     "Charset": CHARSET,
-                    "Data": f"{first_name} {last_name}, your detected heart rate is abnormal! \
+                    "Data": f"""{first_name} {last_name}, your detected heart rate is abnormal!
                     Your heart rate readings are {extreme_hr_counts}.
-                    Please rest or seek some help.",
+                    Please rest or seek some help.""",
                 }
             },
             "Subject": {
