@@ -2,17 +2,20 @@
 
 import pytest
 
-from validate_heart_rate import calculate_max_heart_rate, calculate_age
+from validate_heart_rate import calculate_max_heart_rate, calculate_min_heart_rate, calculate_age
 
 
 @pytest.mark.parametrize('birthdate, age', [
     ('-336700800000', 64),
     ('256700800000', 45),
     ('1111700800000', 18),
-    ('571700800000', 35)
+    ('571700800000', 35),
+    ('-356700800000', 65)
 ])
 def test_calculate_age_valid(birthdate: str, age: int):
     assert calculate_age(birthdate) == age
+
+# calculate_max_heart_rate()
 
 
 @pytest.mark.parametrize('user_details, threshold', [
@@ -27,3 +30,20 @@ def test_calculate_age_valid(birthdate: str, age: int):
 ])
 def test_calculate_max_heart_rate_valid(user_details: dict, threshold: int):
     assert calculate_max_heart_rate(user_details) == threshold
+
+
+# calculate_min_heart_rate()
+@pytest.mark.parametrize('user_details, threshold', [
+    ({"birthdate": '1111700800000', "gender": 'male'}, 40),  # age = 18
+    ({"birthdate": '571700800000', "gender": 'male'}, 40),  # age = 35
+    ({"birthdate": '1111700800000', "gender": 'female'}, 45),  # age = 18
+    ({"birthdate": '571700800000', "gender": 'female'}, 45),  # age = 35
+    ({"birthdate": '-336700800000', "gender": 'male'}, 47),  # age = 64
+    ({"birthdate": '256700800000', "gender": 'male'}, 47),  # age = 45
+    ({"birthdate": '-336700800000', "gender": 'female'}, 52),  # age = 64
+    ({"birthdate": '256700800000', "gender": 'female'}, 52),  # age = 45
+    ({"birthdate": '-356700800000', "gender": 'male'}, 52),  # age = 65
+    ({"birthdate": '-356700800000', "gender": 'female'}, 57)  # age = 65
+])
+def test_calculate_min_heart_rate_valid(user_details: dict, threshold: int):
+    assert calculate_min_heart_rate(user_details) == threshold

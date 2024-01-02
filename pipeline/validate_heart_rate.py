@@ -90,6 +90,6 @@ def calculate_min_heart_rate(user_details: dict) -> int:
     return 0
 
 
-def send_email() -> None:
+def send_email(user_details: dict, extreme_hr_count: int) -> None:
     """Sends an email to the relevant email address using AWS SES."""
     pass
