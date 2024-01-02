@@ -14,6 +14,11 @@ These are:
 """
 
 
+def calculate_age(birthdate: str) -> int:
+    """Returns the age in years for the given date."""
+    pass
+
+
 def calculate_max_heart_rate(user_details: dict) -> int:
     """Returns the maximum heart rate for the given user based on their age and gender."""
     pass

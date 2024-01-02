@@ -2,7 +2,14 @@
 
 import pytest
 
-from validate_heart_rate import calculate_max_heart_rate
+from validate_heart_rate import calculate_max_heart_rate, calculate_age
+
+
+@pytest.mark.parametrize('birthdate, age', [
+    ('-336700800000', 64)
+])
+def test_calculate_age_valid(birthdate: str, age: int):
+    assert calculate_age(birthdate) == age
 
 
 @pytest.mark.parametrize('user_details, threshold', [
