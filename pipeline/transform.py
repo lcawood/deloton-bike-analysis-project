@@ -22,6 +22,11 @@ def get_reading_data_from_log_line(reading: dict, log_line: str) -> dict:
     pass
 
 
+def get_bike_serial_number_from_log_line(log_line: str) -> int:
+    """Takes in a kafka log line, and returns bike serial number from it."""
+    pass
+
+
 def get_address_from_log_line(log_line: str) -> dict:
     """Takes in a kafka log line and returns a dictionary of address data from it."""
     pass
