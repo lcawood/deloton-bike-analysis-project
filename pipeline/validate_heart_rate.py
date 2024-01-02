@@ -29,21 +29,16 @@ from datetime import datetime
 # TODO assume birthdate is in date format.
 
 
-def calculate_age(birthdate: str) -> int:
+def calculate_age(birthdate: datetime) -> int:
     """
-    Returns the age in years for the given date in
-    milliseconds since the Unix epoch (January 1, 1970, 00:00:00 UTC).
+    Returns the age in years for the given date as a datetime object
+    in the format YYYY-MM-DD.
     """
-    birthdate_in_seconds = int(birthdate)/1000
-    print(birthdate_in_seconds)
-    birth_date = datetime.utcfromtimestamp(birthdate_in_seconds)
-    print(birth_date)
     current_date = datetime.utcnow()
-    print(current_date)
 
-    age = current_date.year - birth_date.year - \
+    age = current_date.year - birthdate.year - \
         ((current_date.month, current_date.day)
-         < (birth_date.month, birth_date.day))
+         < (birthdate.month, birthdate.day))
 
     return age
 
@@ -90,6 +85,6 @@ def calculate_min_heart_rate(user_details: dict) -> int:
     return 0
 
 
-def send_email(user_details: dict, extreme_hr_count: int) -> None:
+def send_email(user_details: dict, extreme_hr_counts: list[int]) -> None:
     """Sends an email to the relevant email address using AWS SES."""
     pass
