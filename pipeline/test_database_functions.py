@@ -1,4 +1,5 @@
 """Tests the database functions work as intended. Ensures they correctly query the database."""
+from unittest.mock import MagicMock
 
 from database_functions import load_user_into_database,load_address_into_database,select_address_from_database,load_ride_into_database,select_ride_from_database,load_reading_into_database,select_reading_from_database
 
@@ -11,3 +12,21 @@ EXAMPLE_ADDRESS = {"first_line" : "63 Studio","second_line" : "Nursery Avenue", 
 
 def test_load_address_into_database():
     """Tests that a address gets correctly loaded into the database"""
+
+    mock_conn = MagicMock()
+
+    mock_execute = mock_conn.cursor.return_value\
+            .__enter__.return_value\
+            .execute
+    mock_fetch = mock_conn.cursor.return_value\
+            .__enter__.return_value\
+            .fetchone
+    
+    mock_fetch.return_value = (1,)
+
+    result = load_address_into_database(mock_conn, EXAMPLE_ADDRESS)
+
+    mock_execute.assert_called_once()
+    mock_fetch.assert_called_once()
+
+    assert result == 1
