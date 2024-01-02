@@ -26,7 +26,10 @@ These are:
 
 from datetime import datetime
 
-# TODO assume birthdate is in date format.
+import boto3
+
+
+CHARSET = "UTF-8"
 
 
 def calculate_age(birthdate: datetime) -> int:
@@ -85,6 +88,43 @@ def calculate_min_heart_rate(user_details: dict) -> int:
     return 0
 
 
+# def verify_email_identity():
+#     """Verifies email to send email using SES, resulting in an email being sent to the users email address."""
+#     ses_client = boto3.client("ses", region_name="eu-west-2")
+#     response = ses_client.verify_email_identity(
+#         EmailAddress="trainee.dawid.dawidowski@sigmalabs.co.uk"
+#     )
+
+
 def send_email(user_details: dict, extreme_hr_counts: list[int]) -> None:
-    """Sends an email to the relevant email address using AWS SES."""
-    pass
+    """
+    Sends an email to the relevant email address using AWS SES,
+    assuming the user email address is already verified.
+    """
+    ses_client = boto3.client("ses", region_name="us-west-2")
+
+    user_email = user_details.get("email")
+    first_name = user_details.get("first_name")
+    last_name = user_details.get("last_name")
+
+    response = ses_client.send_email(
+        Destination={
+            "ToAddresses": [
+                user_email,
+            ],
+        },
+        Message={
+            "Body": {
+                "Text": {
+                    "Charset": CHARSET,
+                    "Data": f"{first_name} {last_name}, your detected heart rate is abnormal! \
+                        Please rest or seek help.",
+                }
+            },
+            "Subject": {
+                "Charset": CHARSET,
+                "Data": "Deloton Heart Rate Alert",
+            },
+        },
+        Source="trainee.dawid.dawidowski@sigmalabs.co.uk",
+    )
