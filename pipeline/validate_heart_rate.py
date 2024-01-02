@@ -11,6 +11,17 @@ These are:
 - Gulati Formula (women): 206 - (0.88 x age)
 - Tanaka Formula (men over age 40): 208 - (0.7 x age)
 - Fox formula (men under age 40): 220 - age
+
+The threshold for a minimum heart rate is assumed to be the lower end of an athletes
+resting heart rate to also accommodate for high performance users.
+These are:
+- Men 18-39: 40
+- Men 40-64: 47
+- Men 65+: 52
+- Women 18-39: 45
+- Women 40-64: 52
+- Women 65+: 57
+
 """
 
 from datetime import datetime
@@ -57,7 +68,30 @@ def calculate_min_heart_rate(user_details: dict) -> int:
     birthdate = user_details.get('birthdate')
     age = calculate_age(birthdate)
     gender = user_details.get('gender')
-    pass
+
+    if gender == "female":
+
+        if 18 <= age <= 39:
+            return 45
+
+        elif 40 <= age <= 64:
+            return 52
+
+        elif age >= 65:
+            return 57
+
+    elif gender == "male":
+
+        if 18 <= age <= 39:
+            return 40
+
+        elif 40 <= age <= 64:
+            return 47
+
+        elif age >= 65:
+            return 52
+
+    return 0
 
 
 def send_email() -> None:
