@@ -63,13 +63,13 @@ def pipeline():
 
             user['max_heart_rate'] = validate_heart_rate.calculate_max_heart_rate(user)
             user['min_heart_rate'] = validate_heart_rate.calculate_min_heart_rate(user)
-            consecutive_extreme_hrs = 0
+            consecutive_extreme_hrs = []
 
-            bike_id = transform.get_bike_id_from_log_line(log_line)
-            load.add_bike(bike_id)
+            bike_serial_number = transform.get_bike_serial_number_from_log_line(log_line)
+            bike_id = load.add_bike(bike_serial_number)
 
             ride_info = transform.get_ride_data_from_log_line(log_line)
-            ride_info['bike_id'] = bike_id
+            ride_info['bike'] = bike_serial_number
 
             ride_id = load.add_ride(ride_info)
             reading = {'ride_id': ride_id}
@@ -81,12 +81,13 @@ def pipeline():
 
             if reading_count == 0:
                 if user['min_heart_rate'] <= reading['heart_rate'] <= user['max_heart_rate']:
-                    consecutive_extreme_hrs = 0
+                    consecutive_extreme_hrs = []
                 else:
-                    consecutive_extreme_hrs += 1
+                    consecutive_extreme_hrs.append(reading['heart_rate'])
 
-                if consecutive_extreme_hrs >= EXTREME_HR_COUNT_THRESHOLD:
-                    validate_heart_rate.send_email()
+                if len(consecutive_extreme_hrs) % EXTREME_HR_COUNT_THRESHOLD == 0:
+                    validate_heart_rate.send_email(user, consecutive_extreme_hrs)
+                    consecutive_extreme_hrs = 0
 
                 load.add_reading(reading)
                 reading = {'ride_id': ride_id}
