@@ -1,0 +1,70 @@
+-- This file should contain all code required to create & seed database tables.
+DROP TABLE IF EXISTS Reading;
+DROP TABLE IF EXISTS Ride;
+DROP TABLE IF EXISTS Bike;
+DROP TABLE IF EXISTS User;
+DROP TABLE IF EXISTS Address;
+
+CREATE TABLE Address(
+    address_id SERIAL PRIMARY KEY,
+    first_line TEXT NOT NULL,
+    second_line TEXT,
+    city TEXT NOT NULL,
+    postcode TEXT NOT NULL,
+    UNIQUE (first_line,city,postcode)
+);
+
+CREATE TABLE User(
+    user_id INT PRIMARY KEY,
+    address_id INT NOT NULL,
+    FOREIGN KEY (address_id)
+        REFERENCES Address(address_id)
+        ON DELETE CASCADE,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    birthdate DATE NOT NULL,
+    height SMALLINT NOT NULL,
+    weight SMALLINT NOT NULL,
+    email TEXT NOT NULL,
+    gender TEXT NOT NULL,
+    account_created DATE NOT NULL,
+    UNIQUE (first_name,last_name,email)
+);
+
+CREATE TABLE Bike(
+    bike_id SERIAL PRIMARY KEY,
+    serial_number TEXT NOT NULL,
+    UNIQUE (serial_number)
+);
+
+CREATE TABLE Ride(
+    ride_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id)
+        REFERENCES User(user_id)
+        ON DELETE CASCADE,
+    bike_id INT NOT NULL,
+    FOREIGN KEY (bike_id)
+        REFERENCES Bike(bike_id)
+        ON DELETE CASCADE,
+    start_time TIMESTAMP,
+    UNIQUE (user_id,bike_id,start_time)
+);
+
+
+CREATE TABLE Reading(
+    reading_id SERIAL PRIMARY KEY,
+    ride_id INT NOT NULL,
+    FOREIGN KEY (ride_id)
+        REFERENCES Ride(ride_id)
+        ON DELETE CASCADE,
+    heart_rate SMALLINT NOT NULL,
+    power SMALLINT NOT NULL,
+    rpm SMALLINT NOT NULL,
+    resistance SMALLINT NOT NULL,
+    elapsed_time SMALLINT NOT NULL,
+    UNIQUE (ride_id,elapsed_time)
+);
+
+
+COMMIT;
