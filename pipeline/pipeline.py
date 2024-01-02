@@ -12,7 +12,7 @@ import validate_heart_rate
 
 
 load_dotenv()
-GROUP_ID = "testing4"
+GROUP_ID = "testing5"
 EXTREME_HR_COUNT_THRESHOLD = 3
 
 
@@ -35,7 +35,7 @@ def get_kafka_consumer(group_id: str, topic: str = environ['KAFKA_TOPIC']) -> Co
 
     except KafkaException as e:
         raise e
-    
+
 
 def get_next_log_line(consumer: Consumer) -> str:
     """Function to retrieve and return next log line from kafka stream."""
@@ -75,7 +75,8 @@ def ride_pipeline(log_line: str, bike_id: int) -> int:
     return load.add_ride(ride_info)
 
 
-def reading_pipeline(log_line: str, ride_id: int, reading: dict, user: dict, consecutive_extreme_hrs: list) -> dict:
+def reading_pipeline(log_line: str, ride_id: int, reading: dict, user: dict,
+                     consecutive_extreme_hrs: list) -> dict:
     """
     Function to extract reading data from log_line, add it to reading dict, and (for every pair of
     readings) upload to db and alert user by email if their heart rate has had an extreme value
@@ -97,7 +98,7 @@ def reading_pipeline(log_line: str, ride_id: int, reading: dict, user: dict, con
         load.add_reading(reading)
         reading.clear()
         reading['ride_id'] = ride_id
-    
+
     return reading
 
 
@@ -107,14 +108,13 @@ def pipeline():
     utilises transform module to get data, and uses load module to upload to the db.
     """
     kafka_consumer = get_kafka_consumer(GROUP_ID)
-    
+
     new_ride = False
     while True:
         log_line = get_next_log_line(kafka_consumer)
 
         if "beginning of a new ride" in log_line:
             new_ride = True
-            reading_count = 0
 
         elif ('[SYSTEM]' in log_line) and new_ride:
             user = user_pipeline(log_line)
@@ -127,10 +127,10 @@ def pipeline():
 
             reading = {'ride_id': ride_id}
             new_ride = False
-        
+
         elif ('[INFO]' in log_line) and (not new_ride):
             reading = reading_pipeline(log_line, ride_id, reading, user, consecutive_extreme_hrs)
-            
+
 
 
 if __name__ == "__main__":
