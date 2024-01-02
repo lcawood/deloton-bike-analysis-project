@@ -2,7 +2,7 @@
 DROP TABLE IF EXISTS Reading;
 DROP TABLE IF EXISTS Ride;
 DROP TABLE IF EXISTS Bike;
-DROP TABLE IF EXISTS User;
+DROP TABLE IF EXISTS Rider;
 DROP TABLE IF EXISTS Address;
 
 CREATE TABLE Address(
@@ -14,8 +14,8 @@ CREATE TABLE Address(
     UNIQUE (first_line,city,postcode)
 );
 
-CREATE TABLE User(
-    user_id INT PRIMARY KEY,
+CREATE TABLE Rider(
+    rider_id INT PRIMARY KEY,
     address_id INT NOT NULL,
     FOREIGN KEY (address_id)
         REFERENCES Address(address_id)
@@ -39,16 +39,16 @@ CREATE TABLE Bike(
 
 CREATE TABLE Ride(
     ride_id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    FOREIGN KEY (user_id)
-        REFERENCES User(user_id)
+    rider_id INT NOT NULL,
+    FOREIGN KEY (rider_id)
+        REFERENCES Rider(rider_id)
         ON DELETE CASCADE,
     bike_id INT NOT NULL,
     FOREIGN KEY (bike_id)
         REFERENCES Bike(bike_id)
         ON DELETE CASCADE,
     start_time TIMESTAMP,
-    UNIQUE (user_id,bike_id,start_time)
+    UNIQUE (rider_id,bike_id,start_time)
 );
 
 
