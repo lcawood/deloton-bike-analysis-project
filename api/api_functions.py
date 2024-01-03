@@ -16,8 +16,8 @@ def get_ride(db_conn: connection, ride_id: int) -> (dict, int):
     database_functions, returning a dictionary of said ride with status code 200 if successful,
     and an error dict with appropriate status code if not.
     """
-    if not isinstance(ride_id, int):
-        return {'error': 'Invalid url; ride_id must be an integer.'}, 400
+    if (type(ride_id) != int) or (ride_id < 0):
+        return {'error': 'Invalid url; ride_id must be a positive integer.'}, 400
 
     try:
         ride = database_functions.get_ride_by_id(db_conn, ride_id)
@@ -36,8 +36,8 @@ def get_rider(db_conn: connection, rider_id: int) -> (dict, int):
     database_functions, returning a dictionary of said rider's information with status code 200 if
     successful, and an error dict with appropriate status code if not.
     """
-    if not isinstance(rider_id, int):
-        return {'error': 'Invalid url; rider_id must be an integer.'}, 400
+    if (type(rider_id) != int) or (rider_id < 0):
+        return {'error': 'Invalid url; rider_id must be a positive integer.'}, 400
 
     try:
         rider = database_functions.get_rider_by_id(db_conn, rider_id)
