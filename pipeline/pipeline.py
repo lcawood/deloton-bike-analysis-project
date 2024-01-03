@@ -1,13 +1,22 @@
-"""Pipeline script"""
+"""
+Pipeline script to establish connection to Kafka stream, retrieve log lines, and then transform and
+upload the relevant data to the database (using functions from the `transform.py` and `load.py`
+files as necessary).
 
-from os import environ
+User's max and min heart rates are calculated using functions from validate_heart_rate, and their
+heart rate given in the readings compared against them; if it above or below the healthy range too
+many times in a row (EXTREME_HR_COUNT_THRESHOLD), the validate_heart_rate function send_email is
+used to alert the user.
+"""
+
 import json
+from os import environ
 
 from confluent_kafka import Consumer, KafkaException, Message
 from dotenv import load_dotenv
 
-import transform
 import load
+import transform
 import validate_heart_rate
 
 
