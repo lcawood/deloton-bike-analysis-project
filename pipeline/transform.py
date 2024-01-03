@@ -31,14 +31,12 @@ def extract_datetime_from_string(input_string: str) -> datetime | None:
 
     pattern = r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+'
     match = re.search(pattern, input_string)
-    if match:
-        try:
-            datetime_obj = datetime.strptime(
-                match.group(), '%Y-%m-%d %H:%M:%S.%f')
-            if check_datetime_is_valid(datetime_obj):
-                return datetime_obj
-        except ValueError:
-            return None
+    try:
+        datetime_obj = datetime.strptime(
+            match.group(), '%Y-%m-%d %H:%M:%S.%f')
+        if check_datetime_is_valid(datetime_obj):
+            return datetime_obj
+    except ValueError:
         return None
     return None
 
