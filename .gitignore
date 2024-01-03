@@ -70,3 +70,4 @@ docker-experiments
 *.csv
 *.json
 *.log
+*.coverage
