@@ -14,7 +14,7 @@ This folder contains all code and resources required to create a Streamlit dashb
 
 - You need a database called `postgres`.
 
-Required env variables:
+Required env variables (NEED TO VERIFY):
 
 - `DATABASE_IP` -> ARN to your AWS RDS.
 - `DATABASE_USERNAME` -> Your database username.
@@ -22,3 +22,11 @@ Required env variables:
 - `DATABASE_PORT` -> Port used to access the database.
 - `AWS_ACCESS_KEY_ID` -> Your AWS access key ID to connect to AWS.
 - `AWS_SECRET_ACCESS_KEY` -> Your AWS secret access key to connect to AWS.
+
+## Wireframe
+
+Collapsed:
+![Dashboard wireframe design (collapsed)](./../diagrams/Dashboard_Wireframe_Collapsed.png)
+
+Expanded:
+![Dashboard wireframe design (expanded)](./../diagrams/Dashboard_Wireframe_Expanded.png)
