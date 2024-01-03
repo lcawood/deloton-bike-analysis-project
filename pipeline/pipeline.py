@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 import load
 import transform
 import validate_heart_rate
-GROUP_ID = "testing23"
+GROUP_ID = "testing24"
 EXTREME_HR_COUNT_THRESHOLD = 3
 
 
@@ -107,6 +107,7 @@ def pipeline():
     new_ride = False
     while True:
         log_line = get_next_log_line(kafka_consumer)
+        print(log_line)
         if "beginning of a new ride" in log_line:
             new_ride = True
         elif ('[SYSTEM]' in log_line) and new_ride:
