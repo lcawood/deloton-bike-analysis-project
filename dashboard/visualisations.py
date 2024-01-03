@@ -7,6 +7,12 @@ import streamlit as st
 import altair as alt
 
 
+def get_dashboard_title() -> None:
+    """Returns a title for the dashboard."""
+
+    st.title("Deloton Bike Analysis")
+
+
 def get_current_ride_header(rider_name: str) -> None:
     """Returns a header for the current ride and the rider's name."""
 

@@ -13,7 +13,7 @@ import streamlit as st
 
 from database import get_database_connection, get_current_ride_data
 from utilities import get_current_rider_name
-from visualisations import get_current_ride_header
+from visualisations import (get_current_ride_header, get_dashboard_title)
 
 
 if __name__ == "__main__":
@@ -31,5 +31,7 @@ if __name__ == "__main__":
     print(current_ride)
 
     rider_name = get_current_rider_name(current_ride)
+
+    get_dashboard_title()
 
     get_current_ride_header(rider_name)
