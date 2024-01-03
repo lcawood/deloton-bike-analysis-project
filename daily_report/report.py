@@ -89,6 +89,7 @@ background-color: #dddddd;
 
     return updated_html
 
+
 def sql_select_all_useful_data(db_connection : extensions.connection) -> pd.DataFrame:
     """Uses SQL to select all the needed data to create the useful report for the ceo"""
     query = """SELECT Ride.ride_id,Ride.rider_id,Ride.bike_id,Ride.start_time,
