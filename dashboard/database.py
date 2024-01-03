@@ -32,7 +32,7 @@ def get_current_ride_data(db_connection: extensions.connection) -> int:
     with db_connection.cursor() as db_cur:
 
         query = """
-        SELECT first_name, last_name, height, weight, gender,
+        SELECT first_name, last_name, height, weight, gender, birthdate
         heart_rate, power, resistance, elapsed_time
         FROM Ride
         JOIN Rider ON Ride.rider_id = Rider.rider_id
@@ -45,7 +45,5 @@ def get_current_ride_data(db_connection: extensions.connection) -> int:
         db_cur.execute(query)
 
         user_details = db_cur.fetchone()
-
-        db_connection.commit()
 
         return user_details
