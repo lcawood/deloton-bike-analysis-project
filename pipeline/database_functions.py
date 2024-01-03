@@ -9,7 +9,7 @@ from psycopg2 import extensions
 load_dotenv()
 
 def get_database_connection() -> extensions.connection:
-    """Return a connection our database"""
+    """Return a connection our database."""
 
     return psycopg2.connect(user=environ["DATABASE_USERNAME"],
                             password=environ["DATABASE_PASSWORD"],
@@ -20,7 +20,7 @@ def get_database_connection() -> extensions.connection:
 
 
 def load_address_into_database(db_connection : extensions.connection, address : dict) -> int:
-    """Loads an Address into the database using SQL"""
+    """Loads an Address from a dict into the database using SQL."""
 
     with db_connection.cursor() as db_cur:
 
@@ -41,7 +41,7 @@ def load_address_into_database(db_connection : extensions.connection, address : 
 def select_address_from_database(db_connection : extensions.connection, address : dict) -> int:
     """
     Selects a address id from the database using the address dict 
-    passed in and a SQL Select Query
+    passed in and a SQL Select Query.
     """
 
     with db_connection.cursor() as db_cur:
@@ -62,7 +62,7 @@ def select_address_from_database(db_connection : extensions.connection, address 
 
 
 def load_user_into_database(db_connection : extensions.connection, user : dict) -> int:
-    """Loads a user into the database using SQL."""
+    """Loads a user from the user dict into the database using SQL."""
 
     with db_connection.cursor() as db_cur:
 
@@ -81,7 +81,7 @@ def load_user_into_database(db_connection : extensions.connection, user : dict) 
         return rider_id[0]
 
 def load_ride_into_database(db_connection : extensions.connection, ride : dict) -> int:
-    """Loads an Ride into the database using SQL"""
+    """Loads an Ride from the ride dict into the database using SQL."""
 
     with db_connection.cursor() as db_cur:
 
@@ -101,7 +101,7 @@ def load_ride_into_database(db_connection : extensions.connection, ride : dict) 
 def select_ride_from_database(db_connection : extensions.connection, ride : dict) -> int:
     """
     Selects a ride id from the database using the ride dict 
-    passed in and a SQL Select Query
+    passed in and a SQL Select Query.
     """
 
     with db_connection.cursor() as db_cur:
@@ -121,7 +121,7 @@ def select_ride_from_database(db_connection : extensions.connection, ride : dict
 
 
 def load_reading_into_database(db_connection : extensions.connection, reading : dict) -> int:
-    """Loads an Reading into the database using SQL"""
+    """Loads an Reading from the reading dict into the database using SQL."""
 
     with db_connection.cursor() as db_cur:
 
@@ -142,7 +142,7 @@ def load_reading_into_database(db_connection : extensions.connection, reading : 
 def select_reading_from_database(db_connection : extensions.connection, reading : dict) -> int:
     """
     Selects a reading id from the database using the reading dict 
-    passed in and a SQL Select Query
+    passed in and a SQL Select Query.
     """
 
     with db_connection.cursor() as db_cur:
@@ -162,7 +162,7 @@ def select_reading_from_database(db_connection : extensions.connection, reading 
 
 
 def load_bike_into_database(db_connection : extensions.connection, bike_serial_number : int) -> int:
-    """Loads an Bike into the database using SQL"""
+    """Loads an Bike into the database using the bikes serial number and SQL."""
 
     with db_connection.cursor() as db_cur:
 
@@ -183,7 +183,7 @@ def select_bike_from_database(db_connection : extensions.connection,
                               bike_serial_number : int) -> int:
     """
     Selects a bike id from the database using the bike serial number 
-    passed in and a SQL Select Query
+    passed in and a SQL Select Query.
     """
 
     with db_connection.cursor() as db_cur:
