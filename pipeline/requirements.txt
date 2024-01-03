@@ -3,3 +3,5 @@ pytest
 confluent-kafka
 python-dotenv
 psycopg2-binary
+boto3
+pytest-cov
