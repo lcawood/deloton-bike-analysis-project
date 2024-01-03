@@ -49,7 +49,7 @@ def get_current_ride_data(db_connection: extensions.connection) -> int:
         return user_details
 
 
-def get_current_rider_best_duration(rider_id: int):
+def get_current_rider_best_duration(db_cur: extensions.connection.cursor, rider_id: int):
     """Returns the highest historical time_elapsed of the rider with the given rider_id."""
     query = """
     SELECT elapsed_time
@@ -69,8 +69,9 @@ def get_current_rider_best_duration(rider_id: int):
     return best_duration[0] if best_duration is not None else None
 
 
-def get_current_ride_data_best(db_connection: extensions.connection) -> int:
+def get_current_ride_data_best(db_connection: extensions.connection, rider_details: list) -> int:
     """Fetched the personal best details of the current ride from the database using an SQL Select Query."""
 
     with db_connection.cursor() as db_cur:
-        best_duration = get_current_rider_best_duration
+        rider_id = rider_details[0]
+        best_duration = get_current_rider_best_duration(db_cur, rider_id)
