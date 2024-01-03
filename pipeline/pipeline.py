@@ -76,7 +76,7 @@ def pipeline():
             new_ride = False
         
         elif ('[INFO]' in log_line) and (not new_ride):
-            reading = transform.get_reading_data_from_log_line(reading, log_line)
+            reading = transform.get_reading_data_from_log_line(reading, log_line, ride_info['start_time'])
             reading_count = (reading_count + 1) % 2  # Readings come in pairs
 
             if reading_count == 0:
@@ -94,4 +94,5 @@ def pipeline():
 
 
 if __name__ == "__main__":
-    pipeline()
+    # pipeline()
+    
