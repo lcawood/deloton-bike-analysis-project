@@ -50,7 +50,7 @@ def get_current_ride_data(db_connection: extensions.connection) -> int:
 
 
 def get_current_rider_best_duration(rider_id: int):
-    """Returns the highest historical duration of the rider with the given rider_id."""
+    """Returns the highest historical time_elapsed of the rider with the given rider_id."""
     query = """
     SELECT elapsed_time
     FROM ride
