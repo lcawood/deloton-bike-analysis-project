@@ -10,7 +10,7 @@ User's max and min heart rates are calculated using functions from `validate_hea
  - Python modules (as listed in `requirements.txt`):
     - confluent-kafka
     - python-dotenv
- - Enviroment variables (in `.env` file or otherwise):
+ - Environment variables (in `.env` file or otherwise):
     - KAFKA_TOPIC
     - BOOTSTRAP_SERVERS
     - SECURITY_PROTOCOL
@@ -31,3 +31,14 @@ User's max and min heart rates are calculated using functions from `validate_hea
  - `validate_heart_rate`
     - `calculate_max_heart_rate`
     - `calculate_min_heart_rate`
+
+
+## load.py
+
+### Requirements:
+ - Environment variables (in `.env` file or otherwise):
+   - DATABASE_IP
+   - DATABASE_USERNAME
+   - DATABASE_NAME
+   - DATABASE_PASSWORD
+   - DATABASE_PORT

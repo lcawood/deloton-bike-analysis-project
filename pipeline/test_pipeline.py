@@ -1,5 +1,7 @@
 """Contains unit tests for pipeline.py"""
 
+from datetime import datetime
+
 from unittest.mock import MagicMock, patch
 
 from pipeline import get_next_log_line, user_pipeline, ride_pipeline, reading_pipeline, pipeline
@@ -51,10 +53,10 @@ def test_user_pipeline(mock_min_heart_rate, mock_max_heart_rate, mock_load_user,
 @patch('load.add_ride')
 def test_ride_pipeline(mock_load_ride, mock_transform_ride):
     """Tests function ride_pipeline for patched transform and load functions."""
+    mock_load_ride.return_value = 7
     mock_transform_ride.return_value = {'key': 'value in a dictionary of ride info'}
-    ride_pipeline('this is a log line', 2)
-    mock_load_ride.assert_called_once_with(
-        {'key': 'value in a dictionary of ride info', 'bike_id': 2})
+    assert ride_pipeline('this is a log line', 2) == {'key': 'value in a dictionary of ride info', 'bike_id': 2, 'ride_id': 7}
+    mock_load_ride.assert_called_once()
 
 
 @patch('pipeline.EXTREME_HR_COUNT_THRESHOLD', 3)
@@ -64,6 +66,7 @@ def test_ride_pipeline(mock_load_ride, mock_transform_ride):
 def test_reading_pipeline(mock_load_reading, mock_send_email, mock_transform_reading):
     """Tests function reading_pipeline for patched transform and load functions."""
     log_line = 'this is a log line'
+    start_time = datetime.now()
     ride_id = 1
     reading = {'ride_id': ride_id}
     user = {'forename': 'Jane', 'surname': 'Doe', 'min_heart_rate': 60, 'max_heart_rate': 180}
@@ -82,27 +85,27 @@ def test_reading_pipeline(mock_load_reading, mock_send_email, mock_transform_rea
             yield value
 
     reading_value = reading_values_generator()
-    mock_transform_reading.side_effect = (lambda x, y: x | next(reading_value))
+    mock_transform_reading.side_effect = (lambda x, y, z: x | next(reading_value))
 
-    reading = reading_pipeline(log_line, ride_id, reading, user, consecutive_extreme_hrs)
+    reading = reading_pipeline(log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
     assert not mock_load_reading.called
     assert not mock_send_email.called
     assert reading == {'ride_id': ride_id, 'duration': 1, 'resistance': 30}
     assert consecutive_extreme_hrs == [46]
 
-    reading = reading_pipeline(log_line, ride_id, reading, user, consecutive_extreme_hrs)
+    reading = reading_pipeline(log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
     assert mock_load_reading.call_count == 1
     assert not mock_send_email.called
     assert reading == {'ride_id': ride_id}
     assert consecutive_extreme_hrs == [46, 196]
 
-    reading = reading_pipeline(log_line, ride_id, reading, user, consecutive_extreme_hrs)
+    reading = reading_pipeline(log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
     assert mock_load_reading.call_count == 1
     assert not mock_send_email.called
     assert reading == {'ride_id': ride_id, 'duration': 2, 'resistance': 42}
     assert consecutive_extreme_hrs == [46, 196]
 
-    reading = reading_pipeline(log_line, ride_id, reading, user, consecutive_extreme_hrs)
+    reading = reading_pipeline(log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
     assert mock_load_reading.call_count == 2
     print(mock_send_email.mock_calls)
     assert mock_send_email.call_count == 1
@@ -111,8 +114,8 @@ def test_reading_pipeline(mock_load_reading, mock_send_email, mock_transform_rea
 
     consecutive_extreme_hrs = [46, 196]
 
-    reading = reading_pipeline(log_line, ride_id, reading, user, consecutive_extreme_hrs)
-    reading = reading_pipeline(log_line, ride_id, reading, user, consecutive_extreme_hrs)
+    reading = reading_pipeline(log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
+    reading = reading_pipeline(log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
     assert mock_send_email.call_count == 1
     assert not consecutive_extreme_hrs
 
