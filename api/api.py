@@ -2,6 +2,7 @@
 
 from flask import Flask, request
 from flask_caching import Cache
+import json
 
 import api_functions
 from database_functions import get_database_connection

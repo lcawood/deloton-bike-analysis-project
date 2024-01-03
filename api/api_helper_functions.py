@@ -1,5 +1,4 @@
-
-from datetime import timedelta
+"""Contains helper functions for the api."""
 
 def format_seconds_as_readable_time(seconds: int) -> str:
     """
@@ -18,5 +17,5 @@ def format_seconds_as_readable_time(seconds: int) -> str:
 
     if hours:
         time_string = f'{hours}h ' + time_string
-        
+
     return time_string

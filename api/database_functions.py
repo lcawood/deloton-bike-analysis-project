@@ -41,7 +41,7 @@ def get_readings_by_ride_id(db_connection: connection, ride_id: int) -> list[dic
             return [dict(row) for row in reading_rows]
 
         return []
-    
+
 
 def get_readings_summary_for_ride_id(db_connection: connection, ride_id: int) -> list[dict]:
     """
@@ -53,11 +53,11 @@ def get_readings_summary_for_ride_id(db_connection: connection, ride_id: int) ->
 
         query = """
                 SELECT
-                    AVG(heart_rate) as avg_hr,
-                    AVG(power) as avg_power,
-                    AVG(rpm) as avg_rpm,
-                    AVG(resistance) as avg_resistance,
-                    MAX(elapsed_time) as duration    
+                    ROUND(AVG(heart_rate), 2)::float as avg_hr,
+                    ROUND(AVG(power::numeric), 2)::float as avg_power,
+                    ROUND(AVG(rpm), 2)::float as avg_rpm,
+                    ROUND(AVG(resistance), 2)::float as avg_resistance,
+                    ROUND(MAX(elapsed_time), 2)::float as duration       
                 FROM Reading
                 WHERE ride_id=%s
                 """
@@ -90,7 +90,7 @@ def get_ride_by_id(db_connection: connection, ride_id: int) -> dict:
             return dict(ride)
 
         return None
-    
+
 
 def delete_ride_by_id(db_connection: connection, ride_id: int) -> dict:
     """
@@ -114,7 +114,7 @@ def delete_ride_by_id(db_connection: connection, ride_id: int) -> dict:
             return dict(ride)
 
         return None
-    
+
 
 def get_rider_by_id(db_connection: connection, rider_id: int) -> dict:
     """
@@ -131,11 +131,10 @@ def get_rider_by_id(db_connection: connection, rider_id: int) -> dict:
         rider = db_cur.fetchone()
 
         if rider:
-            key_order = ['rider_id', 'account_created', 'first_name', 'last_name', 'birthdate', 'address_id', 'email', 'gender', 'height', 'weight']
             return dict(rider)
 
         return None
-    
+
 
 def get_rider_rides_by_id(db_connection: connection, rider_id: int) -> dict:
     """
@@ -169,7 +168,7 @@ def get_daily_rides(db_connection: connection, date: datetime) -> dict:
         ride_rows = db_cur.fetchall()
 
         return [dict(row) for row in ride_rows]
-    
+
 
 if __name__ == "__main__":
     db_conn = get_database_connection()

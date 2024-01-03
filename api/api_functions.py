@@ -52,7 +52,8 @@ def get_rider(db_conn: connection, rider_id: int) -> (dict, int):
     return {'error': f'Rider with id {rider_id} could not be found.'}, 404
 
 
-def get_rider_rides(db_conn: connection, rider_id: int, expanded: bool, summary: bool) -> (dict, int):
+def get_rider_rides(db_conn: connection, rider_id: int, expanded: str = 'False',
+                    summary: str = 'False') -> (dict, int):
     """
     Function to attempt to retrieve a list of all rides belonging to a rider with specified id from
     database using relevant database_functions, returning a list of dictionaries of said rider's
@@ -61,20 +62,32 @@ def get_rider_rides(db_conn: connection, rider_id: int, expanded: bool, summary:
     """
     if (type(rider_id) != int) or (rider_id < 0):
         return {'error': 'Invalid url; rider_id must be a positive integer.'}, 400
+    
+    if expanded not in ['True', 'False']:
+        return {'error': 'Invalid url; expanded must be a boolean value (True/False).'}, 400
+
+    if summary not in ['True', 'False']:
+        return {'error': 'Invalid url; summary must be a boolean value (True/False).'}, 400
 
     try:
         rides = database_functions.get_rider_rides_by_id(db_conn, rider_id)
+
+        if expanded == 'True':
+            for i, ride in enumerate(rides):
+                rides[i]['readings'] = database_functions.get_readings_by_ride_id(
+                    db_conn, ride['ride_id'])
+
+        if summary == 'True':
+            for i, ride in enumerate(rides):
+                rides[i]['reading_summary'] = database_functions.get_readings_summary_for_ride_id(
+                    db_conn, ride['ride_id'])
+                rides[i]['reading_summary']['duration'] = format_seconds_as_readable_time(
+                    rides[i]['reading_summary']['duration'])
+
     except Error as e:
         return {'error': str(e)}, 500
 
     if rides:
-        if expanded:
-            for i, ride in enumerate(rides):
-                rides[i]['readings'] = database_functions.get_readings_by_ride_id(db_conn, ride['ride_id'])
-        if summary:
-            for i, ride in enumerate(rides):
-                rides[i]['reading_summary'] = database_functions.get_readings_summary_for_ride_id(db_conn, ride['ride_id'])
-                rides[i]['reading_summary']['duration'] = format_seconds_as_readable_time(rides[i]['reading_summary']['duration'])
         return rides, 200
 
     return {'error': f'Unable to locate any rides belonging to a rider with id {rider_id}.'}, 404
