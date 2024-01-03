@@ -17,7 +17,6 @@ BIRTHDATE_AGE_45 = datetime.strptime('1979-01-01', "%Y-%m-%d")
 BIRTHDATE_AGE_18 = datetime.strptime('2006-01-01', "%Y-%m-%d")
 BIRTHDATE_AGE_35 = datetime.strptime('1989-01-01', "%Y-%m-%d")
 BIRTHDATE_AGE_65 = datetime.strptime('1959-01-01', "%Y-%m-%d")
-
 TEST_CURRENT_DATE = datetime.strptime('2024-01-03', "%Y-%m-%d")
 
 
