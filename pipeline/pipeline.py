@@ -26,7 +26,7 @@ EXTREME_HR_COUNT_THRESHOLD = 3
 
 
 
-def get_kafka_consumer(group_id: str, topic: str) -> Consumer:
+def get_kafka_consumer(group_id: str) -> Consumer:
     """Function to return a consumer for the kafka cluster specified in .env"""
     try:
         kafka_config = {
@@ -39,7 +39,7 @@ def get_kafka_consumer(group_id: str, topic: str) -> Consumer:
             'auto.offset.reset': 'earliest'
         }
         consumer = Consumer(kafka_config)
-        consumer.subscribe([topic])
+        consumer.subscribe([environ['KAFKA_TOPIC']])
         return consumer
 
     except KafkaException as e:
@@ -116,7 +116,7 @@ def pipeline():
     Function to run the main pipeline; establishes connection to Kafka stream, retrieves messages,
     utilises transform module to get data, and uses load module to upload to the db.
     """
-    kafka_consumer = get_kafka_consumer(GROUP_ID, environ['KAFKA_TOPIC'])
+    kafka_consumer = get_kafka_consumer(GROUP_ID)
 
     new_ride = False
     while True:
