@@ -12,13 +12,8 @@ from pandas import DataFrame
 import streamlit as st
 
 from database import get_database_connection, get_current_ride_data
-
-from visualisations import get_current_ride_name
-
-
-def get_current_ride_header() -> None:
-    """Gets the current ride header and name of the current rider."""
-    st.header(f"CURRENT RIDE: ")
+from utilities import get_current_rider_name
+from visualisations import get_current_ride_header
 
 
 if __name__ == "__main__":
@@ -27,8 +22,14 @@ if __name__ == "__main__":
 
     conn = get_database_connection()
 
-    current_ride = get_current_ride_data(conn)
+    # current_ride = get_current_ride_data(conn)
+    current_ride = ["John", "Doe", 175, 75, "Male", 105, 11.4, 60, 45]
+
+    # SELECT first_name, last_name, height, weight, gender,
+    # heart_rate, power, resistance, elapsed_time
 
     print(current_ride)
 
-    rider_name =
+    rider_name = get_current_rider_name(current_ride)
+
+    get_current_ride_header(rider_name)
