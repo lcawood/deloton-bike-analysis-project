@@ -91,12 +91,27 @@ background-color: #dddddd;
 
 def sql_select_all_useful_data(db_connection : extensions.connection) -> pd.DataFrame:
     """Uses SQL to select all the needed data to create the useful report for the ceo"""
-    pass
+    query = """SELECT Ride.ride_id,Ride.rider_id,Ride.bike_id,Ride.start_time,
+    Rider.gender, AVG(Reading.heart_rate) FROM Ride INNER JOIN
+    Rider ON Rider.rider_id = Ride.rider_id INNER JOIN
+    Reading ON Reading.ride_id = Ride.ride_id
+    WHERE DATE(start_time) = '2023-10-05'
+    GROUP BY Ride.ride_id,Rider.gender;"""
 
-def create_report_data(rides : pd.DataFrame, yesterday :datetime) -> dict:
+    rides = pd.read_sql_query(query,db_connection)
+
+    print(rides.groupby('rider_id', as_index=False)['avg'].mean())
+
+    return rides
+
+def create_report_data(rides : pd.DataFrame, yesterday :datetime, db_connection : extensions.connection) -> dict:
     """Creates and calls all the data needed in the report"""
 
     report_data_dict = {}
+
+    data_dict = sql_select_all_useful_data(db_connection)
+
+    print(data_dict)
 
     exported_html = create_html_string(report_data_dict, yesterday)
 
@@ -135,10 +150,10 @@ def handler(event=None, context=None) -> int:
         yesterday = datetime.now().date() #- timedelta(days=1)
 
         load_dotenv()
-        get_database_connection()
+        connection = get_database_connection()
         s3_client = get_s3_client(environ)
 
-        report_dict = create_report_data({},yesterday)
+        report_dict = create_report_data({},yesterday,connection)
         create_html_file(report_dict["html_body"],yesterday)
 
         upload_file(s3_client,f"./daily_report_{yesterday}.html", "c9-deloton-daily-reports",
