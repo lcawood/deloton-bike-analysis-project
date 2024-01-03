@@ -7,10 +7,9 @@ from psycopg2 import errors
 
 from database_functions import get_database_connection,load_user_into_database,load_address_into_database,select_address_from_database,load_ride_into_database,select_ride_from_database,load_reading_into_database,select_reading_from_database,load_bike_into_database,select_bike_from_database
 
+
 def add_address(address : dict) -> int:
     """adds a address dictionary as a record in the Address table in the db."""
-
-
 
     connection = get_database_connection()
 
