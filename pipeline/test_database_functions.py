@@ -53,6 +53,7 @@ def test_load_address_into_database():
 
     assert address_id == 1
 
+
 def test_select_address_from_database():
     """Tests that a address gets correctly selected from the database"""
 
@@ -96,6 +97,7 @@ def test_load_user_into_database():
 
     assert user_id == 1234
 
+
 def test_load_ride_into_database():
     """Tests that a ride gets correctly loaded into the database"""
 
@@ -116,6 +118,7 @@ def test_load_ride_into_database():
     mock_fetch.assert_called_once()
 
     assert ride_id == 1
+
 
 def test_select_ride_from_database():
     """Tests that a ride gets correctly selected from the database"""
@@ -160,6 +163,7 @@ def test_load_reading_into_database():
 
     assert reading_id == 1
 
+
 def test_select_reading_from_database():
     """Tests that a reading gets correctly selected from the database"""
 
@@ -181,6 +185,7 @@ def test_select_reading_from_database():
 
     assert reading_id == 1
 
+
 def test_load_bike_into_database():
     """Tests that a bike gets correctly loaded into the database"""
 
@@ -201,6 +206,7 @@ def test_load_bike_into_database():
     mock_fetch.assert_called_once()
 
     assert bike_id == 1
+
 
 def test_select_bike_from_database():
     """Tests that a bike gets correctly selected from the database"""

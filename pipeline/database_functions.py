@@ -38,6 +38,7 @@ def load_address_into_database(db_connection : extensions.connection, address : 
 
         return address_id[0]
 
+
 def select_address_from_database(db_connection : extensions.connection, address : dict) -> int:
     """
     Selects a address id from the database using the address dict 
@@ -80,6 +81,7 @@ def load_user_into_database(db_connection : extensions.connection, user : dict) 
 
         return rider_id[0]
 
+
 def load_ride_into_database(db_connection : extensions.connection, ride : dict) -> int:
     """Loads an Ride from the ride dict into the database using SQL."""
 
@@ -97,6 +99,7 @@ def load_ride_into_database(db_connection : extensions.connection, ride : dict) 
         db_connection.commit()
 
         return ride_id[0]
+
 
 def select_ride_from_database(db_connection : extensions.connection, ride : dict) -> int:
     """
@@ -139,6 +142,7 @@ def load_reading_into_database(db_connection : extensions.connection, reading : 
 
         return reading_id[0]
 
+
 def select_reading_from_database(db_connection : extensions.connection, reading : dict) -> int:
     """
     Selects a reading id from the database using the reading dict 
@@ -178,6 +182,7 @@ def load_bike_into_database(db_connection : extensions.connection, bike_serial_n
         db_connection.commit()
 
         return bike_id[0]
+
 
 def select_bike_from_database(db_connection : extensions.connection,
                               bike_serial_number : int) -> int:

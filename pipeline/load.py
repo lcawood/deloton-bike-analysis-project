@@ -15,7 +15,6 @@ def add_address(address : dict) -> int:
 
     try:
         address_id = load_address_into_database(connection,address)
-        print(address_id)
         return address_id
 
     except errors.UniqueViolation:
