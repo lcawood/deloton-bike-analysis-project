@@ -25,3 +25,27 @@ def get_database_connection() -> extensions.connection:
     except OperationalError as err:
         print("Error connecting to database. %s", err)
         return None
+
+
+def get_current_ride_data(db_connection: extensions.connection, address: dict) -> int:
+    """Fetched the details of the current ride from the database using  a SQL Select Query."""
+    with db_connection.cursor() as db_cur:
+
+        query = """
+        SELECT first_name, last_name, height, weight, gender,
+        heart_rate, power, resistance, elapsed_time
+        FROM Ride
+        JOIN Rider ON Ride.rider_id = Rider.rider_id
+        JOIN Reading ON Ride.ride_id = Reading.ride_id
+        ORDER BY start_time
+        LIMIT 1
+        ;
+        """
+
+        db_cur.execute(query)
+
+        user_details = db_cur.fetchone()
+
+        db_connection.commit()
+
+        return user_details

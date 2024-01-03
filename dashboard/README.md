@@ -17,6 +17,7 @@ This folder contains all code and resources required to create a Streamlit dashb
 Required env variables (NEED TO VERIFY):
 
 - `DATABASE_IP` -> ARN to your AWS RDS.
+- `DATABASE_NAME` -> Name of your database.
 - `DATABASE_USERNAME` -> Your database username.
 - `DATABASE_PASSWORD` -> Password to access your database.
 - `DATABASE_PORT` -> Port used to access the database.
