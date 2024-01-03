@@ -41,6 +41,24 @@ jobs:
         run: |
           cd pipeline
           pytest 
+
+      - name: Run the unit tests with pytest
+        id: test-dashboard
+        run: |
+          cd dashboard
+          pytest 
+
+      - name: Run the unit tests with pytest
+        id: test-api
+        run: |
+          cd api
+          pytest 
+
+      - name: Run the unit tests with pytest
+        id: test-report
+        run: |
+          cd daily_report
+          pytest 
   pylint:
     runs-on: ubuntu-latest
 
@@ -64,3 +82,18 @@ jobs:
         id: pylint-pipeline
         run: |
           pylint --fail-under=8 pipeline/*.py
+
+      - name: Run pylint
+        id: pylint-api
+        run: |
+          pylint --fail-under=8 api/*.py
+
+      - name: Run pylint
+        id: pylint-dashboard
+        run: |
+          pylint --fail-under=8 dashboard/*.py
+
+      - name: Run pylint
+        id: pylint-report
+        run: |
+          pylint --fail-under=8 daily_report/*.py
