@@ -10,6 +10,7 @@ used to alert the user.
 """
 
 import json
+import logging
 from os import environ
 
 from confluent_kafka import Consumer, KafkaException, Message
@@ -42,8 +43,9 @@ def get_kafka_consumer(group_id: str) -> Consumer:
         consumer.subscribe([environ['KAFKA_TOPIC']])
         return consumer
 
-    except KafkaException as e:
-        raise e
+    except KafkaException as error:
+        logging.critical("Unable to connect to Kafka stream.")
+        raise error
 
 
 def get_next_log_line(consumer: Consumer) -> str:
