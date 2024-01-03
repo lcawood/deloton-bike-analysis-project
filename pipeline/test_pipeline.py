@@ -1,6 +1,7 @@
 """Contains unit tests for pipeline.py"""
 
 from unittest.mock import MagicMock, patch
+
 from pipeline import get_next_log_line, user_pipeline, ride_pipeline, reading_pipeline, pipeline
 
 

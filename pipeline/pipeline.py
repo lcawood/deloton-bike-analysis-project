@@ -21,14 +21,12 @@ import transform
 import validate_heart_rate
 
 
-load_dotenv()
 GROUP_ID = "testing5"
 EXTREME_HR_COUNT_THRESHOLD = 3
 
 
-
 def get_kafka_consumer(group_id: str) -> Consumer:
-    """Function to return a consumer for the kafka cluster specified in .env"""
+    """Function to return a consumer for the kafka cluster specified in .env."""
     try:
         kafka_config = {
             'bootstrap.servers': environ['BOOTSTRAP_SERVERS'],
@@ -145,4 +143,5 @@ def pipeline():
 
 
 if __name__ == "__main__":
+    load_dotenv()
     pipeline()
