@@ -49,7 +49,7 @@ def add_ride(ride: dict) -> int:
         return ride_id
 
 
-def add_reading(reading: dict):
+def add_reading(reading: dict) -> int:
     """Adds reading dictionary as a record in the Reading table in the db."""
     connection = get_database_connection()
 
