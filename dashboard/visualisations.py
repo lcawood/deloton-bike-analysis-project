@@ -21,29 +21,35 @@ def get_current_ride_header(rider_name: str) -> None:
     st.header(f"CURRENT RIDE: {rider_name}", divider='blue')
 
 
-def get_current_ride_header_metrics(user_details) -> None:
+def get_current_ride_header_personal_info(user_details) -> None:
     """
-    Gets the main headers for the current ride and displays them.
+    Gets the main header personal_info for the current ride and displays them.
     """
+    with st.expander('Personal Info ⛛'):
+        # get metrics
+        height = user_details[3]
+        weight = user_details[4]
+        gender = user_details[5]
+        gender_emoji = "♂" if gender == "male" else "♀"
+        birthdate = user_details[6]
+        age = calculate_age(birthdate)
 
-    # get metrics
-    height = user_details[3]
-    weight = user_details[4]
-    gender = user_details[5]
-    gender_emoji = "♂" if gender == "male" else "♀"
-    birthdate = user_details[6]
-    age = calculate_age(birthdate)
+        # create visualisation
+        head_cols = st.columns(4)
+        with head_cols[0]:
+            st.metric("Gender", f"{gender_emoji} {gender}")
+        with head_cols[1]:
+            st.metric("Age", age)
+        with head_cols[2]:
+            st.metric("Height", height)
+        with head_cols[3]:
+            st.metric("Weight", weight)
 
-    # create visualisation
-    head_cols = st.columns(4)
-    with head_cols[0]:
-        st.metric("Gender", f"{gender_emoji} {gender}")
-    with head_cols[1]:
-        st.metric("Age", age)
-    with head_cols[2]:
-        st.metric("Height", height)
-    with head_cols[3]:
-        st.metric("Weight", weight)
-    st.divider()
 
+def get_current_ride_personal_best_metrics(user_best_details) -> None:
+    """
+    Gets the main header metric personal bests for the current ride and displays them.
+    """
     # with st.expander('Show graph.'):
+    #     get_current_ride_header_metrics(user_best_details)
+    pass

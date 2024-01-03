@@ -140,3 +140,5 @@ def get_current_ride_data_highest(db_connection: extensions.connection, rider_de
         highest_power = get_current_rider_highest_power(db_cur, rider_id)
         highest_resistance = get_current_rider_highest_resistance(
             db_cur, rider_id)
+
+        return (hi)
