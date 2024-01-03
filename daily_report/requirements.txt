@@ -1,0 +1,8 @@
+pytest
+pylint
+python-dotenv
+psycopg2-binary
+pandas
+boto3
+fsspec
+s3fs
