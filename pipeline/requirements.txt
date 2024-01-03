@@ -2,5 +2,6 @@ pylint
 pytest
 confluent-kafka
 python-dotenv
-psycopg2
+boto3
+pytest-cov
 spacy
