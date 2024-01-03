@@ -4,4 +4,3 @@ confluent-kafka
 python-dotenv
 boto3
 pytest-cov
-spacy

@@ -4,7 +4,6 @@ from ast import literal_eval
 from datetime import datetime, timedelta
 import re
 
-import spacy
 
 INVALID_DATE_THRESHOLD = datetime(1900, 1, 1, 0, 0, 0)
 
@@ -161,45 +160,15 @@ def get_address_from_log_line(log_line: str) -> dict:
         return address
 
     address_string = address_dict['address']
+    address_lines = address_string.split(',')
+    address['first_line'] = address_lines[0].strip()
+    address['city'] = address_lines[-2].strip()
+    address['postcode'] = address_lines[-1].strip()
 
-    # Assumption: the first line of the address is everything before the first comma
-    if ',' in address_string:
-        first_line = address_string.split(',')[0]
-        address['first_line'] = first_line
-    else:
-        first_line = None
-
-    # Assumption: city is last in order of found named entities
-    nlp = spacy.load('en_core_web_md')
-    doc = nlp(address_string)
-    city = [ent.text for ent in doc.ents if ent.label_ == 'GPE']
-    if city:
-        address['city'] = city[-1]
-    else:
-        address['city'] = None
-
-    # Assumption: users live in the UK only
-    uk_postcode_pattern = r'[A-Za-z]{1,2}\d[A-Za-z\d]?\s*\d[A-Za-z]{2}'
-    postcode = re.search(uk_postcode_pattern, address_string)
-    if postcode:
-        address['postcode'] = postcode.group()
-    else:
-        address['postcode'] = None
-
-    # Assumption: the second line of the address is everything else not found
-    if address_string:
-        address_string = address_string.replace(first_line, '')
-    if city:
-        address_string = address_string.replace(city[-1], '')
-    if postcode:
-        address_string = address_string.replace(postcode.group(), '')
-
-    second_line = address_string.replace(',', '').strip()
-    if second_line:
-        address['second_line'] = second_line
+    if len(address_lines) == 4:
+        address['second_line'] = address_lines[1].strip()
     else:
         address['second_line'] = None
-
     return address
 
 
