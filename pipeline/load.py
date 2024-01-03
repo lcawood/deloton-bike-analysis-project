@@ -18,7 +18,7 @@ def add_address(address : dict) -> int:
         return address_id
 
     except errors.UniqueViolation:
-        connection.commit()
+        connection.rollback()
         address_id = select_address_from_database(connection,address)
         return address_id
 
@@ -44,7 +44,7 @@ def add_ride(ride: dict) -> int:
         return ride_id
 
     except errors.UniqueViolation:
-        connection.commit()
+        connection.rollback()
         ride_id = select_ride_from_database(connection,ride)
         return ride_id
 
@@ -58,7 +58,7 @@ def add_reading(reading: dict):
         return reading_id
 
     except errors.UniqueViolation:
-        connection.commit()
+        connection.rollback()
         reading_id = select_reading_from_database(connection,reading)
         return reading_id
 
@@ -75,6 +75,6 @@ def add_bike(bike_serial_number: int) -> int:
         return bike_id
 
     except errors.UniqueViolation:
-        connection.commit()
+        connection.rollback()
         bike_id = select_bike_from_database(connection,bike_serial_number)
         return bike_id
