@@ -2,9 +2,10 @@
 
 # pylint: disable=C0301
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock,patch
 
 from database_functions import load_user_into_database,load_address_into_database,select_address_from_database,load_ride_into_database,select_ride_from_database,load_reading_into_database,select_reading_from_database,load_bike_into_database,select_bike_from_database
+from load import add_address
 
 EXAMPLE_USER = {'user_id' : 1234,'address_id' : 6,'first_name': "Charlie",
                           'last_name': "Derick",'birthdate': "2002-04-13",
@@ -20,6 +21,18 @@ EXAMPLE_READING = {"ride_id" : 1, "heart_rate" : 76, "power" : 12, "rpm" : 20,
                    "resistance" : 50, "elapsed_time" : 120}
 
 EXAMPLE_BIKE_SERIAL = "SD2e4219u"
+
+@patch("load.get_database_connection")
+@patch("load.load_address_into_database")
+def test_add_address(mock_load_address_into_database,mock_get_database_connection):
+    """Tests the flow of adding a new dict and returning a ID functions correctly."""
+
+    mock_load_address_into_database.return_value = 1
+
+    assert add_address(EXAMPLE_ADDRESS) == 1
+
+
+    
 
 def test_load_address_into_database():
     """Tests that a address gets correctly loaded into the database"""
