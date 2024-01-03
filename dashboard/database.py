@@ -27,7 +27,7 @@ def get_database_connection() -> extensions.connection:
         return None
 
 
-def get_current_ride_data(db_connection: extensions.connection, address: dict) -> int:
+def get_current_ride_data(db_connection: extensions.connection) -> int:
     """Fetched the details of the current ride from the database using  a SQL Select Query."""
     with db_connection.cursor() as db_cur:
 
