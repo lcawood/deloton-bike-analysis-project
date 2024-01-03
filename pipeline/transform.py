@@ -36,7 +36,7 @@ def extract_datetime_from_string(input_string: str) -> datetime | None:
             match.group(), '%Y-%m-%d %H:%M:%S.%f')
         if check_datetime_is_valid(datetime_obj):
             return datetime_obj
-    except ValueError:
+    except (ValueError, AttributeError):
         return None
     return None
 
