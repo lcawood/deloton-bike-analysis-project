@@ -19,6 +19,19 @@ def get_current_ride_header(rider_name: str) -> None:
     st.header(f"CURRENT RIDE: {rider_name}", divider='blue')
 
 
+def calculate_age(birthdate: datetime, current_date: datetime = datetime.utcnow()) -> int:
+    """
+    Returns the age in years for the given date as a datetime object
+    in the format YYYY-MM-DD.
+    'birthdate' is assumed to be cleaned and always as a datetime type.
+    """
+    age = current_date.year - birthdate.year - \
+        ((current_date.month, current_date.day)
+         < (birthdate.month, birthdate.day))
+
+    return age
+
+
 def get_current_ride_header_metrics(user_details) -> None:
     """
     Gets the main headers and displays them.
