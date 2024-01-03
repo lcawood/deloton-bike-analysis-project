@@ -12,20 +12,13 @@ import pytest
 from validate_heart_rate import (calculate_max_heart_rate, calculate_min_heart_rate,
                                  calculate_age, send_email)
 
+BIRTHDATE_AGE_64 = datetime.strptime('1960-01-01', "%Y-%m-%d")
+BIRTHDATE_AGE_45 = datetime.strptime('1979-01-01', "%Y-%m-%d")
+BIRTHDATE_AGE_18 = datetime.strptime('2006-01-01', "%Y-%m-%d")
+BIRTHDATE_AGE_35 = datetime.strptime('1989-01-01', "%Y-%m-%d")
+BIRTHDATE_AGE_65 = datetime.strptime('1959-01-01', "%Y-%m-%d")
 
-# Function to calculate birthdate based on age
-def calculate_birthdate(age):
-    """Calculates and returns birthdate based on age for use in unit tests."""
-    current_date = datetime.now()
-    birthdate = current_date - timedelta(days=(365.25 * age))
-    return birthdate
-
-
-BIRTHDATE_AGE_64 = calculate_birthdate(64)
-BIRTHDATE_AGE_45 = calculate_birthdate(45)
-BIRTHDATE_AGE_18 = calculate_birthdate(18)
-BIRTHDATE_AGE_35 = calculate_birthdate(35)
-BIRTHDATE_AGE_65 = calculate_birthdate(65)
+TEST_CURRENT_DATE = datetime.strptime('2024-01-03', "%Y-%m-%d")
 
 
 @pytest.mark.parametrize('birthdate, age', [
@@ -35,9 +28,9 @@ BIRTHDATE_AGE_65 = calculate_birthdate(65)
     (BIRTHDATE_AGE_35, 35),
     (BIRTHDATE_AGE_65, 65)
 ])
-def test_calculate_age_valid(birthdate: str, age: int):
+def test_calculate_age_valid(birthdate: datetime, age: int):
     """Test that the expected ages are returned for the given datetime objects."""
-    assert calculate_age(birthdate) == age
+    assert calculate_age(birthdate, TEST_CURRENT_DATE) == age
 
 
 @pytest.mark.parametrize('user_details, threshold', [

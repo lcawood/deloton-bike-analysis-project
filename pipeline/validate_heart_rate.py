@@ -38,7 +38,6 @@ def calculate_age(birthdate: datetime, current_date: datetime = datetime.utcnow(
     in the format YYYY-MM-DD.
     'birthdate' is assumed to be cleaned and always as a datetime type.
     """
-
     age = current_date.year - birthdate.year - \
         ((current_date.month, current_date.day)
          < (birthdate.month, birthdate.day))
