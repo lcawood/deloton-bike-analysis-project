@@ -1,4 +1,4 @@
-'''Module to transform the data received from the Kafka cluster.'''
+"""Module to transform the data received from the Kafka cluster."""
 
 from ast import literal_eval
 from datetime import datetime, timedelta
@@ -9,8 +9,8 @@ INVALID_DATE_THRESHOLD = datetime(1900, 1, 1, 0, 0, 0)
 
 
 def timestamp_to_date(timestamp_ms: int | None) -> str | None:
-    '''Helper function that converts a timestamp in milliseconds
-    since the Unix epoch to a date string in the form YYYY-MM-DD.'''
+    """Helper function that converts a timestamp in milliseconds
+    since the Unix epoch to a date string in the form YYYY-MM-DD."""
 
     if timestamp_ms is None:
         return timestamp_ms
@@ -18,8 +18,8 @@ def timestamp_to_date(timestamp_ms: int | None) -> str | None:
 
 
 def check_datetime_is_valid(dt: datetime) -> bool:
-    '''Helper function that returns True if a datetime is valid, i.e. each component
-    in the datetime is within its appropriate range, or returns False if invalid.'''
+    """Helper function that returns True if a datetime is valid, i.e. each component
+    in the datetime is within its appropriate range, or returns False if invalid."""
 
     if dt > datetime.now() or dt < INVALID_DATE_THRESHOLD:
         return False
@@ -27,8 +27,8 @@ def check_datetime_is_valid(dt: datetime) -> bool:
 
 
 def extract_datetime_from_string(input_string: str) -> datetime | None:
-    '''Helper function to extract a datetime object from a string that contains
-    a datetime in the format 'YYYY-MM-DD HH:MM:SS.microseconds'.'''
+    """Helper function to extract a datetime object from a string that contains
+    a datetime in the format 'YYYY-MM-DD HH:MM:SS.microseconds'."""
 
     pattern = r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+'
     match = re.search(pattern, input_string)
@@ -43,27 +43,26 @@ def extract_datetime_from_string(input_string: str) -> datetime | None:
 
 
 def get_bike_serial_number_from_log_line(log_line: str) -> str | None:
-    '''Takes in a kafka log line, and returns the bike serial number if found.'''
+    """Takes in a kafka log line, and returns the bike serial number if found."""
 
     log_line_dict = literal_eval(log_line.split('=')[1])
     if 'bike_serial' in log_line_dict.keys():
         return log_line_dict['bike_serial']
     return None
 
+# "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\"address\":\"Studio 3,William alley,New Bethan,WR4V 7TA\",\"date_of_birth\":-336700800000,\"email_address\":\"wayne_fitzgerald@hotmail.com\",\"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\"bike_serial\":\"SN0000\",\"original_source\":\"offline\"}\n"
+
 
 def get_email_from_log_line(log_line: str) -> str | None:
-    '''Helper function to extract an email address from a log line using regex if found.'''
+    """Helper function to extract an email address from a log line using if found."""
 
-    email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
-    match = re.search(email_pattern, log_line)
-    if match:
-        return match.group()
-    return None
+    log_line_dict = literal_eval(log_line.split('=')[1])
+    return log_line_dict.get('email_address', None)
 
 
 def get_user_from_log_line(log_line: str) -> dict:
-    '''Takes in a kafka log line and returns a dictionary of user data from it (excluding address).
-    If any user information is missing, this field is given as None in the returned dictionary.'''
+    """Takes in a kafka log line and returns a dictionary of user data from it (excluding address).
+    If any user information is missing, this field is given as None in the returned dictionary."""
 
     user = {}
     log_line_data = literal_eval(log_line.split('=')[1])
@@ -95,11 +94,11 @@ def get_user_from_log_line(log_line: str) -> dict:
 
 
 def get_ride_data_from_log_line(log_line: str) -> dict:
-    '''
+    """
     Takes in a kafka log line and returns a dictionary of ride data from it (corresponding to
     non-auto-generated attributes in ride table in db). If a given field is not found, its value
     in the returned dictionary is given as None.
-    '''
+    """
 
     ride = {}
 
@@ -120,10 +119,10 @@ def get_ride_data_from_log_line(log_line: str) -> dict:
 
 
 def get_reading_data_from_log_line(reading: dict, log_line: str, start_time: datetime) -> dict:
-    '''
+    """
     Takes in a kafka log line, and transforms and appends reading data
     contained within it to the given reading dictionary.
-    '''
+    """
     if 'Ride' in log_line:
         try:
             reading['resistance'] = int(
@@ -148,7 +147,7 @@ def get_reading_data_from_log_line(reading: dict, log_line: str, start_time: dat
 
 
 def get_address_from_log_line(log_line: str) -> dict:
-    '''Takes in a kafka log line and returns a dictionary of address data from it.'''
+    """Takes in a kafka log line and returns a dictionary of address data from it."""
 
     address = {}
     address_dict = literal_eval(log_line.split('=')[1])
