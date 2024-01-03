@@ -13,6 +13,13 @@ import streamlit as st
 
 from database import get_database_connection, get_current_ride_data
 
+from visualisations import get_current_ride_name
+
+
+def get_current_ride_header() -> None:
+    """Gets the current ride header and name of the current rider."""
+    st.header(f"CURRENT RIDE: ")
+
 
 if __name__ == "__main__":
 
@@ -23,3 +30,5 @@ if __name__ == "__main__":
     current_ride = get_current_ride_data(conn)
 
     print(current_ride)
+
+    rider_name =
