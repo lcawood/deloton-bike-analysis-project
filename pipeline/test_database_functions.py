@@ -17,7 +17,7 @@ EXAMPLE_ADDRESS = {"first_line" : "63 Studio","second_line" : "Nursery Avenue",
 
 EXAMPLE_RIDE = {"user_id" : 1234, "bike_id": 1, "start_time" : "2021-07-03 16:21:12"}
 
-EXAMPLE_READING = {"ride_id" : 1, "heart_rate" : 76, "power" : 12, "rpm" : 20,
+EXAMPLE_READING = {"ride_id" : 1, "heart_rate" : 76, "power" : 12.6423, "rpm" : 20,
                    "resistance" : 50, "elapsed_time" : 120}
 
 EXAMPLE_BIKE_SERIAL = "SD2e4219u"
