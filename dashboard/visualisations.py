@@ -41,9 +41,32 @@ def get_current_ride_header_personal_info(user_details) -> None:
         with head_cols[1]:
             st.metric("Age", age)
         with head_cols[2]:
-            st.metric("Height", height)
+            st.metric("Height", f"{height} cm")
         with head_cols[3]:
-            st.metric("Weight", weight)
+            st.metric("Weight", f"{weight} kg")
+
+
+def get_current_ride_metrics(user_details) -> None:
+    """
+    Gets the header metrics for the current ride and displays them.
+    """
+
+    # get metrics
+    heart_rate = user_details[7]
+    power = user_details[8]
+    resistance = user_details[9]
+    elapsed_time = user_details[10]
+
+    # create visualisation
+    head_cols = st.columns(4)
+    with head_cols[0]:
+        st.metric("Elapsed Time", f"{elapsed_time} secs")
+    with head_cols[1]:
+        st.metric("Heart Rate", f"{heart_rate} BPM")
+    with head_cols[2]:
+        st.metric("Power", f"{power} W")
+    with head_cols[3]:
+        st.metric("Resistance", resistance)
 
 
 def get_current_ride_personal_best_metrics(user_best_details) -> None:
