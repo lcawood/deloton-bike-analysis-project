@@ -1,7 +1,7 @@
 """Test suite for the transform.py script, covering a range of possible errors in the
 attained data from the log lines, as well as missing/incomplete data."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from transform import timestamp_to_date, check_datetime_is_valid, extract_datetime_from_string, \
     get_bike_serial_number_from_log_line, get_email_from_log_line, get_user_from_log_line, \
@@ -11,20 +11,20 @@ from transform import timestamp_to_date, check_datetime_is_valid, extract_dateti
 def test_convert_epoch_to_datetime():
     """Tests for the timestamp_to_date function where inputs are valid."""
 
-    assert timestamp_to_date(0) == '1970-01-01'
+    assert timestamp_to_date(0) == datetime(year=1970, month=1, day=1).date()
 
-    assert timestamp_to_date(1609459200000) == '2021-01-01'
+    assert timestamp_to_date(1609459200000) == datetime(year=2021, month=1, day=1).date()
 
-    assert timestamp_to_date(1612137600000) == '2021-02-01'
+    assert timestamp_to_date(1612137600000) == datetime(year=2021, month=2, day=1).date()
 
-    assert timestamp_to_date(1614556800000) == '2021-03-01'
+    assert timestamp_to_date(1614556800000) == datetime(year=2021, month=3, day=1).date()
 
     # Test with current time
     current_time = int(datetime.utcnow().timestamp() * 1000)
     assert timestamp_to_date(
-        current_time) == datetime.now().strftime('%Y-%m-%d')
+        current_time) == datetime.now().date()
 
-    assert timestamp_to_date(-631152000000) == '1950-01-01'
+    assert timestamp_to_date(-631152000000) == datetime(year=1950, month=1, day=1).date()
 
 
 def test_valid_datetime_object():
@@ -141,9 +141,9 @@ def test_get_valid_user_data_from_log_line():
         \"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\
         \"bike_serial\":\"SN0000\",\"original_source\":\"offline\"}\n"
     ) == {'user_id': 815, 'first_name': 'Wayne', 'last_name': 'Fitzgerald',
-          'birthdate': '1959-05-02', 'height': 187, 'weight': 52,
+          'birthdate': datetime(year=1959, month=5, day=2).date(), 'height': 187, 'weight': 52,
           'email': 'wayne_fitzgerald@hotmail.com', 'gender': 'male',
-          'account_created': '2022-01-04'}
+          'account_created': datetime(year=2022, month=1, day=4).date()}
 
 
 def test_valid_ride_data_from_log_line():
@@ -156,7 +156,7 @@ def test_valid_ride_data_from_log_line():
         \"date_of_birth\":-336700800000,\"email_address\":\"wayne_fitzgerald@hotmail.com\",\
         \"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\
         \"bike_serial\":\"SN0000\",\"original_source\":\"offline\"}\n"
-    ) == {'user_id': 815, 'start_time': '2022-07-25 16:13:36'}
+    ) == {'user_id': 815, 'start_time': datetime.strptime('25/07/2022 16:13:37.209120', "%d/%m/%Y %H:%M:%S.%f") - timedelta(seconds=0.5)}
 
 
 def test_invalid_ride_data_from_log_line():

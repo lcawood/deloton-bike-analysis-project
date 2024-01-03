@@ -14,7 +14,7 @@ def timestamp_to_date(timestamp_ms: int | None) -> str | None:
 
     if timestamp_ms is None:
         return timestamp_ms
-    return datetime.utcfromtimestamp(timestamp_ms / 1000).strftime('%Y-%m-%d')
+    return datetime.utcfromtimestamp(timestamp_ms / 1000).date()
 
 
 def check_datetime_is_valid(dt: datetime) -> bool:
@@ -29,7 +29,6 @@ def check_datetime_is_valid(dt: datetime) -> bool:
 def extract_datetime_from_string(input_string: str) -> datetime | None:
     """Helper function to extract a datetime object from a string that contains
     a datetime in the format 'YYYY-MM-DD HH:MM:SS.microseconds'."""
-
     pattern = r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+'
     match = re.search(pattern, input_string)
     try:
@@ -49,8 +48,6 @@ def get_bike_serial_number_from_log_line(log_line: str) -> str | None:
     if 'bike_serial' in log_line_dict.keys():
         return log_line_dict['bike_serial']
     return None
-
-# "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\"address\":\"Studio 3,William alley,New Bethan,WR4V 7TA\",\"date_of_birth\":-336700800000,\"email_address\":\"wayne_fitzgerald@hotmail.com\",\"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\"bike_serial\":\"SN0000\",\"original_source\":\"offline\"}\n"
 
 
 def get_email_from_log_line(log_line: str) -> str | None:
@@ -111,7 +108,7 @@ def get_ride_data_from_log_line(log_line: str) -> dict:
 
     if extract_datetime_from_string(log_line):
         ride['start_time'] = (extract_datetime_from_string(
-            log_line) - timedelta(seconds=0.5)).strftime('%Y-%m-%d %H:%M:%S')
+            log_line) - timedelta(seconds=0.5))
     else:
         ride['start_time'] = None
 
@@ -130,7 +127,7 @@ def get_reading_data_from_log_line(reading: dict, log_line: str, start_time: dat
         except IndexError:
             reading['resistance'] = None
 
-        if extract_datetime_from_string(log_line) is not None and \
+        if extract_datetime_from_string(log_line) and \
                 extract_datetime_from_string(log_line) > start_time:
             reading['elapsed_time'] = int((extract_datetime_from_string(
                 log_line) - start_time).total_seconds())
@@ -142,7 +139,6 @@ def get_reading_data_from_log_line(reading: dict, log_line: str, start_time: dat
             log_line.split(';')[0].split('=')[1].strip())
         reading['power'] = float(log_line.split('=')[-1].strip())
         reading['rpm'] = int(log_line.split(';')[1].split('=')[1].strip())
-
     return reading
 
 
@@ -172,5 +168,4 @@ def get_address_from_log_line(log_line: str) -> dict:
 
 
 if __name__ == "__main__":
-
     pass
