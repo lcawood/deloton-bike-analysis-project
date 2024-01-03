@@ -1,10 +1,12 @@
 """Utility functions to transform data fetched from SQL for use in visualisations."""
 
+from datetime import datetime
+
 
 def get_current_rider_name(current_ride: list) -> str:
     """Returns a string containing the rider first and last name."""
-    first_name = current_ride[0]
-    last_name = current_ride[1]
+    first_name = current_ride[1]
+    last_name = current_ride[2]
     rider_name = f"{first_name} {last_name}"
     return rider_name
 
