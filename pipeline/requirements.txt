@@ -1,4 +1,6 @@
 pylint
 pytest
+confluent-kafka
+python-dotenv
 boto3
 pytest-cov
