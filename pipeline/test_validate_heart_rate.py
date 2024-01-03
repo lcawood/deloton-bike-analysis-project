@@ -4,7 +4,7 @@ Testing suite for the validate_heart_rate script.
 The global constant ages are valid as of January 2024.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -12,11 +12,20 @@ import pytest
 from validate_heart_rate import (calculate_max_heart_rate, calculate_min_heart_rate,
                                  calculate_age, send_email)
 
-BIRTHDATE_AGE_64 = datetime.strptime('1960-01-01', "%Y-%m-%d")
-BIRTHDATE_AGE_45 = datetime.strptime('1979-01-01', "%Y-%m-%d")
-BIRTHDATE_AGE_18 = datetime.strptime('2006-01-01', "%Y-%m-%d")
-BIRTHDATE_AGE_35 = datetime.strptime('1989-01-01', "%Y-%m-%d")
-BIRTHDATE_AGE_65 = datetime.strptime('1959-01-01', "%Y-%m-%d")
+
+# Function to calculate birthdate based on age
+def calculate_birthdate(age):
+    """Calculates and returns birthdate based on age for use in unit tests."""
+    current_date = datetime.now()
+    birthdate = current_date - timedelta(days=(365.25 * age))
+    return birthdate
+
+
+BIRTHDATE_AGE_64 = calculate_birthdate(64)
+BIRTHDATE_AGE_45 = calculate_birthdate(45)
+BIRTHDATE_AGE_18 = calculate_birthdate(18)
+BIRTHDATE_AGE_35 = calculate_birthdate(35)
+BIRTHDATE_AGE_65 = calculate_birthdate(65)
 
 
 @pytest.mark.parametrize('birthdate, age', [
