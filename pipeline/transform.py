@@ -9,10 +9,12 @@ import spacy
 INVALID_DATE_THRESHOLD = datetime(1900, 1, 1, 0, 0, 0)
 
 
-def timestamp_to_date(timestamp_ms: int) -> str:
+def timestamp_to_date(timestamp_ms: int | None) -> str | None:
     '''Helper function that converts a timestamp in milliseconds
     since the Unix epoch to a date string in the form YYYY-MM-DD.'''
 
+    if timestamp_ms is None:
+        return timestamp_ms
     return datetime.utcfromtimestamp(timestamp_ms / 1000).strftime('%Y-%m-%d')
 
 
@@ -68,42 +70,27 @@ def get_user_from_log_line(log_line: str) -> dict:
     log_line_data = literal_eval(log_line.split('=')[1])
 
     # Obtain user data from the log line directly
-    try:
-        user['user_id'] = int(log_line_data['user_id'])
-    except KeyError:
-        user['user_id'] = None
-    try:
+    user['user_id'] = int(log_line_data.get('user_id', -1))
+
+    if log_line_data.get('name'):
         user['first_name'] = log_line_data['name'].split()[0]
-    except KeyError:
-        user['first_name'] = None
-    try:
         user['last_name'] = " ".join(log_line_data['name'].split()[1:])
-    except KeyError:
+    else:
+        user['first_name'] = None
         user['last_name'] = None
-    try:
-        user_dob = log_line_data['date_of_birth']
-        user['birthdate'] = timestamp_to_date(user_dob)
-    except KeyError:
-        user['birthdate'] = None
-    try:
-        user['height'] = int(log_line_data['height_cm'])
-    except KeyError:
-        user['height'] = None
-    try:
-        user['weight'] = int(log_line_data['weight_kg'])
-    except KeyError:
-        user['weight'] = None
-    # Email key-pair is added if found, otherwise is given as None
+
+    user['birthdate'] = timestamp_to_date(
+        log_line_data.get('date_of_birth', None))
+    user['height'] = int(log_line_data.get('height_cm', -1))
+    user['weight'] = int(log_line_data.get('weight_kg', -1))
     user['email'] = get_email_from_log_line(log_line)
-    try:
-        user['gender'] = log_line_data['gender']
-    except KeyError:
-        user['gender'] = None
-    try:
-        account_created_date = log_line_data['account_create_date']
-        user['account_created'] = timestamp_to_date(account_created_date)
-    except KeyError:
-        user['account_created'] = None
+    user['gender'] = log_line_data.get('gender', None)
+    user['account_created'] = timestamp_to_date(
+        log_line_data.get('account_create_date', None))
+
+    for key, val in user.items():
+        if val == -1:
+            user[key] = None
 
     return user
 

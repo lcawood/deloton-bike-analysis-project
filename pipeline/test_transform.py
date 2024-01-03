@@ -1,4 +1,6 @@
-# pylint: skip-file
+"""Test suite for the transform.py script, covering a range of possible errors in the
+attained data from the log lines, as well as missing/incomplete data."""
+
 from datetime import datetime
 
 from transform import timestamp_to_date, check_datetime_is_valid, extract_datetime_from_string, \
@@ -7,6 +9,8 @@ from transform import timestamp_to_date, check_datetime_is_valid, extract_dateti
 
 
 def test_convert_epoch_to_datetime():
+    """Tests for the timestamp_to_date function where inputs are valid."""
+
     assert timestamp_to_date(0) == '1970-01-01'
 
     assert timestamp_to_date(1609459200000) == '2021-01-01'
@@ -24,43 +28,58 @@ def test_convert_epoch_to_datetime():
 
 
 def test_valid_datetime_object():
+    """Tests for the check_datetime_is_valid function where the input is valid."""
+
     assert check_datetime_is_valid(
-        datetime(2024, 1, 1, 1, 2, 3, 123456)) == True
+        datetime(2024, 1, 1, 1, 2, 3, 123456))
     assert check_datetime_is_valid(
-        datetime(2023, 12, 30, 1, 2, 3, 123456)) == True
+        datetime(2023, 12, 30, 1, 2, 3, 123456))
 
 
 def test_invalid_datetime_object():
+    """Tests for the check_datetime_is_valid function where the input is invalid."""
+
     assert check_datetime_is_valid(
-        datetime(2025, 1, 1, 1, 2, 3, 123456)) == False
+        datetime(2025, 1, 1, 1, 2, 3, 123456)) is False
     assert check_datetime_is_valid(
-        datetime(1899, 12, 30, 1, 2, 3, 123456)) == False
+        datetime(1899, 12, 30, 1, 2, 3, 123456)) is False
 
 
 def test_valid_date_in_log_line():
+    """Test for the extract_datetime_from_string function where there is a valid input."""
+
     assert extract_datetime_from_string(
         'some text 2024-01-01 01:02:03.123456 some text') == datetime(2024, 1, 1, 1, 2, 3, 123456)
 
 
 def test_no_date_found_in_log_line():
+    """Test for the extract_datetime_from_string function where there is no date."""
+
     assert extract_datetime_from_string(
-        'some text some text some text') == None
+        'some text some text some text') is None
 
 
 def test_future_date_found_in_log_line():
+    """Test for the extract_datetime_from_string function where the date is in the future."""
+
     assert extract_datetime_from_string(
-        'some text 2025-01-01 01:02:03.123456 some text') == None
+        'some text 2025-01-01 01:02:03.123456 some text') is None
 
 
 def test_invalid_date_found_in_log_line():
-    assert extract_datetime_from_string(
-        'some text 2024-01-01 50:02:03.123456 some text') == None
+    """Tests for the extract_datetime_from_string function where the dates are invalid."""
 
     assert extract_datetime_from_string(
-        'some text 1850-01-01 50:02:03.123456 some text') == None
+        'some text 2024-01-01 50:02:03.123456 some text') is None
+
+    assert extract_datetime_from_string(
+        'some text 1850-01-01 50:02:03.123456 some text') is None
 
 
 def test_get_serial_number_from_log_line():
+    """Test for the get_bike_serial_number_from_log_line
+    function where a serial number is present."""
+
     assert get_bike_serial_number_from_log_line(
         "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = \
         {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
@@ -72,6 +91,9 @@ def test_get_serial_number_from_log_line():
 
 
 def test_no_serial_number_contained_in_log_line():
+    """Test for the get_bike_serial_number_from_log_line
+    function where a serial number is not present."""
+
     assert get_bike_serial_number_from_log_line(
         "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = \
         {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
@@ -79,10 +101,12 @@ def test_no_serial_number_contained_in_log_line():
         \"date_of_birth\":-336700800000,\"email_address\":\"wayne_fitzgerald@hotmail.com\",\
         \"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\
         \"original_source\":\"offline\"}\n"
-    ) == None
+    ) is None
 
 
 def test_valid_email_in_log_line():
+    """Test for the get_email_from_log_line function where an email is present."""
+
     assert get_email_from_log_line(
         "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = \
     {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
@@ -94,6 +118,8 @@ def test_valid_email_in_log_line():
 
 
 def test_no_email_found_in_log_line():
+    """Test for the get_email_from_log_line function where an email is not present."""
+
     assert get_email_from_log_line(
         "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = \
     {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
@@ -101,10 +127,12 @@ def test_no_email_found_in_log_line():
     \"date_of_birth\":-336700800000,\
     \"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\
     \"original_source\":\"offline\"}\n"
-    ) == None
+    ) is None
 
 
 def test_get_valid_user_data_from_log_line():
+    """Test for the get_user_from_log_line function where all fields are present."""
+
     assert get_user_from_log_line(
         "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = \
         {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
@@ -114,10 +142,13 @@ def test_get_valid_user_data_from_log_line():
         \"bike_serial\":\"SN0000\",\"original_source\":\"offline\"}\n"
     ) == {'user_id': 815, 'first_name': 'Wayne', 'last_name': 'Fitzgerald',
           'birthdate': '1959-05-02', 'height': 187, 'weight': 52,
-          'email': 'wayne_fitzgerald@hotmail.com', 'gender': 'male', 'account_created': '2022-01-04'}
+          'email': 'wayne_fitzgerald@hotmail.com', 'gender': 'male',
+          'account_created': '2022-01-04'}
 
 
 def test_valid_ride_data_from_log_line():
+    """Test for the get_ride_data_from_log_line function where all fields are present."""
+
     assert get_ride_data_from_log_line(
         "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = \
         {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
@@ -129,6 +160,8 @@ def test_valid_ride_data_from_log_line():
 
 
 def test_invalid_ride_data_from_log_line():
+    """Test for the get_ride_data_from_log_line function where all fields are not present."""
+
     assert get_ride_data_from_log_line(
         "mendoza v9: [SYSTEM] data = \
         {\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
@@ -140,6 +173,8 @@ def test_invalid_ride_data_from_log_line():
 
 
 def test_valid_reading_data_from_log_line():
+    """Tests for the get_reading_data_from_log_line function where all fields are present."""
+
     assert get_reading_data_from_log_line({}, "2022-07-25 16:13:37.709125 mendoza v9: \
                                           [INFO]: Ride - duration = 1.0; resistance = 30\n",
                                           datetime(2022, 7, 25, 16,
@@ -154,6 +189,8 @@ def test_valid_reading_data_from_log_line():
 
 
 def test_invalid_reading_data_from_log_line():
+    """Tests for the get_reading_data_from_log_line function where all fields are not present."""
+
     assert get_reading_data_from_log_line({}, "2022-07-25 16:13:37.709125 mendoza v9: \
                                           [INFO]: Ride - duration = 1.0;",
                                           datetime(2022, 7, 25, 16,
@@ -168,6 +205,9 @@ def test_invalid_reading_data_from_log_line():
 
 
 def test_start_time_after_reading_time_in_log_line():
+    """Test for the get_reading_data_from_log_line function
+    where the reading time is after the start time."""
+
     assert get_reading_data_from_log_line({}, "2022-07-25 16:13:37.709125 mendoza v9: \
                                           [INFO]: Ride - duration = 1.0; resistance = 30\n",
                                           datetime(2100, 7, 25, 16,
@@ -176,6 +216,8 @@ def test_start_time_after_reading_time_in_log_line():
 
 
 def test_get_valid_address_from_log_line():
+    """Test for the get_address_from_log_line function where an address is present."""
+
     assert get_address_from_log_line(
         "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = \
         {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
@@ -188,6 +230,8 @@ def test_get_valid_address_from_log_line():
 
 
 def test_missing_address_from_log_line():
+    """Test for the get_address_from_log_line function where an address is not present."""
+
     assert get_address_from_log_line(
         "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = \
         {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
