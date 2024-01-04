@@ -108,6 +108,7 @@ resource "aws_lambda_function" "c9-deloton-lambda-report-t" {
     role = aws_iam_role.c9_deloton_lambda_report_role.arn
     image_uri = "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-deloton-daily-report:latest"
     package_type  = "Image"
+    timeout = 15
     environment {
       variables = {
       DATABASE_IP = "${var.database_ip}",
@@ -329,7 +330,7 @@ resource "aws_scheduler_schedule" "c9_deloton_report_schedule_t" {
     mode = "FLEXIBLE"
   }
   schedule_expression_timezone = "Europe/London"
-  schedule_expression = "cron(10 15 * * ? *)" 
+  schedule_expression = "cron(22 15 * * ? *)" 
 
   target{
     arn = aws_sfn_state_machine.c9_deloton_report_fsm_t.arn
