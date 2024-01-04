@@ -62,14 +62,21 @@ def get_user_from_log_line(log_line: str) -> dict:
     If any user information is missing, this field is given as None in the returned dictionary."""
 
     user = {}
+    prefixes = ['mr', 'mrs', 'miss', 'ms', 'dr',
+                'mr.', 'mrs.', 'miss.', 'ms.', 'dr.']
+
     log_line_data = literal_eval(log_line.split('=')[1])
 
     # Obtain user data from the log line directly
     user['user_id'] = int(log_line_data.get('user_id', -1))
 
     if log_line_data.get('name'):
-        user['first_name'] = log_line_data['name'].split()[0]
-        user['last_name'] = " ".join(log_line_data['name'].split()[1:])
+        name_parts = log_line_data['name'].split()
+        name_no_prefix = [
+            part for part in name_parts if part.lower() not in prefixes]
+        full_name = ' '. join(name_no_prefix)
+        user['first_name'] = full_name[:full_name.rfind(' ')]
+        user['last_name'] = full_name.split()[-1]
     else:
         user['first_name'] = None
         user['last_name'] = None
@@ -169,3 +176,6 @@ def get_address_from_log_line(log_line: str) -> dict:
 
 if __name__ == "__main__":
     pass
+
+    print(get_user_from_log_line(
+        "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = {\"user_id\":815,\"name\":\"Mr Wayne J Fitzgerald\",\"gender\":\"male\",\"address\":\"Studio 3,William alley,New Bethan,WR4V 7TA\",\"date_of_birth\":-336700800000,\"email_address\":\"wayne_fitzgerald@hotmail.com\",\"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\"bike_serial\":\"SN0000\",\"original_source\":\"offline\"}\n"))
