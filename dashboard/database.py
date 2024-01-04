@@ -30,13 +30,12 @@ def get_current_ride_data(db_connection: extensions.connection) -> int:
 
         query = """
         SELECT Ride.rider_id, first_name, last_name, height, weight, gender, birthdate,
-        heart_rate, power, resistance, elapsed_time
+        heart_rate, power, resistance, elapsed_time, start_time
         FROM Ride
         JOIN Rider ON Ride.rider_id = Rider.rider_id
         JOIN Reading ON Ride.ride_id = Reading.ride_id
-        ORDER BY start_time DESC
-        LIMIT 1
-        ;
+        ORDER BY start_time DESC, elapsed_time DESC
+        LIMIT 1;
         """
 
         db_cur.execute(query)
