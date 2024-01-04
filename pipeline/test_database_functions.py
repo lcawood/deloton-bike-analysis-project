@@ -4,10 +4,10 @@
 
 from unittest.mock import MagicMock,patch
 
-from database_functions import load_user_into_database,load_address_into_database,select_address_from_database,load_ride_into_database,select_ride_from_database,load_reading_into_database,select_reading_from_database,load_bike_into_database,select_bike_from_database
+from database_functions import load_rider_into_database,load_address_into_database,select_address_from_database,load_ride_into_database,select_ride_from_database,load_reading_into_database,select_reading_from_database,load_bike_into_database,select_bike_from_database
 from load import add_address
 
-EXAMPLE_USER = {'user_id' : 1234,'address_id' : 6,'first_name': "Charlie",
+EXAMPLE_USER = {'rider_id' : 1234,'address_id' : 6,'first_name': "Charlie",
                           'last_name': "Derick",'birthdate': "2002-04-13",
                           'height' : 152,'weight' : 280,'email' : "charlie@gmail.com",
                           'gender' : "male",'account_created' : "2021-09-27"}
@@ -15,7 +15,7 @@ EXAMPLE_USER = {'user_id' : 1234,'address_id' : 6,'first_name': "Charlie",
 EXAMPLE_ADDRESS = {"first_line" : "63 Studio","second_line" : "Nursery Avenue",
                    "city" : "London", "postcode" : "LA1 34A"}
 
-EXAMPLE_RIDE = {"user_id" : 1234, "bike_id": 1, "start_time" : "2021-07-03 16:21:12"}
+EXAMPLE_RIDE = {"rider_id" : 1234, "bike_id": 1, "start_time" : "2021-07-03 16:21:12"}
 
 EXAMPLE_READING = {"ride_id" : 1, "heart_rate" : 76, "power" : 12.6423, "rpm" : 20,
                    "resistance" : 50, "elapsed_time" : 120}
@@ -76,8 +76,8 @@ def test_select_address_from_database():
     assert address_id == 1
 
 
-def test_load_user_into_database():
-    """Tests that a user gets correctly loaded into the database"""
+def test_load_rider_into_database():
+    """Tests that a rider gets correctly loaded into the database"""
 
     mock_conn = MagicMock()
 
@@ -88,14 +88,14 @@ def test_load_user_into_database():
             .__enter__.return_value\
             .fetchone
 
-    mock_fetch.return_value = (EXAMPLE_USER["user_id"],)
+    mock_fetch.return_value = (EXAMPLE_USER["rider_id"],)
 
-    user_id = load_user_into_database(mock_conn, EXAMPLE_USER)
+    rider_id = load_rider_into_database(mock_conn, EXAMPLE_USER)
 
     mock_execute.assert_called_once()
     mock_fetch.assert_called_once()
 
-    assert user_id == 1234
+    assert rider_id == 1234
 
 
 def test_load_ride_into_database():

@@ -3,7 +3,7 @@
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-from pipeline import get_next_log_line, user_pipeline, ride_pipeline, reading_pipeline, pipeline
+from pipeline import get_next_log_line, rider_pipeline, ride_pipeline, reading_pipeline, pipeline
 
 
 def test_get_next_log_line():
@@ -19,27 +19,27 @@ def test_get_next_log_line():
     assert get_next_log_line(test_consumer) == 'this is a log line'
 
 
-@patch('transform.get_user_from_log_line')
+@patch('transform.get_rider_from_log_line')
 @patch('transform.get_address_from_log_line')
 @patch('load.add_address')
-@patch('load.add_user')
+@patch('load.add_rider')
 @patch('validate_heart_rate.calculate_max_heart_rate')
 @patch('validate_heart_rate.calculate_min_heart_rate')
-def test_user_pipeline(mock_min_heart_rate, mock_max_heart_rate, mock_load_user, mock_load_address,
-                       mock_transform_address, mock_transform_user):
+def test_rider_pipeline(mock_min_heart_rate, mock_max_heart_rate, mock_load_rider, mock_load_address,
+                       mock_transform_address, mock_transform_rider):
     """
-    Tests user_pipeline function for patched transform, validate_heart_rate and load functions.
+    Tests rider_pipeline function for patched transform, validate_heart_rate and load functions.
     """
-    mock_transform_user.return_value = {'user_id': 7, 'forename': 'John', 'surname': 'Doe'}
+    mock_transform_rider.return_value = {'rider_id': 7, 'forename': 'John', 'surname': 'Doe'}
     mock_transform_address.return_value = {'key': 'this is an address'}
     mock_load_address.return_value = 1
     mock_min_heart_rate.return_value = 60
     mock_max_heart_rate.return_value = 180
 
-    user = user_pipeline('I am a log line')
+    rider = rider_pipeline('I am a log line')
 
-    assert user == {
-        'user_id': 7,
+    assert rider == {
+        'rider_id': 7,
         'forename': 'John',
         'surname': 'Doe',
         'address_id': 1,
@@ -72,7 +72,7 @@ def test_reading_pipeline(mock_load_reading, mock_send_email, mock_transform_rea
     start_time = datetime.now()
     ride_id = 1
     reading = {'ride_id': ride_id}
-    user = {'forename': 'Jane', 'surname': 'Doe', 'min_heart_rate': 60, 'max_heart_rate': 180}
+    rider = {'forename': 'Jane', 'surname': 'Doe', 'min_heart_rate': 60, 'max_heart_rate': 180}
     consecutive_extreme_hrs = [46]
 
     def reading_values_generator():
@@ -91,28 +91,28 @@ def test_reading_pipeline(mock_load_reading, mock_send_email, mock_transform_rea
     mock_transform_reading.side_effect = (lambda x, y, z: x | next(reading_value))
 
     reading = reading_pipeline(
-        log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
+        log_line, ride_id, start_time, reading, rider, consecutive_extreme_hrs)
     assert not mock_load_reading.called
     assert not mock_send_email.called
     assert reading == {'ride_id': ride_id, 'duration': 1, 'resistance': 30}
     assert consecutive_extreme_hrs == [46]
 
     reading = reading_pipeline(
-        log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
+        log_line, ride_id, start_time, reading, rider, consecutive_extreme_hrs)
     assert mock_load_reading.call_count == 1
     assert not mock_send_email.called
     assert reading == {'ride_id': ride_id}
     assert consecutive_extreme_hrs == [46, 196]
 
     reading = reading_pipeline(
-        log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
+        log_line, ride_id, start_time, reading, rider, consecutive_extreme_hrs)
     assert mock_load_reading.call_count == 1
     assert not mock_send_email.called
     assert reading == {'ride_id': ride_id, 'duration': 2, 'resistance': 42}
     assert consecutive_extreme_hrs == [46, 196]
 
     reading = reading_pipeline(
-        log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
+        log_line, ride_id, start_time, reading, rider, consecutive_extreme_hrs)
     assert mock_load_reading.call_count == 2
     print(mock_send_email.mock_calls)
     assert mock_send_email.call_count == 1
@@ -122,22 +122,22 @@ def test_reading_pipeline(mock_load_reading, mock_send_email, mock_transform_rea
     consecutive_extreme_hrs = [46, 196]
 
     reading = reading_pipeline(
-        log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
+        log_line, ride_id, start_time, reading, rider, consecutive_extreme_hrs)
     reading = reading_pipeline(
-        log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
+        log_line, ride_id, start_time, reading, rider, consecutive_extreme_hrs)
     assert mock_send_email.call_count == 1
     assert not consecutive_extreme_hrs
 
 
 @patch('pipeline.get_next_log_line')
 @patch('pipeline.get_kafka_consumer')
-@patch('pipeline.user_pipeline')
+@patch('pipeline.rider_pipeline')
 @patch('pipeline.ride_pipeline')
 @patch('pipeline.reading_pipeline')
 @patch('transform.get_bike_serial_number_from_log_line')
 @patch('load.add_bike')
 def test_pipeline(mock_load_bike, mock_transform_bike, mock_reading_pipeline, mock_ride_pipeline,
-                  mock_user_pipeline, mock_get_kafka_consumer, mock_get_next_log_line):
+                  mock_rider_pipeline, mock_get_kafka_consumer, mock_get_next_log_line):
     """
     Tests the function pipeline directs log lines correctly starting at the beginning of a ride.
     """
@@ -237,7 +237,7 @@ def test_pipeline(mock_load_bike, mock_transform_bike, mock_reading_pipeline, mo
         pass
 
     assert mock_get_next_log_line.call_count == 40 + 1
-    assert mock_user_pipeline.call_count == 3
+    assert mock_rider_pipeline.call_count == 3
     assert mock_transform_bike.call_count == 3
     assert mock_load_bike.call_count == 3
     assert mock_ride_pipeline.call_count == 3
@@ -248,14 +248,14 @@ def test_pipeline(mock_load_bike, mock_transform_bike, mock_reading_pipeline, mo
 @patch('pipeline.retrieve_text_from_s3_file')
 @patch('pipeline.get_next_log_line')
 @patch('pipeline.get_kafka_consumer')
-@patch('pipeline.user_pipeline')
+@patch('pipeline.rider_pipeline')
 @patch('pipeline.ride_pipeline')
 @patch('pipeline.reading_pipeline')
 @patch('transform.get_bike_serial_number_from_log_line')
 @patch('load.add_bike')
 def test_pipeline_s3_backup_exists_new_reading(
         mock_load_bike, mock_transform_bike, mock_reading_pipeline, mock_ride_pipeline,
-        mock_user_pipeline, mock_get_kafka_consumer, mock_get_next_log_line, mock_retrieve_from_s3,
+        mock_rider_pipeline, mock_get_kafka_consumer, mock_get_next_log_line, mock_retrieve_from_s3,
         mock_save_to_s3):
     """
     Checks that the function pipeline makes the correct calls to the functions save_log_line_to_s3
@@ -301,7 +301,7 @@ def test_pipeline_s3_backup_exists_new_reading(
     assert mock_get_next_log_line.call_count == 13
     assert mock_retrieve_from_s3.call_count == 1
     assert mock_save_to_s3.call_count == 1
-    assert mock_user_pipeline.call_count == 2
+    assert mock_rider_pipeline.call_count == 2
     assert mock_transform_bike.call_count == 2
     assert mock_load_bike.call_count == 2
     assert mock_ride_pipeline.call_count == 2
@@ -312,14 +312,14 @@ def test_pipeline_s3_backup_exists_new_reading(
 @patch('pipeline.retrieve_text_from_s3_file')
 @patch('pipeline.get_next_log_line')
 @patch('pipeline.get_kafka_consumer')
-@patch('pipeline.user_pipeline')
+@patch('pipeline.rider_pipeline')
 @patch('pipeline.ride_pipeline')
 @patch('pipeline.reading_pipeline')
 @patch('transform.get_bike_serial_number_from_log_line')
 @patch('load.add_bike')
 def test_pipeline_s3_backup_exists_mid_reading(
         mock_load_bike, mock_transform_bike, mock_reading_pipeline, mock_ride_pipeline,
-        mock_user_pipeline, mock_get_kafka_consumer, mock_get_next_log_line, mock_retrieve_from_s3,
+        mock_rider_pipeline, mock_get_kafka_consumer, mock_get_next_log_line, mock_retrieve_from_s3,
         mock_save_to_s3):
     """
     Checks that the function pipeline makes the correct calls to the functions save_log_line_to_s3
@@ -364,7 +364,7 @@ def test_pipeline_s3_backup_exists_mid_reading(
     assert mock_get_next_log_line.call_count == 12
     assert mock_retrieve_from_s3.call_count == 1
     assert mock_save_to_s3.call_count == 1
-    assert mock_user_pipeline.call_count == 2
+    assert mock_rider_pipeline.call_count == 2
     assert mock_transform_bike.call_count == 2
     assert mock_load_bike.call_count == 2
     assert mock_ride_pipeline.call_count == 2
@@ -375,14 +375,14 @@ def test_pipeline_s3_backup_exists_mid_reading(
 @patch('pipeline.retrieve_text_from_s3_file')
 @patch('pipeline.get_next_log_line')
 @patch('pipeline.get_kafka_consumer')
-@patch('pipeline.user_pipeline')
+@patch('pipeline.rider_pipeline')
 @patch('pipeline.ride_pipeline')
 @patch('pipeline.reading_pipeline')
 @patch('transform.get_bike_serial_number_from_log_line')
 @patch('load.add_bike')
 def test_pipeline_s3_backup_does_not_exist_new_reading(
         mock_load_bike, mock_transform_bike, mock_reading_pipeline, mock_ride_pipeline,
-        mock_user_pipeline, mock_get_kafka_consumer,  mock_get_next_log_line,
+        mock_rider_pipeline, mock_get_kafka_consumer,  mock_get_next_log_line,
         mock_retrieve_from_s3, mock_save_to_s3):
     """
     Checks that the function pipeline makes the correct calls to the functions save_log_line_to_s3
@@ -428,7 +428,7 @@ def test_pipeline_s3_backup_does_not_exist_new_reading(
     assert mock_get_next_log_line.call_count == 13
     assert mock_retrieve_from_s3.call_count == 1
     assert mock_save_to_s3.call_count == 1
-    assert mock_user_pipeline.call_count == 1
+    assert mock_rider_pipeline.call_count == 1
     assert mock_transform_bike.call_count == 1
     assert mock_load_bike.call_count == 1
     assert mock_ride_pipeline.call_count == 1
@@ -439,14 +439,14 @@ def test_pipeline_s3_backup_does_not_exist_new_reading(
 @patch('pipeline.retrieve_text_from_s3_file')
 @patch('pipeline.get_next_log_line')
 @patch('pipeline.get_kafka_consumer')
-@patch('pipeline.user_pipeline')
+@patch('pipeline.rider_pipeline')
 @patch('pipeline.ride_pipeline')
 @patch('pipeline.reading_pipeline')
 @patch('transform.get_bike_serial_number_from_log_line')
 @patch('load.add_bike')
 def test_pipeline_s3_backup_does_not_exist_new_reading(
         mock_load_bike, mock_transform_bike, mock_reading_pipeline, mock_ride_pipeline,
-        mock_user_pipeline, mock_get_kafka_consumer,  mock_get_next_log_line,
+        mock_rider_pipeline, mock_get_kafka_consumer,  mock_get_next_log_line,
         mock_retrieve_from_s3, mock_save_to_s3):
     """
     Checks that the function pipeline makes the correct calls to the functions save_log_line_to_s3
@@ -491,7 +491,7 @@ def test_pipeline_s3_backup_does_not_exist_new_reading(
     assert mock_get_next_log_line.call_count == 12
     assert mock_retrieve_from_s3.call_count == 1
     assert mock_save_to_s3.call_count == 1
-    assert mock_user_pipeline.call_count == 1
+    assert mock_rider_pipeline.call_count == 1
     assert mock_transform_bike.call_count == 1
     assert mock_load_bike.call_count == 1
     assert mock_ride_pipeline.call_count == 1
