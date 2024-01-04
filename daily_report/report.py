@@ -239,11 +239,11 @@ def handler(event=None, context=None) -> int:
 
     try:
 
-        yesterday = datetime.now().date() #- timedelta(days=1)
-
         load_dotenv()
         connection = get_database_connection()
         s3_client = get_s3_client(environ)
+
+        yesterday = previous_day_from_database(connection)
 
         report_dict = create_report_data(yesterday,connection)
 
