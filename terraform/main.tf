@@ -114,7 +114,9 @@ resource "aws_lambda_function" "c9-charliedean-lambda-query-t" {
       DATABASE_NAME ="${var.database_name}",
       DATABASE_PASSWORD = "${var.database_password}",
       DATABASE_PORT ="${var.database_port}",
-      DATABASE_USERNAME = "${var.database_username}"
+      DATABASE_USERNAME = "${var.database_username}",
+      AWS_ACCESS = "${var.aws_access_key_id}",
+      AWS_SECRET_ACCESS = "${var.aws_secret_access_key}"
     }
 }
 }
