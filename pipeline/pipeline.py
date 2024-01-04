@@ -96,7 +96,10 @@ def reading_pipeline(log_line: str, ride_id: int, start_time: datetime, reading:
         else:
             consecutive_extreme_hrs.append(reading['heart_rate'])
         if len(consecutive_extreme_hrs) == EXTREME_HR_COUNT_THRESHOLD:
-            validate_heart_rate.send_email(rider, consecutive_extreme_hrs)
+            try:
+                validate_heart_rate.send_email(rider, consecutive_extreme_hrs)
+            except Exception:
+                print('Unable to send email.')
             consecutive_extreme_hrs.clear()
         load.add_reading(reading)
         reading.clear()
