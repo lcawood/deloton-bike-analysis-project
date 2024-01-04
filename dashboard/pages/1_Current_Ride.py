@@ -17,11 +17,10 @@ from utilities import get_current_rider_name, is_heart_rate_abnormal
 from visualisations import (get_current_ride_header, get_dashboard_title,
                             get_current_ride_header_personal_info, get_current_ride_metrics,
                             get_current_ride_personal_best_metrics, get_last_updated_current_ride,
-                            get_heart_rate_warning, get_recent_rides_header, get_last_updated_recent_rides)
+                            get_heart_rate_warning)
 
 
 CURRENT_RIDE_REFRESH_RATE = 5
-RECENT_RIDE_REFRESH_RATE = 5
 LAST_UPDATED_COUNT_INCREMENT = 1
 
 
@@ -58,22 +57,6 @@ def main_current_ride(db_connection: extensions.connection) -> None:
         return empty_last_updated_placeholder
 
 
-def main_recent_rides(db_connection: extensions.connection) -> None:
-    """
-    Main function that calls all the functions related to
-    displaying the recent rides visualisations.
-    """
-    with st.container():
-        get_recent_rides_header()
-
-        recent_rides = get_recent_12hr_data(db_connection)
-
-        # Placeholder for last updated time caption
-        empty_last_updated_placeholder = st.empty()
-
-        return empty_last_updated_placeholder
-
-
 if __name__ == "__main__":
 
     load_dotenv()
@@ -86,14 +69,9 @@ if __name__ == "__main__":
         last_updated_placeholder_current = main_current_ride(conn)
         update_time = datetime.now()
 
-        last_updated_placeholder_recent = main_recent_rides(conn)
-        update_time = datetime.now()
-
         for i in range(CURRENT_RIDE_REFRESH_RATE):
             get_last_updated_current_ride(
                 update_time, last_updated_placeholder_current)
-            get_last_updated_current_ride(
-                update_time, last_updated_placeholder_recent)
             time.sleep(LAST_UPDATED_COUNT_INCREMENT)
 
         st.rerun()
