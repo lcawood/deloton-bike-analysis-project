@@ -204,8 +204,5 @@ def test_handler_returns_error_message(mock_extract_report_data,mock_sql_select_
 
     handler_return = handler(0,0)
 
-    print(handler_return)
-
-
     assert handler_return["statusCode"] == 404
     assert "ValueError" in handler_return["body"]
