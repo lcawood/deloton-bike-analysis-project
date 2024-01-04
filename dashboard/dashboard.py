@@ -28,17 +28,6 @@ if __name__ == "__main__":
     current_ride = get_current_ride_data(conn)
     current_ride_personal_best = get_current_ride_data_highest(
         conn, current_ride)
-    # current_ride = [1, "John", "Doe", 175, 75, "Male", fake_birthdate,
-    #                 105, 11.4, 60, 45]
-    print(current_ride)
-    print(current_ride_personal_best)
-    # current_ride_personal_best = [1, "John", "Doe", 175, 75, "Male", fake_birthdate,
-    #                               125, 15.4, 90, 65]
-
-    # SELECT rider_id, first_name, last_name, height, weight, gender, birthdate
-    # heart_rate, power, resistance, elapsed_time
-
-    print(current_ride)
 
     rider_name = get_current_rider_name(current_ride)
 
