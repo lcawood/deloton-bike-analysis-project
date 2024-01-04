@@ -1,7 +1,6 @@
 """Contains unit tests for pipeline.py"""
 
 from datetime import datetime
-
 from unittest.mock import MagicMock, patch
 
 from pipeline import get_next_log_line, user_pipeline, ride_pipeline, reading_pipeline, pipeline
@@ -55,7 +54,11 @@ def test_ride_pipeline(mock_load_ride, mock_transform_ride):
     """Tests function ride_pipeline for patched transform and load functions."""
     mock_load_ride.return_value = 7
     mock_transform_ride.return_value = {'key': 'value in a dictionary of ride info'}
-    assert ride_pipeline('this is a log line', 2) == {'key': 'value in a dictionary of ride info', 'bike_id': 2, 'ride_id': 7}
+    assert ride_pipeline('this is a log line', 2) == {
+        'key': 'value in a dictionary of ride info',
+        'bike_id': 2, 
+        'ride_id': 7
+        }
     mock_load_ride.assert_called_once()
 
 
@@ -87,25 +90,29 @@ def test_reading_pipeline(mock_load_reading, mock_send_email, mock_transform_rea
     reading_value = reading_values_generator()
     mock_transform_reading.side_effect = (lambda x, y, z: x | next(reading_value))
 
-    reading = reading_pipeline(log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
+    reading = reading_pipeline(
+        log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
     assert not mock_load_reading.called
     assert not mock_send_email.called
     assert reading == {'ride_id': ride_id, 'duration': 1, 'resistance': 30}
     assert consecutive_extreme_hrs == [46]
 
-    reading = reading_pipeline(log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
+    reading = reading_pipeline(
+        log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
     assert mock_load_reading.call_count == 1
     assert not mock_send_email.called
     assert reading == {'ride_id': ride_id}
     assert consecutive_extreme_hrs == [46, 196]
 
-    reading = reading_pipeline(log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
+    reading = reading_pipeline(
+        log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
     assert mock_load_reading.call_count == 1
     assert not mock_send_email.called
     assert reading == {'ride_id': ride_id, 'duration': 2, 'resistance': 42}
     assert consecutive_extreme_hrs == [46, 196]
 
-    reading = reading_pipeline(log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
+    reading = reading_pipeline(
+        log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
     assert mock_load_reading.call_count == 2
     print(mock_send_email.mock_calls)
     assert mock_send_email.call_count == 1
@@ -114,8 +121,10 @@ def test_reading_pipeline(mock_load_reading, mock_send_email, mock_transform_rea
 
     consecutive_extreme_hrs = [46, 196]
 
-    reading = reading_pipeline(log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
-    reading = reading_pipeline(log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
+    reading = reading_pipeline(
+        log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
+    reading = reading_pipeline(
+        log_line, ride_id, start_time, reading, user, consecutive_extreme_hrs)
     assert mock_send_email.call_count == 1
     assert not consecutive_extreme_hrs
 
@@ -129,7 +138,10 @@ def test_reading_pipeline(mock_load_reading, mock_send_email, mock_transform_rea
 @patch('load.add_bike')
 def test_pipeline(mock_load_bike, mock_transform_bike, mock_reading_pipeline, mock_ride_pipeline,
                   mock_user_pipeline, mock_get_kafka_consumer, mock_get_next_log_line):
-    """Tests the function pipeline directs log lines correctly"""
+    """
+    Tests the function pipeline directs log lines correctly starting at the beginning of a ride.
+    """
+
     mock_get_next_log_line.side_effect = [
         "--------- beginning of main\n",
         "--------- beginning of a new ride\n",
@@ -230,3 +242,257 @@ def test_pipeline(mock_load_bike, mock_transform_bike, mock_reading_pipeline, mo
     assert mock_load_bike.call_count == 3
     assert mock_ride_pipeline.call_count == 3
     assert mock_reading_pipeline.call_count == 40 - 4*3
+
+
+@patch('pipeline.save_log_line_to_s3')
+@patch('pipeline.retrieve_text_from_s3_file')
+@patch('pipeline.get_next_log_line')
+@patch('pipeline.get_kafka_consumer')
+@patch('pipeline.user_pipeline')
+@patch('pipeline.ride_pipeline')
+@patch('pipeline.reading_pipeline')
+@patch('transform.get_bike_serial_number_from_log_line')
+@patch('load.add_bike')
+def test_pipeline_s3_backup_exists_new_reading(
+        mock_load_bike, mock_transform_bike, mock_reading_pipeline, mock_ride_pipeline,
+        mock_user_pipeline, mock_get_kafka_consumer, mock_get_next_log_line, mock_retrieve_from_s3,
+        mock_save_to_s3):
+    """
+    Checks that the function pipeline makes the correct calls to the functions save_log_line_to_s3
+    and retrieve_text_from_s3_file, and correctly routes the subsequent log_lines when the first
+    log_line is a new reading, mid-ride, and there is a valid backup log_line response.
+    """
+    mock_retrieve_from_s3.return_value = 'I am a log line!!'
+    mock_get_next_log_line.side_effect = [
+        "2022-07-25 16:13:31.709082 mendoza v9: \
+            [INFO]: Ride - duration = 454.0; resistance = 60\n",
+        "2022-07-25 16:13:32.209086 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        "2022-07-25 16:13:32.709090 mendoza v9: \
+            [INFO]: Ride - duration = 455.0; resistance = 60\n",
+        "2022-07-25 16:13:33.209093 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        "--------- beginning of main\n",
+        "--------- beginning of a new ride\n",
+        "2022-07-25 16:13:36.709117 mendoza v9: Getting user data from server..\n",
+        "2022-07-25 16:13:37.209120 mendoza v9: \
+            [SYSTEM] data = {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
+                \"address\":\"Studio 3,William alley,New Bethan,WR4V 7TA\",\
+                \"date_of_birth\":-336700800000,\
+                \"email_address\":\"wayne_fitzgerald@hotmail.com\",\"height_cm\":187,\
+                \"weight_kg\":52,\"account_create_date\":1641254400000,\"bike_serial\":\"SN0000\",\
+                \"original_source\":\"offline\"}\n",
+        "2022-07-25 16:13:31.709082 mendoza v9: \
+            [INFO]: Ride - duration = 454.0; resistance = 60\n",
+        "2022-07-25 16:13:32.209086 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        "2022-07-25 16:13:32.709090 mendoza v9: \
+            [INFO]: Ride - duration = 455.0; resistance = 60\n",
+        "2022-07-25 16:13:33.209093 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        ValueError
+        ]
+
+    try:
+        pipeline()
+    except ValueError:
+        pass
+
+    assert mock_get_next_log_line.call_count == 13
+    assert mock_retrieve_from_s3.call_count == 1
+    assert mock_save_to_s3.call_count == 1
+    assert mock_user_pipeline.call_count == 2
+    assert mock_transform_bike.call_count == 2
+    assert mock_load_bike.call_count == 2
+    assert mock_ride_pipeline.call_count == 2
+    assert mock_reading_pipeline.call_count == 8
+
+
+@patch('pipeline.save_log_line_to_s3')
+@patch('pipeline.retrieve_text_from_s3_file')
+@patch('pipeline.get_next_log_line')
+@patch('pipeline.get_kafka_consumer')
+@patch('pipeline.user_pipeline')
+@patch('pipeline.ride_pipeline')
+@patch('pipeline.reading_pipeline')
+@patch('transform.get_bike_serial_number_from_log_line')
+@patch('load.add_bike')
+def test_pipeline_s3_backup_exists_mid_reading(
+        mock_load_bike, mock_transform_bike, mock_reading_pipeline, mock_ride_pipeline,
+        mock_user_pipeline, mock_get_kafka_consumer, mock_get_next_log_line, mock_retrieve_from_s3,
+        mock_save_to_s3):
+    """
+    Checks that the function pipeline makes the correct calls to the functions save_log_line_to_s3
+    and retrieve_text_from_s3_file, and correctly routes the subsequent log_lines when the first
+    log_line is a the second half of a reading, mid-ride, and there is a valid backup log_line
+    response.
+    """
+    mock_retrieve_from_s3.return_value = 'I am a log line!!'
+    mock_get_next_log_line.side_effect = [
+        "2022-07-25 16:13:32.209086 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        "2022-07-25 16:13:32.709090 mendoza v9: \
+            [INFO]: Ride - duration = 455.0; resistance = 60\n",
+        "2022-07-25 16:13:33.209093 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        "--------- beginning of main\n",
+        "--------- beginning of a new ride\n",
+        "2022-07-25 16:13:36.709117 mendoza v9: Getting user data from server..\n",
+        "2022-07-25 16:13:37.209120 mendoza v9: \
+            [SYSTEM] data = {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
+                \"address\":\"Studio 3,William alley,New Bethan,WR4V 7TA\",\
+                \"date_of_birth\":-336700800000,\
+                \"email_address\":\"wayne_fitzgerald@hotmail.com\",\"height_cm\":187,\
+                \"weight_kg\":52,\"account_create_date\":1641254400000,\"bike_serial\":\"SN0000\",\
+                \"original_source\":\"offline\"}\n",
+        "2022-07-25 16:13:31.709082 mendoza v9: \
+            [INFO]: Ride - duration = 454.0; resistance = 60\n",
+        "2022-07-25 16:13:32.209086 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        "2022-07-25 16:13:32.709090 mendoza v9: \
+            [INFO]: Ride - duration = 455.0; resistance = 60\n",
+        "2022-07-25 16:13:33.209093 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        ValueError
+        ]
+
+    try:
+        pipeline()
+    except ValueError:
+        pass
+
+    assert mock_get_next_log_line.call_count == 12
+    assert mock_retrieve_from_s3.call_count == 1
+    assert mock_save_to_s3.call_count == 1
+    assert mock_user_pipeline.call_count == 2
+    assert mock_transform_bike.call_count == 2
+    assert mock_load_bike.call_count == 2
+    assert mock_ride_pipeline.call_count == 2
+    assert mock_reading_pipeline.call_count == 6
+
+
+@patch('pipeline.save_log_line_to_s3')
+@patch('pipeline.retrieve_text_from_s3_file')
+@patch('pipeline.get_next_log_line')
+@patch('pipeline.get_kafka_consumer')
+@patch('pipeline.user_pipeline')
+@patch('pipeline.ride_pipeline')
+@patch('pipeline.reading_pipeline')
+@patch('transform.get_bike_serial_number_from_log_line')
+@patch('load.add_bike')
+def test_pipeline_s3_backup_does_not_exist_new_reading(
+        mock_load_bike, mock_transform_bike, mock_reading_pipeline, mock_ride_pipeline,
+        mock_user_pipeline, mock_get_kafka_consumer,  mock_get_next_log_line,
+        mock_retrieve_from_s3, mock_save_to_s3):
+    """
+    Checks that the function pipeline makes the correct calls to the functions save_log_line_to_s3
+    and retrieve_text_from_s3_file, and correctly routes the subsequent log_lines when the first
+    log_line is a new reading, mid-ride, and there is no valid backup log_line response.
+    """
+    mock_retrieve_from_s3.return_value = None
+    mock_get_next_log_line.side_effect = [
+        "2022-07-25 16:13:31.709082 mendoza v9: \
+            [INFO]: Ride - duration = 454.0; resistance = 60\n",
+        "2022-07-25 16:13:32.209086 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        "2022-07-25 16:13:32.709090 mendoza v9: \
+            [INFO]: Ride - duration = 455.0; resistance = 60\n",
+        "2022-07-25 16:13:33.209093 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        "--------- beginning of main\n",
+        "--------- beginning of a new ride\n",
+        "2022-07-25 16:13:36.709117 mendoza v9: Getting user data from server..\n",
+        "2022-07-25 16:13:37.209120 mendoza v9: \
+            [SYSTEM] data = {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
+                \"address\":\"Studio 3,William alley,New Bethan,WR4V 7TA\",\
+                \"date_of_birth\":-336700800000,\
+                \"email_address\":\"wayne_fitzgerald@hotmail.com\",\"height_cm\":187,\
+                \"weight_kg\":52,\"account_create_date\":1641254400000,\"bike_serial\":\"SN0000\",\
+                \"original_source\":\"offline\"}\n",
+        "2022-07-25 16:13:31.709082 mendoza v9: \
+            [INFO]: Ride - duration = 454.0; resistance = 60\n",
+        "2022-07-25 16:13:32.209086 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        "2022-07-25 16:13:32.709090 mendoza v9: \
+            [INFO]: Ride - duration = 455.0; resistance = 60\n",
+        "2022-07-25 16:13:33.209093 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        ValueError
+        ]
+
+    try:
+        pipeline()
+    except ValueError:
+        pass
+
+    assert mock_get_next_log_line.call_count == 13
+    assert mock_retrieve_from_s3.call_count == 1
+    assert mock_save_to_s3.call_count == 1
+    assert mock_user_pipeline.call_count == 1
+    assert mock_transform_bike.call_count == 1
+    assert mock_load_bike.call_count == 1
+    assert mock_ride_pipeline.call_count == 1
+    assert mock_reading_pipeline.call_count == 4
+
+
+@patch('pipeline.save_log_line_to_s3')
+@patch('pipeline.retrieve_text_from_s3_file')
+@patch('pipeline.get_next_log_line')
+@patch('pipeline.get_kafka_consumer')
+@patch('pipeline.user_pipeline')
+@patch('pipeline.ride_pipeline')
+@patch('pipeline.reading_pipeline')
+@patch('transform.get_bike_serial_number_from_log_line')
+@patch('load.add_bike')
+def test_pipeline_s3_backup_does_not_exist_new_reading(
+        mock_load_bike, mock_transform_bike, mock_reading_pipeline, mock_ride_pipeline,
+        mock_user_pipeline, mock_get_kafka_consumer,  mock_get_next_log_line,
+        mock_retrieve_from_s3, mock_save_to_s3):
+    """
+    Checks that the function pipeline makes the correct calls to the functions save_log_line_to_s3
+    and retrieve_text_from_s3_file, and correctly routes the subsequent log_lines when the first
+    log_line is the second half of a reading, mid-ride, and there is no valid backup log_line
+    response.
+    """
+    mock_retrieve_from_s3.return_value = None
+    mock_get_next_log_line.side_effect = [
+        "2022-07-25 16:13:32.209086 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        "2022-07-25 16:13:32.709090 mendoza v9: \
+            [INFO]: Ride - duration = 455.0; resistance = 60\n",
+        "2022-07-25 16:13:33.209093 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        "--------- beginning of main\n",
+        "--------- beginning of a new ride\n",
+        "2022-07-25 16:13:36.709117 mendoza v9: Getting user data from server..\n",
+        "2022-07-25 16:13:37.209120 mendoza v9: \
+            [SYSTEM] data = {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
+                \"address\":\"Studio 3,William alley,New Bethan,WR4V 7TA\",\
+                \"date_of_birth\":-336700800000,\
+                \"email_address\":\"wayne_fitzgerald@hotmail.com\",\"height_cm\":187,\
+                \"weight_kg\":52,\"account_create_date\":1641254400000,\"bike_serial\":\"SN0000\",\
+                \"original_source\":\"offline\"}\n",
+        "2022-07-25 16:13:31.709082 mendoza v9: \
+            [INFO]: Ride - duration = 454.0; resistance = 60\n",
+        "2022-07-25 16:13:32.209086 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        "2022-07-25 16:13:32.709090 mendoza v9: \
+            [INFO]: Ride - duration = 455.0; resistance = 60\n",
+        "2022-07-25 16:13:33.209093 mendoza v9: \
+            [INFO]: Telemetry - hrt = 0; rpm = 30; power = 11.22896664\n",
+        ValueError
+        ]
+
+    try:
+        pipeline()
+    except ValueError:
+        pass
+
+    assert mock_get_next_log_line.call_count == 12
+    assert mock_retrieve_from_s3.call_count == 1
+    assert mock_save_to_s3.call_count == 1
+    assert mock_user_pipeline.call_count == 1
+    assert mock_transform_bike.call_count == 1
+    assert mock_load_bike.call_count == 1
+    assert mock_ride_pipeline.call_count == 1
+    assert mock_reading_pipeline.call_count == 4
