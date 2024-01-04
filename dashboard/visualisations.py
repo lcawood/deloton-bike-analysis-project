@@ -37,7 +37,7 @@ def get_current_ride_header_personal_info(user_details) -> None:
         # create visualisation
         head_cols = st.columns(4)
         with head_cols[0]:
-            st.metric("Gender", f"{gender_emoji} {gender}")
+            st.metric("Gender", f"{gender_emoji} {gender.title()}")
         with head_cols[1]:
             st.metric("Age", age)
         with head_cols[2]:
