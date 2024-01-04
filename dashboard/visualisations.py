@@ -6,7 +6,7 @@ import pandas as pd
 import streamlit as st
 import altair as alt
 
-from utilities import calculate_age
+from utilities import calculate_age, is_heart_rate_abnormal
 
 
 def get_dashboard_title() -> None:
@@ -57,6 +57,18 @@ def get_current_ride_header_personal_info(user_details) -> None:
             st.metric("Weight", f"{weight} kg")
 
 
+def get_heart_rate_warning(heart_rate: int) -> None:
+    """Displays a warning message if the heart rate is abnormal for the current ride."""
+    if heart_rate == 0:
+        st.warning(
+            f'''WARNING! HEART RATE IS ZERO: \n
+            PLEASE PLACE HANDS ON HANDLE BARS OR SEEK ASSISTANCE!''', icon="⚠️")
+    else:
+        st.warning(
+            f'''WARNING! HEART RATE IS OUTSIDE THE HEALTHY RANGE: \n
+            PLEASE SLOW DOWN OR SEEK ASSISTANCE!''', icon="⚠️")
+
+
 def get_current_ride_metrics(user_details) -> None:
     """
     Gets the header metrics for the current ride and displays them.
@@ -67,6 +79,9 @@ def get_current_ride_metrics(user_details) -> None:
     power = round(user_details[8], 1)
     resistance = user_details[9]
     elapsed_time = user_details[10]
+
+    if is_heart_rate_abnormal(user_details):
+        get_heart_rate_warning(heart_rate)
 
     # create visualisation
     head_cols = st.columns(4)
