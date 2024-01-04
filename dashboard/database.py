@@ -56,7 +56,7 @@ def get_current_rider_highest_duration(db_cur: extensions.connection.cursor, rid
     FROM ride
     JOIN Rider ON Ride.rider_id = Rider.rider_id
     JOIN Reading ON Ride.ride_id = Reading.ride_id
-    WHERE Ride.rider_id LIKE %s
+    WHERE Ride.rider_id = %s
     ORDER BY elapsed_time DESC
     LIMIT 1
     ;
@@ -78,7 +78,7 @@ def get_current_rider_highest_heart_rate(db_cur: extensions.connection.cursor, r
     FROM ride
     JOIN Rider ON Ride.rider_id = Rider.rider_id
     JOIN Reading ON Ride.ride_id = Reading.ride_id
-    WHERE Ride.rider_id LIKE %s
+    WHERE Ride.rider_id = %s
     ORDER BY elapsed_time DESC
     LIMIT 1
     ;
@@ -98,7 +98,7 @@ def get_current_rider_highest_power(db_cur: extensions.connection.cursor, rider_
     FROM ride
     JOIN Rider ON Ride.rider_id = Rider.rider_id
     JOIN Reading ON Ride.ride_id = Reading.ride_id
-    WHERE Ride.rider_id LIKE %s
+    WHERE Ride.rider_id = %s
     ORDER BY elapsed_time DESC
     LIMIT 1
     ;
@@ -118,7 +118,7 @@ def get_current_rider_highest_resistance(db_cur: extensions.connection.cursor, r
     FROM ride
     JOIN Rider ON Ride.rider_id = Rider.rider_id
     JOIN Reading ON Ride.ride_id = Reading.ride_id
-    WHERE Ride.rider_id LIKE %s
+    WHERE Ride.rider_id = %s
     ORDER BY elapsed_time DESC
     LIMIT 1
     ;
@@ -135,6 +135,8 @@ def get_current_ride_data_highest(db_connection: extensions.connection, rider_de
     """Fetched the personal highest details of the current ride from the database using an SQL Select Query."""
 
     with db_connection.cursor() as db_cur:
+
+        # fetch rider personal bests
         rider_id = rider_details[0]
         highest_duration = get_current_rider_highest_duration(db_cur, rider_id)
         highest_heart_rate = get_current_rider_highest_heart_rate(
@@ -144,7 +146,9 @@ def get_current_ride_data_highest(db_connection: extensions.connection, rider_de
             db_cur, rider_id)
 
         # create new list with the personal best replacing the relevant readings
-        personal_best = rider_details[0:7].append(highest_heart_rate, highest_power,
-                                                  highest_resistance, highest_duration)
+        user_base_details = list(rider_details[0:7])
+        highest_readings = [highest_heart_rate,
+                            highest_power, highest_resistance, highest_duration]
+        user_base_details.extend(highest_readings)
 
-        return personal_best
+        return user_base_details

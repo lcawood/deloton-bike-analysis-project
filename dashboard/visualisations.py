@@ -51,6 +51,8 @@ def get_current_ride_metrics(user_details) -> None:
     Gets the header metrics for the current ride and displays them.
     """
 
+    print("current ride user details:", user_details)
+
     # get metrics
     heart_rate = user_details[7]
     power = round(user_details[8], 1)

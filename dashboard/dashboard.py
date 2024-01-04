@@ -11,7 +11,8 @@ from dotenv import load_dotenv
 from pandas import DataFrame
 import streamlit as st
 
-from database import get_database_connection, get_current_ride_data, get_current_ride_data_highest
+from database import (get_database_connection,
+                      get_current_ride_data, get_current_ride_data_highest)
 from utilities import get_current_rider_name
 from visualisations import (
     get_current_ride_header, get_dashboard_title, get_current_ride_header_personal_info, get_current_ride_metrics, get_current_ride_personal_best_metrics)
@@ -30,8 +31,9 @@ if __name__ == "__main__":
     # current_ride = [1, "John", "Doe", 175, 75, "Male", fake_birthdate,
     #                 105, 11.4, 60, 45]
     print(current_ride)
-    current_ride_personal_best = [1, "John", "Doe", 175, 75, "Male", fake_birthdate,
-                                  125, 15.4, 90, 65]
+    print(current_ride_personal_best)
+    # current_ride_personal_best = [1, "John", "Doe", 175, 75, "Male", fake_birthdate,
+    #                               125, 15.4, 90, 65]
 
     # SELECT rider_id, first_name, last_name, height, weight, gender, birthdate
     # heart_rate, power, resistance, elapsed_time
