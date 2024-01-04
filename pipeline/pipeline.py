@@ -9,8 +9,10 @@ used to alert the rider.
 """
 
 from datetime import datetime
+from functools import partial
 import json
 import logging
+from multiprocessing import Pool
 from os import environ
 
 from boto3 import client
@@ -64,8 +66,6 @@ def rider_pipeline(log_line: str) -> dict:
     address = transform.get_address_from_log_line(log_line)
     rider['address_id'] = load.add_address(address)
     load.add_rider(rider)
-    rider['min_heart_rate'] = validate_heart_rate.calculate_min_heart_rate(rider)
-    rider['max_heart_rate'] = validate_heart_rate.calculate_max_heart_rate(rider)
     return rider
 
 
@@ -80,30 +80,25 @@ def ride_pipeline(log_line: str, bike_id: int) -> dict:
     return ride_info
 
 
-def reading_pipeline(log_line: str, ride_id: int, start_time: datetime, reading: dict, rider: dict,
-                     consecutive_extreme_hrs: list) -> dict:
+def reading_pipeline(log_line: str, ride_id: int, start_time: datetime):
     """
     Function to extract reading data from log_line, add it to reading dict, and (for every pair of
     readings) upload to db and alert rider by email if their heart rate has had an extreme value
     for enough consecutive readings.
     """
-    reading = transform.get_reading_data_from_log_line(reading, log_line, start_time)
-    if 'heart_rate' in reading:
-        # Heart rate comes with the second of every pair of reading log lines.
-        if (reading['heart_rate'] == 0) or \
-            (rider['min_heart_rate'] <= reading['heart_rate'] <= rider['max_heart_rate']):
-            consecutive_extreme_hrs.clear()
-        else:
-            consecutive_extreme_hrs.append(reading['heart_rate'])
-        if len(consecutive_extreme_hrs) == EXTREME_HR_COUNT_THRESHOLD:
-            try:
-                validate_heart_rate.send_email(rider, consecutive_extreme_hrs)
-            except Exception:
-                print('Unable to send email.')
-            consecutive_extreme_hrs.clear()
-        load.add_reading(reading)
-        reading.clear()
-        reading['ride_id'] = ride_id
+    reading = transform.get_reading_data_from_log_line(log_line, start_time)
+    '''if (reading['heart_rate'] == 0) or \
+        (rider['min_heart_rate'] <= reading['heart_rate'] <= rider['max_heart_rate']):
+        consecutive_extreme_hrs.clear()
+    else:
+        consecutive_extreme_hrs.append(reading['heart_rate'])
+    if len(consecutive_extreme_hrs) == EXTREME_HR_COUNT_THRESHOLD:
+        try:
+            validate_heart_rate.send_email(rider, consecutive_extreme_hrs)
+        except Exception:
+            print('Unable to send email.')
+        consecutive_extreme_hrs.clear()'''
+    reading['ride_id'] = ride_id
     return reading
 
 
@@ -143,9 +138,9 @@ def pipeline():
     kafka_consumer = get_kafka_consumer(GROUP_ID)
     rider = None
     first_relevant_line = True
+    log_line = get_next_log_line(kafka_consumer)
     while True:
-        log_line = get_next_log_line(kafka_consumer)
-
+        reading_log_lines = []
         if ('[SYSTEM]' in log_line) or (('[INFO]: Ride' in log_line) and first_relevant_line):
             # SYSTEM log_line, or the pipeline is starting mid ride.
 
@@ -164,12 +159,29 @@ def pipeline():
                 ride = ride_pipeline(system_log_line, bike_id)
                 reading = {'ride_id': ride['ride_id']}
 
-            first_relevant_line = False
+                if '[SYSTEM]' in log_line:
+                    log_line = get_next_log_line(kafka_consumer)
 
-        if ('[INFO]' in log_line) and rider:
-            reading = reading_pipeline(
-                log_line, ride['ride_id'], ride['start_time'], reading, rider,
-                consecutive_extreme_hrs)
+                while '[INFO]' in log_line:
+                    log_line += get_next_log_line(kafka_consumer)
+                    reading_log_lines.append(log_line)
+                    log_line = get_next_log_line(kafka_consumer)
+
+                partial_reading_pipeline = partial(reading_pipeline, ride_id = ride['ride_id'], start_time = ride['start_time'])
+                
+                with Pool() as pool:
+                    readings = pool.map(partial_reading_pipeline, reading_log_lines)
+                
+                print(ride['start_time'])
+                load.add_readings(readings)
+                print(ride['start_time'])
+
+                reading_log_lines.clear()
+            
+            first_relevant_line = False
+        
+        else:
+            log_line = get_next_log_line(kafka_consumer)
 
 
 if __name__ == "__main__":

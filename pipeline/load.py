@@ -5,7 +5,7 @@
 
 from psycopg2 import errors
 
-from database_functions import get_database_connection,load_rider_into_database,load_address_into_database,select_address_from_database,load_ride_into_database,select_ride_from_database,load_reading_into_database,select_reading_from_database,load_bike_into_database,select_bike_from_database
+from database_functions import get_database_connection,load_rider_into_database,load_address_into_database,select_address_from_database,load_ride_into_database,select_ride_from_database,load_reading_into_database,select_reading_from_database,load_bike_into_database,select_bike_from_database, load_readings_into_database
 
 
 def add_address(address : dict) -> int:
@@ -61,6 +61,19 @@ def add_reading(reading: dict) -> int:
         connection.rollback()
         reading_id = select_reading_from_database(connection,reading)
         return reading_id
+    
+
+def add_readings(readings: list[dict]) -> bool:
+    """Adds reading dictionary as a record in the Reading table in the db."""
+    connection = get_database_connection()
+
+    try:
+        load_readings_into_database(connection, readings)
+        return True
+
+    except errors.UniqueViolation:
+        connection.rollback()
+        return False
 
 
 def add_bike(bike_serial_number: int) -> int:

@@ -142,6 +142,21 @@ def load_reading_into_database(db_connection : extensions.connection, reading : 
         db_connection.commit()
 
         return reading_id[0]
+    
+
+def load_readings_into_database(db_connection : extensions.connection, readings : list[dict]):
+    """Loads a list of readings into the database using SQL."""
+
+    with db_connection.cursor() as db_cur:
+
+        query = """INSERT INTO Reading(resistance, elapsed_time, heart_rate, power, rpm, ride_id)
+          VALUES (%s,%s,%s,%s,%s,%s);"""
+
+        parameters = [tuple(reading.values()) for reading in readings]
+
+        db_cur.executemany(query, parameters)
+
+        db_connection.commit()
 
 
 def select_reading_from_database(db_connection : extensions.connection, reading : dict) -> int:
