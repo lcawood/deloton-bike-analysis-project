@@ -266,4 +266,4 @@ def handler(event=None, context=None) -> int:
 
 
 if __name__ == "__main__":
-   handler()
+   print(handler())

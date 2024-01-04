@@ -330,7 +330,7 @@ resource "aws_scheduler_schedule" "c9_deloton_report_schedule_t" {
     mode = "FLEXIBLE"
   }
   schedule_expression_timezone = "Europe/London"
-  schedule_expression = "cron(37 15 * * ? *)" 
+  schedule_expression = "cron(30 09 * * ? *)" 
 
   target{
     arn = aws_sfn_state_machine.c9_deloton_report_fsm_t.arn
