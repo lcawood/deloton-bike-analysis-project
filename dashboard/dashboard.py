@@ -1,7 +1,7 @@
 """
 Dashboard script to establish connection to the RDS database, fetch data using SQL queries and
-create visualisations in a Streamlit app (using functions from the `database.py`, `visualisations.py` and `utilities.py`
-files as necessary).
+create visualisations in a Streamlit app (using functions from the `database.py`,
+`visualisations.py` and `utilities.pyz files as necessary).
 """
 
 from datetime import datetime
@@ -10,7 +10,6 @@ import time
 from dotenv import load_dotenv
 from psycopg2 import extensions
 import streamlit as st
-from streamlit_autorefresh import st_autorefresh
 
 from database import (get_database_connection,
                       get_current_ride_data, get_current_ride_data_highest)
@@ -30,9 +29,9 @@ def main_current_ride(db_connection: extensions.connection) -> None:
     displaying the current ride visualisations.
     """
 
-    current_ride = get_current_ride_data(conn)
+    current_ride = get_current_ride_data(db_connection)
     current_ride_personal_best = get_current_ride_data_highest(
-        conn, current_ride)
+        db_connection, current_ride)
 
     rider_name = get_current_rider_name(current_ride)
 
@@ -41,13 +40,15 @@ def main_current_ride(db_connection: extensions.connection) -> None:
     get_current_ride_header(rider_name)
 
     # Placeholder for last updated time caption
-    last_updated_placeholder = st.empty()
+    empty_last_updated_placeholder = st.empty()
+
+    get_current_ride_header_personal_info(current_ride)
 
     get_current_ride_metrics(current_ride)
 
     get_current_ride_personal_best_metrics(current_ride_personal_best)
 
-    return last_updated_placeholder
+    return empty_last_updated_placeholder
 
 
 if __name__ == "__main__":

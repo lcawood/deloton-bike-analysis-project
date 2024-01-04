@@ -21,8 +21,6 @@ Required env variables (NEED TO VERIFY):
 - `DATABASE_USERNAME` -> Your database username.
 - `DATABASE_PASSWORD` -> Password to access your database.
 - `DATABASE_PORT` -> Port used to access the database.
-- `AWS_ACCESS_KEY_ID` -> Your AWS access key ID to connect to AWS.
-- `AWS_SECRET_ACCESS_KEY` -> Your AWS secret access key to connect to AWS.
 
 ## Wireframe
 

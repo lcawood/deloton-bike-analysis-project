@@ -133,7 +133,10 @@ def get_current_rider_highest_resistance(db_cur: extensions.connection.cursor, r
 
 
 def get_current_ride_data_highest(db_connection: extensions.connection, rider_details: list) -> int:
-    """Fetched the personal highest details of the current ride from the database using an SQL Select Query."""
+    """
+    Fetched the personal highest details of the current ride
+    from the database using an SQL Select Query.
+    """
 
     with db_connection.cursor() as db_cur:
 

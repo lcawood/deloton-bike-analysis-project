@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-import pandas as pandas
+import pandas as pd
 import streamlit as st
 import altair as alt
 
