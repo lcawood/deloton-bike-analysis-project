@@ -78,4 +78,4 @@ def is_heart_rate_abnormal(user_details):
     max_heart_rate = calculate_max_heart_rate(user_details)
     heart_rate = user_details[7]
 
-    return True if (heart_rate == 0) or (min_heart_rate <= heart_rate <= max_heart_rate) else False
+    return (heart_rate == 0) or (min_heart_rate <= heart_rate <= max_heart_rate)
