@@ -1,6 +1,4 @@
-"""
-Functions for visualising Deloton Bike ride data on the streamlit app.
-"""
+"""Functions for visualising Deloton Bike ride data on the Streamlit app."""
 
 from datetime import datetime
 
