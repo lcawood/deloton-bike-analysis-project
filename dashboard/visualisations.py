@@ -23,8 +23,6 @@ def get_last_updated_current_ride(last_update_time: datetime,
                                   last_updated_placeholder: st.empty) -> None:
     """Returns a caption under the header with the time since the last data update."""
 
-    # time_delta = (current_time-last_update_time).total_seconds()
-
     current_time = datetime.utcnow()
     time_delta = int((current_time - last_update_time).total_seconds())
 
