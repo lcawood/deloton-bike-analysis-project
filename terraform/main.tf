@@ -103,10 +103,10 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
 
 #Report : Lambda 
 
-resource "aws_lambda_function" "c9-charliedean-lambda-query-t" {
-    function_name = "c9-charliedean-lambda-query-t"
-    role = "arn:aws:iam::129033205317:role/service-role/c9-charliedean-query-function-role-4oq83pji"
-    image_uri = "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-charliedean-lambda-query:latest"
+resource "aws_lambda_function" "c9-deloton-lambda-report-t" {
+    function_name = "c9-deloton-lambda-report-t"
+    role = aws_iam_role.c9_deloton_lambda_report_role.arn
+    image_uri = "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-deloton-daily-report:latest"
     package_type  = "Image"
     environment {
       variables = {
