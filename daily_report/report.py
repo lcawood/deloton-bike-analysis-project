@@ -7,7 +7,7 @@ The html document is sent to a S3 Bucket.
 
 from os import environ, _Environ, remove
 import json
-from datetime import datetime,timedelta
+from datetime import datetime,timedelta,date
 
 from boto3 import client
 from dotenv import load_dotenv
@@ -31,6 +31,53 @@ def get_database_connection() -> extensions.connection:
                             port=environ["DATABASE_PORT"],
                             database=environ["DATABASE_NAME"]
                             )
+
+def create_gender_split_table(gender_dict : dict) -> str:
+    """Creates html string for multiple lines in a table based on the gender dict size"""
+    
+    html_string = ""
+
+    for gender in gender_dict:
+        html_string += f"""
+<tr>
+<td>
+{gender["gender"]}
+</td>
+<td>
+{gender["count"]}
+</td>
+</tr>
+"""
+        
+    html_string += "</table>"
+    return html_string
+
+def create_user_stats_table(age_dict : dict,power_dict : dict, heart_dict : dict) -> str:
+    """Creates html string for multiple lines in a table based on the gender dict size"""
+    
+    html_string = ""
+
+    for i in range(len(age_dict)):
+        html_string += f"""
+<tr>
+<td>
+{age_dict[i]["rider_id"]}
+</td>
+<td>
+{age_dict[i]["Age"]}
+</td>
+<td>
+{power_dict[i]["average_power"]}
+</td>
+<td>
+{heart_dict[i]["avg"]}
+</td>
+</tr>
+"""
+        
+    html_string += "</table>"
+    return html_string
+
 
 def create_html_string(ride_dict : dict,yesterday : datetime) -> str:
     """Creates a html string to create tables of data for the email report"""
@@ -66,24 +113,37 @@ background-color: #dddddd;
 </tr>
 <tr>"""
 
-    values_in_html = f"""<td>Number of rides completed in the past day</td>
-<td>{current_values}</td>
-</tr>
-<tr>
-<td>Gender split of riders of the past day</td>
-<td>{current_values}</td>
-</tr>
-<tr>
-<td>Ages of the riders of the past day</td>
-<td>{current_values}</td>
-</tr>
-<tr>
-<td>Average power and heart rate of riders of past day</td>
-<td>{current_values}</td>
+    table_insert_one = f"""<td>Number of rides completed in the past day</td>
+<td>{ride_dict["amount_of_rides"]}</td>
 </tr>
 </table>
-</body>"""
-    updated_html = html_style + body_beginning + values_in_html
+<p>&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<h3>Gender split of riders</h3>
+<table>
+<tr>
+    <th>Gender</th>
+    <th>Count</th>
+</tr>
+"""
+    gender_split = create_gender_split_table(ride_dict["gender"])
+
+    table_insert_two = f"""
+<p>&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<h3>Statistics from Riders</h3>
+<table>
+<tr>
+    <th>Rider ID</th>
+    <th>Age</th>
+    <th>Average Heart Rate</th>
+    <th>Average Power</th>
+</tr>
+"""
+    
+    user_stats = create_user_stats_table(ride_dict["ages"],ride_dict["power"],ride_dict["heart_rate"])
+
+    final = "</body>"
+
+    updated_html = html_style + body_beginning + table_insert_one + gender_split + table_insert_two + user_stats + final
 
     updated_html = updated_html.replace("\n", "")
 
@@ -93,26 +153,55 @@ background-color: #dddddd;
 def sql_select_all_useful_data(db_connection : extensions.connection) -> pd.DataFrame:
     """Uses SQL to select all the needed data to create the useful report for the ceo"""
     query = """SELECT Ride.ride_id,Ride.rider_id,Ride.bike_id,Ride.start_time,
-    Rider.gender, AVG(Reading.heart_rate) FROM Ride INNER JOIN
+    Rider.gender,Rider.birthdate,AVG(Reading.heart_rate),AVG(Reading.power) as average_power FROM Ride INNER JOIN
     Rider ON Rider.rider_id = Ride.rider_id INNER JOIN
     Reading ON Reading.ride_id = Ride.ride_id
     WHERE DATE(start_time) = '2023-10-05'
-    GROUP BY Ride.ride_id,Rider.gender;"""
+    GROUP BY Ride.ride_id,Rider.gender,Rider.birthdate;"""
 
     rides = pd.read_sql_query(query,db_connection)
 
-    print(rides.groupby('rider_id', as_index=False)['avg'].mean())
-
     return rides
 
-def create_report_data(rides : pd.DataFrame, yesterday :datetime, db_connection : extensions.connection) -> dict:
+def convert_to_age(born): 
+    born = datetime.strptime(born, "%Y-%m-%d").date() 
+    today = date.today() 
+    return today.year - born.year - ((today.month,  
+                                      today.day) < (born.month,  
+                                                    born.day)) 
+
+def extract_report_data(rides : pd.DataFrame) -> dict:
+    """Extracts all the data needed to populate the report"""
+
+
+    rides['birthdate']=rides['birthdate'].astype(str)
+    rides['Age'] = rides['birthdate'].apply(convert_to_age) 
+
+    number_of_rides = rides.ride_id.count()
+
+    average_power_users = rides.groupby('rider_id', as_index=False)['average_power'].mean()
+    average_heart_rate_users = rides.groupby('rider_id', as_index=False)['avg'].mean()
+
+    gender_split = rides.groupby(['gender'], as_index=False)['ride_id'].count()
+    gender_split = gender_split.rename(columns={"ride_id": "count"})
+
+    riders_age_df = rides.groupby('rider_id')['Age'].mean().reset_index()
+    riders_age_df['Age'] = riders_age_df['Age'].astype(int)
+
+    power = average_power_users.to_dict('records')
+    heart_rate = average_heart_rate_users.to_dict('records')
+    gender = gender_split.to_dict('records')
+    ages = riders_age_df.to_dict('records')
+
+    return {"power" : power,"heart_rate" : heart_rate,"amount_of_rides": number_of_rides,
+            "gender": gender, "ages" : ages}
+
+def create_report_data(yesterday :datetime, db_connection : extensions.connection) -> dict:
     """Creates and calls all the data needed in the report"""
 
-    report_data_dict = {}
+    rides_df = sql_select_all_useful_data(db_connection)
 
-    data_dict = sql_select_all_useful_data(db_connection)
-
-    print(data_dict)
+    report_data_dict = extract_report_data(rides_df)
 
     exported_html = create_html_string(report_data_dict, yesterday)
 
@@ -154,10 +243,10 @@ def handler(event=None, context=None) -> int:
         connection = get_database_connection()
         s3_client = get_s3_client(environ)
 
-        report_dict = create_report_data({},yesterday,connection)
+        report_dict = create_report_data(yesterday,connection)
         create_html_file(report_dict["html_body"],yesterday)
 
-        upload_file(s3_client,f"./daily_report_{yesterday}.html", "c9-deloton-daily-reports",
+        upload_file(s3_client,f"./daily_report_{yesterday}.html", "c9-deloton",
             f"c9-deloton-daily-reports/daily_report_{yesterday}.html")
         
         remove_old_file(yesterday)
