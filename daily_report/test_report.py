@@ -1,4 +1,10 @@
 """Unit tests for the report.py file"""
+
+# pylint: disable=C0301
+# pylint: disable=W0612
+# pylint: disable=R0913
+# pylint: disable=W0613
+
 from unittest.mock import MagicMock,patch
 from datetime import date, datetime
 from freezegun import freeze_time
@@ -9,27 +15,27 @@ from report import create_gender_split_table,create_user_stats_table,create_html
 
 EXAMPLE_GENDER_DICT = [{'gender': 'female', 'count': 16}, {'gender': 'male', 'count': 13}]
 EXAMPLE_AGE_DICT = [{'rider_id': 712, 'Age': 70}, {'rider_id': 713, 'Age': 62}]
-EXAMPLE_POWER_DICT = [{'rider_id': 712, 'average_power': 43.57344918850486}, 
+EXAMPLE_POWER_DICT = [{'rider_id': 712, 'average_power': 43.57344918850486},
                       {'rider_id': 713, 'average_power': 62.949498282492094}]
-EXAMPLE_HEART_RATE_DICT = [{'rider_id': 712, 'avg': 92.47115384615384}, 
+EXAMPLE_HEART_RATE_DICT = [{'rider_id': 712, 'avg': 92.47115384615384},
                            {'rider_id': 713, 'avg': 115.65092655699591}]
 
-EXAMPLE_RIDE_DICT = {'power': [{'rider_id': 795, 'average_power': 55.93454529937276}, 
-                               {'rider_id': 796, 'average_power': 40.9406303}], 
-                     'heart_rate': [{'rider_id': 795, 'avg': 111.02109854967553}, 
-                                    {'rider_id': 796, 'avg': 91.2131693284919}], 
+EXAMPLE_RIDE_DICT = {'power': [{'rider_id': 795, 'average_power': 55.93454529937276},
+                               {'rider_id': 796, 'average_power': 40.9406303}],
+                     'heart_rate': [{'rider_id': 795, 'avg': 111.02109854967553},
+                                    {'rider_id': 796, 'avg': 91.2131693284919}],
                      'amount_of_rides': 170, 
                      'gender': [{'gender': 'female', 'count': 11}, {'gender': 'male', 'count': 15}], 
                      'ages': [{'rider_id': 795, 'Age': 60}, {'rider_id': 796, 'Age': 36}]}
 
 
-EXAMPLE_SQL_FETCHED_DICT = [{'ride_id': 5609, 'rider_id': 1345, 'bike_id': 1, 
-                             'start_time': pd.Timestamp('2023-11-08 00:04:15.434890'), 
-                             'gender': 'male', 'birthdate': date(1974, 3, 21), 
-                             'avg': 122.62088974854932, 'average_power': 56.05435014914318}, 
-                             {'ride_id': 5610, 'rider_id': 1345, 'bike_id': 1, 
-                              'start_time': pd.Timestamp('2023-11-08 00:12:54.447122'), 
-                              'gender': 'male', 'birthdate': date(1974, 3, 21), 
+EXAMPLE_SQL_FETCHED_DICT = [{'ride_id': 5609, 'rider_id': 1345, 'bike_id': 1,
+                             'start_time': pd.Timestamp('2023-11-08 00:04:15.434890'),
+                             'gender': 'male', 'birthdate': date(1974, 3, 21),
+                             'avg': 122.62088974854932, 'average_power': 56.05435014914318},
+                             {'ride_id': 5610, 'rider_id': 1345, 'bike_id': 1,
+                              'start_time': pd.Timestamp('2023-11-08 00:12:54.447122'),
+                              'gender': 'male', 'birthdate': date(1974, 3, 21),
                               'avg': 116.86872586872587, 'average_power': 64.37955624535546}]
 
 EXAMPLE_DATAFRAME = pd.DataFrame(EXAMPLE_SQL_FETCHED_DICT)
@@ -58,7 +64,8 @@ def test_test_create_gender_split_table_works_empty_list():
 def test_create_user_stats_table():
     """Tests the user statistics table creates the correct details and functions"""
 
-    html_string_output = create_user_stats_table(EXAMPLE_AGE_DICT,EXAMPLE_POWER_DICT,EXAMPLE_HEART_RATE_DICT)
+    html_string_output = create_user_stats_table(EXAMPLE_AGE_DICT,EXAMPLE_POWER_DICT,
+                                                 EXAMPLE_HEART_RATE_DICT)
 
     assert "43.57344918850486" in html_string_output
     assert "712" in html_string_output
@@ -92,7 +99,7 @@ def test_previous_day_from_database_current():
     mock_fetch = mock_conn.cursor.return_value\
             .__enter__.return_value\
             .fetchone
-    
+
     datetime_object = datetime.strptime("2024-01-04", '%Y-%m-%d')
 
     mock_fetch.return_value = (datetime_object,)
@@ -113,7 +120,7 @@ def test_previous_day_from_database_on_year():
     mock_fetch = mock_conn.cursor.return_value\
             .__enter__.return_value\
             .fetchone
-    
+
     datetime_object = datetime.strptime("2024-01-01", '%Y-%m-%d')
 
     mock_fetch.return_value = (datetime_object,)

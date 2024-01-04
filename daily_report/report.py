@@ -5,7 +5,10 @@ The html body is returned in a lambda handler.
 The html document is sent to a S3 Bucket.
 """
 
-from os import environ, _Environ, remove
+# pylint: disable=C0301
+# pylint: disable=W0613
+
+from os import environ, _Environ
 import json
 from datetime import datetime,timedelta,date
 
@@ -37,7 +40,7 @@ def create_gender_split_table(gender_dict : dict) -> str:
 
     if gender_dict == []:
         gender_dict = [{'gender': 'female', 'count': 0}, {'gender': 'male', 'count': 0}]
-    
+
     html_string = ""
 
     for gender in gender_dict:
@@ -51,13 +54,13 @@ def create_gender_split_table(gender_dict : dict) -> str:
 </td>
 </tr>
 """
-        
+
     html_string += "</table>"
     return html_string
 
 def create_user_stats_table(age_dict : dict,power_dict : dict, heart_dict : dict) -> str:
     """Creates html string for multiple lines in a table based on the gender dict size"""
-    
+
     html_string = ""
 
     for i in range(len(age_dict)):
@@ -77,7 +80,7 @@ def create_user_stats_table(age_dict : dict,power_dict : dict, heart_dict : dict
 </td>
 </tr>
 """
-        
+
     html_string += "</table>"
     return html_string
 
@@ -128,7 +131,7 @@ background-color: #dddddd;
 """
     gender_split = create_gender_split_table(ride_dict["gender"])
 
-    table_insert_two = f"""
+    table_insert_two = """
 <p>&nbsp;&nbsp;&nbsp;&nbsp;</p>
 <h3>Statistics from Riders</h3>
 <table>
@@ -139,8 +142,9 @@ background-color: #dddddd;
     <th>Average Power</th>
 </tr>
 """
-    
-    user_stats = create_user_stats_table(ride_dict["ages"],ride_dict["power"],ride_dict["heart_rate"])
+
+    user_stats = create_user_stats_table(ride_dict["ages"],ride_dict["power"],
+                                         ride_dict["heart_rate"])
 
     final = "</body>"
 
@@ -152,7 +156,7 @@ background-color: #dddddd;
 
 def previous_day_from_database(db_connection : extensions.connection) -> str:
     """Gets the previous day based on the most recent entry to the database"""
-    
+
     query = """SELECT start_time
     FROM Ride 
     ORDER BY start_time DESC 
@@ -187,18 +191,20 @@ def sql_select_all_useful_data(db_connection : extensions.connection) -> pd.Data
 
     return rides
 
-def convert_to_age(born): 
-    born = datetime.strptime(born, "%Y-%m-%d").date() 
-    today = date.today() 
-    return today.year - born.year - ((today.month,  
-                                      today.day) < (born.month,  
-                                                    born.day)) 
+def convert_to_age(born):
+    """Converts a date of birth to the age of the person"""
+
+    born = datetime.strptime(born, "%Y-%m-%d").date()
+    today = date.today()
+    return today.year - born.year - ((today.month,
+                                      today.day) < (born.month,
+                                                    born.day))
 
 def extract_report_data(rides : pd.DataFrame) -> dict:
     """Extracts all the data needed to populate the report"""
 
     rides['birthdate']=rides['birthdate'].astype(str)
-    rides['Age'] = rides['birthdate'].apply(convert_to_age) 
+    rides['Age'] = rides['birthdate'].apply(convert_to_age)
 
     number_of_rides = rides.ride_id.count()
 
@@ -254,8 +260,8 @@ def handler(event=None, context=None) -> int:
         return {
                 'statusCode': 200,
                 'body': json.dumps(report_dict["html_body"])
-        }   
-    
+        }
+
     except Exception as e:
         return {
             'statusCode': 404,
@@ -265,4 +271,4 @@ def handler(event=None, context=None) -> int:
 
 
 if __name__ == "__main__":
-   print(handler())
+    print(handler())
