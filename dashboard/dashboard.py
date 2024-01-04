@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from psycopg2 import extensions
 import streamlit as st
 
-from database import (get_database_connection,
+from database import (get_database_connection, get_recent_12hr_data,
                       get_current_ride_data, get_current_ride_data_highest)
 from utilities import get_current_rider_name, is_heart_rate_abnormal
 from visualisations import (get_current_ride_header, get_dashboard_title,
@@ -62,6 +62,9 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
     """
     with st.container():
         get_recent_rides_header()
+
+        recent_rides = get_recent_12hr_data(db_connection)
+        print(recent_rides)
 
         # Placeholder for last updated time caption
         empty_last_updated_placeholder = st.empty()

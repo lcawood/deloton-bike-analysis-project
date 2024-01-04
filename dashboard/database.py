@@ -1,11 +1,18 @@
 """Utility functions to interact with the RDS database."""
 
+
+from datetime import timedelta, datetime
 from os import environ
 
+import pandas as pd
 import psycopg2
 from psycopg2 import extensions, OperationalError
+import streamlit as st
+
+TWELVE_HOURS_AGO = (datetime.now() - timedelta(hours=12))
 
 
+@st.cache_resource
 def get_database_connection() -> extensions.connection:
     """Returns a live database connection."""
 
@@ -21,6 +28,8 @@ def get_database_connection() -> extensions.connection:
     except OperationalError as err:
         print("Error connecting to database. %s", err)
         return None
+
+# CURRENT RIDE
 
 
 def get_current_ride_data(db_connection: extensions.connection) -> int:
@@ -155,3 +164,27 @@ def get_current_ride_data_highest(db_connection: extensions.connection, rider_de
         user_base_details.extend(highest_readings)
 
         return user_base_details
+
+
+# RECENT RIDES
+def get_recent_12hr_data(db_connection: extensions.connection) -> pd.DataFrame:
+    """
+    Retrieves data from the last 12 hours (by attribute 'start_time') from the database
+    as a Pandas Dataframe.
+    """
+
+    with db_connection.cursor() as db_cur:
+        query = """
+        SELECT Ride.rider_id, first_name, last_name, height, weight, gender, birthdate,
+        heart_rate, power, resistance, elapsed_time, start_time
+        FROM Ride
+        JOIN Rider ON Ride.rider_id = Rider.rider_id
+        JOIN Reading ON Ride.ride_id = Reading.ride_id
+        ;
+        """
+
+        db_cur.execute(query)
+
+        recent_rides = db_cur.fetchall()
+
+        return pd.DataFrame(recent_rides)
