@@ -24,8 +24,6 @@ def get_last_updated_current_ride(last_update_time: datetime,
                                   last_updated_placeholder: st.empty) -> None:
     """Returns a caption under the header with the time since the last data update."""
 
-    # time_delta = (current_time-last_update_time).total_seconds()
-
     current_time = datetime.utcnow()
     time_delta = int((current_time - last_update_time).total_seconds())
 
@@ -80,9 +78,6 @@ def get_current_ride_metrics(user_details: list) -> None:
     power = round(user_details[8], 1)
     resistance = user_details[9]
     elapsed_time = user_details[10]
-
-    # if is_heart_rate_abnormal(user_details):
-    #     get_heart_rate_warning(heart_rate)
 
     # create visualisation
     head_cols = st.columns(4)
