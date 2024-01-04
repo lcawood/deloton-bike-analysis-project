@@ -151,14 +151,37 @@ background-color: #dddddd;
 
     return updated_html
 
+def previous_day_from_database(db_connection : extensions.connection) -> str:
+    """Gets the previous day based on the most recent entry to the database"""
+    
+    query = """SELECT start_time
+    FROM Ride 
+    ORDER BY start_time DESC 
+    LIMIT 1"""
+
+    with db_connection.cursor() as db_cur:
+        db_cur.execute(query)
+
+        row = db_cur.fetchone()
+
+        db_connection.commit()
+
+    last_time = row[0]
+    last_date = last_time.date() - timedelta(days=1)
+    date_time = last_date.strftime("%Y-%m-%d")
+    return date_time
 
 def sql_select_all_useful_data(db_connection : extensions.connection) -> pd.DataFrame:
     """Uses SQL to select all the needed data to create the useful report for the ceo"""
-    query = """SELECT Ride.ride_id,Ride.rider_id,Ride.bike_id,Ride.start_time,
+
+    calculate_previous_day = previous_day_from_database(db_connection)
+
+
+    query = f"""SELECT Ride.ride_id,Ride.rider_id,Ride.bike_id,Ride.start_time,
     Rider.gender,Rider.birthdate,AVG(Reading.heart_rate),AVG(Reading.power) as average_power FROM Ride INNER JOIN
     Rider ON Rider.rider_id = Ride.rider_id INNER JOIN
     Reading ON Reading.ride_id = Ride.ride_id
-    WHERE DATE(start_time) = '2023-10-05'
+    WHERE DATE(start_time) = '{calculate_previous_day}'
     GROUP BY Ride.ride_id,Rider.gender,Rider.birthdate;"""
 
     rides = pd.read_sql_query(query,db_connection)
@@ -183,8 +206,10 @@ def extract_report_data(rides : pd.DataFrame) -> dict:
     average_power_users = rides.groupby('rider_id', as_index=False)['average_power'].mean()
     average_heart_rate_users = rides.groupby('rider_id', as_index=False)['avg'].mean()
 
-    gender_split = rides.groupby(['gender'], as_index=False)['ride_id'].count()
-    gender_split = gender_split.rename(columns={"ride_id": "count"})
+    grouped_users = rides.groupby('rider_id').agg({'Age': 'mean', 'gender': lambda x: x.mode().iat[0]}).reset_index()
+
+    gender_split = grouped_users.groupby(['gender'], as_index=False)['rider_id'].count()
+    gender_split = gender_split.rename(columns={"rider_id": "count"})
 
     riders_age_df = rides.groupby('rider_id')['Age'].mean().reset_index()
     riders_age_df['Age'] = riders_age_df['Age'].astype(int)
@@ -241,4 +266,4 @@ def handler(event=None, context=None) -> int:
 
 
 if __name__ == "__main__":
-    print(handler())
+   handler()
