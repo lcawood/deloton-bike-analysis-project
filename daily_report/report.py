@@ -35,7 +35,8 @@ def get_database_connection() -> extensions.connection:
 def create_gender_split_table(gender_dict : dict) -> str:
     """Creates html string for multiple lines in a table based on the gender dict size"""
 
-    print(gender_dict)
+    if gender_dict == []:
+        gender_dict = [{'gender': 'female', 'count': 0}, {'gender': 'male', 'count': 0}]
     
     html_string = ""
 
@@ -83,8 +84,6 @@ def create_user_stats_table(age_dict : dict,power_dict : dict, heart_dict : dict
 
 def create_html_string(ride_dict : dict,yesterday : datetime) -> str:
     """Creates a html string to create tables of data for the email report"""
-
-    current_values = 0
 
     html_style = """
 <head>
@@ -259,7 +258,7 @@ def handler(event=None, context=None) -> int:
     
     except Exception as e:
         return {
-            'statusCode': 200,
+            'statusCode': 404,
             'body': json.dumps(str(e))
         }
 
