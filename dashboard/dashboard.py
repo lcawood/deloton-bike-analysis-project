@@ -24,10 +24,12 @@ if __name__ == "__main__":
     conn = get_database_connection()
 
     fake_birthdate = datetime.strptime('1999-01-01', "%Y-%m-%d")
-    # current_ride = get_current_ride_data(conn)
-    # current_ride_personal_best = get_current_ride_data_highest(conn, current_ride)
-    current_ride = [1, "John", "Doe", 175, 75, "Male", fake_birthdate,
-                    105, 11.4, 60, 45]
+    current_ride = get_current_ride_data(conn)
+    current_ride_personal_best = get_current_ride_data_highest(
+        conn, current_ride)
+    # current_ride = [1, "John", "Doe", 175, 75, "Male", fake_birthdate,
+    #                 105, 11.4, 60, 45]
+    print(current_ride)
     current_ride_personal_best = [1, "John", "Doe", 175, 75, "Male", fake_birthdate,
                                   125, 15.4, 90, 65]
 

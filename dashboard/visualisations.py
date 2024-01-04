@@ -53,7 +53,7 @@ def get_current_ride_metrics(user_details) -> None:
 
     # get metrics
     heart_rate = user_details[7]
-    power = user_details[8]
+    power = round(user_details[8], 1)
     resistance = user_details[9]
     elapsed_time = user_details[10]
 
