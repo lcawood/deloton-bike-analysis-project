@@ -47,8 +47,11 @@ def main_current_ride(db_connection: extensions.connection) -> None:
 
     get_current_ride_metrics(current_ride)
 
-    if is_heart_rate_abnormal(current_ride):
-        heart_rate = current_ride[7]
+    # readings to monitor for heart rate warning
+    heart_rate = current_ride[7]
+    elapsed_time = current_ride[10]
+
+    if is_heart_rate_abnormal(current_ride) and elapsed_time > 10:
         get_heart_rate_warning(heart_rate)
 
     get_current_ride_personal_best_metrics(current_ride_personal_best)
