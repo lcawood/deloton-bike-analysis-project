@@ -34,6 +34,8 @@ def get_database_connection() -> extensions.connection:
 
 def create_gender_split_table(gender_dict : dict) -> str:
     """Creates html string for multiple lines in a table based on the gender dict size"""
+
+    print(gender_dict)
     
     html_string = ""
 
