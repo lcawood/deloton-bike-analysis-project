@@ -6,6 +6,8 @@ import re
 
 
 INVALID_DATE_THRESHOLD = datetime(1900, 1, 1, 0, 0, 0)
+PREFIXES = ['mr', 'mrs', 'miss', 'ms', 'dr',
+            'mr.', 'mrs.', 'miss.', 'ms.', 'dr.']
 
 
 def timestamp_to_date(timestamp_ms: int | None) -> str | None:
@@ -62,21 +64,21 @@ def get_user_from_log_line(log_line: str) -> dict:
     If any user information is missing, this field is given as None in the returned dictionary."""
 
     user = {}
-    prefixes = ['mr', 'mrs', 'miss', 'ms', 'dr',
-                'mr.', 'mrs.', 'miss.', 'ms.', 'dr.']
 
     log_line_data = literal_eval(log_line.split('=')[1])
 
     # Obtain user data from the log line directly
     user['user_id'] = int(log_line_data.get('user_id', -1))
 
+    # If a full name is found in the log line, get the first and last name
     if log_line_data.get('name'):
         name_parts = log_line_data['name'].split()
         name_no_prefix = [
-            part for part in name_parts if part.lower() not in prefixes]
+            part for part in name_parts if part.lower() not in PREFIXES]
         full_name = ' '. join(name_no_prefix)
         user['first_name'] = full_name[:full_name.rfind(' ')]
         user['last_name'] = full_name.split()[-1]
+    # If no name is found in the log line, set the first and last name to None
     else:
         user['first_name'] = None
         user['last_name'] = None
