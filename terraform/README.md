@@ -10,6 +10,13 @@ This folder should contain all code and resources required to handle the infrast
 
 - `database_username`
 - `database_password`
+- `aws_access_key_id`
+- `aws_secret_access_key`
+- `database_username`
+- `database_password`
+- `database_ip`
+- `database_port`
+- `database_name`
 
 ## 🏃 Running the script
 
