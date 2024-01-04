@@ -21,6 +21,19 @@ def get_current_ride_header(rider_name: str) -> None:
     st.header(f"CURRENT RIDE: {rider_name}", divider='blue')
 
 
+def get_last_updated_current_ride(last_update_time: datetime,
+                                  last_updated_placeholder: st.empty) -> None:
+    """Returns a caption under the header with the time since the last data update."""
+
+    # time_delta = (current_time-last_update_time).total_seconds()
+
+    current_time = datetime.utcnow()
+    time_delta = int((current_time - last_update_time).total_seconds())
+
+    last_updated_placeholder.caption(
+        f"Last updated: {time_delta} seconds ago")
+
+
 def get_current_ride_header_personal_info(user_details) -> None:
     """
     Gets the main header personal_info for the current ride and displays them.
@@ -50,8 +63,6 @@ def get_current_ride_metrics(user_details) -> None:
     """
     Gets the header metrics for the current ride and displays them.
     """
-
-    print("current ride user details:", user_details)
 
     # get metrics
     heart_rate = user_details[7]
