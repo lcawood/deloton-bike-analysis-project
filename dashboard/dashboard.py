@@ -13,10 +13,11 @@ import streamlit as st
 
 from database import (get_database_connection,
                       get_current_ride_data, get_current_ride_data_highest)
-from utilities import get_current_rider_name
+from utilities import get_current_rider_name, is_heart_rate_abnormal
 from visualisations import (get_current_ride_header, get_dashboard_title,
                             get_current_ride_header_personal_info, get_current_ride_metrics,
-                            get_current_ride_personal_best_metrics, get_last_updated_current_ride)
+                            get_current_ride_personal_best_metrics, get_last_updated_current_ride,
+                            get_heart_rate_warning)
 
 
 CURRENT_RIDE_REFRESH_RATE = 20
@@ -45,6 +46,10 @@ def main_current_ride(db_connection: extensions.connection) -> None:
     get_current_ride_header_personal_info(current_ride)
 
     get_current_ride_metrics(current_ride)
+
+    if is_heart_rate_abnormal(current_ride):
+        heart_rate = current_ride[7]
+        get_heart_rate_warning(heart_rate)
 
     get_current_ride_personal_best_metrics(current_ride_personal_best)
 

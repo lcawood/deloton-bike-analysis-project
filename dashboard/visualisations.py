@@ -80,8 +80,8 @@ def get_current_ride_metrics(user_details: list) -> None:
     resistance = user_details[9]
     elapsed_time = user_details[10]
 
-    if is_heart_rate_abnormal(user_details):
-        get_heart_rate_warning(heart_rate)
+    # if is_heart_rate_abnormal(user_details):
+    #     get_heart_rate_warning(heart_rate)
 
     # create visualisation
     head_cols = st.columns(4)
