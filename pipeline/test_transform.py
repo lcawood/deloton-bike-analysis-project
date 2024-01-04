@@ -1,9 +1,7 @@
 """Test suite for the transform.py script, covering a range of possible errors in the
 attained data from the log lines, as well as missing/incomplete data."""
 
-from datetime import datetime, timedelta
-from unittest.mock import MagicMock
-
+from datetime import datetime
 
 from transform import timestamp_to_date, check_datetime_is_valid, extract_datetime_from_string, \
     get_bike_serial_number_from_log_line, get_email_from_log_line, get_user_from_log_line, \
