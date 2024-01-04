@@ -61,14 +61,17 @@ if __name__ == "__main__":
     load_dotenv()
 
     conn = get_database_connection()
+    try:
+        while True:
+            # Auto-refresh the current ride section
+            last_updated_placeholder = main_current_ride(conn)
+            update_time = datetime.now()
+            for i in range(CURRENT_RIDE_REFRESH_RATE):
+                get_last_updated_current_ride(
+                    update_time, last_updated_placeholder)
+                time.sleep(LAST_UPDATED_COUNT_INCREMENT)
 
-    while True:
-        # Auto-refresh the current ride section
-        last_updated_placeholder = main_current_ride(conn)
-        update_time = datetime.now()
-        for i in range(CURRENT_RIDE_REFRESH_RATE):
-            get_last_updated_current_ride(
-                update_time, last_updated_placeholder)
-            time.sleep(LAST_UPDATED_COUNT_INCREMENT)
+            st.rerun()
 
-        st.rerun()
+    finally:
+        conn.close()
