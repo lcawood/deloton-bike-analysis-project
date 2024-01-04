@@ -21,6 +21,7 @@ from visualisations import (get_current_ride_header, get_dashboard_title,
 
 
 CURRENT_RIDE_REFRESH_RATE = 20
+LAST_UPDATED_COUNT_INCREMENT = 1
 
 
 def main_current_ride(db_connection: extensions.connection) -> None:
@@ -62,6 +63,6 @@ if __name__ == "__main__":
         for i in range(CURRENT_RIDE_REFRESH_RATE):
             get_last_updated_current_ride(
                 update_time, last_updated_placeholder)
-            time.sleep(1)
+            time.sleep(LAST_UPDATED_COUNT_INCREMENT)
 
         st.rerun()

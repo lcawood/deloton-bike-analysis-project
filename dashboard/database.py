@@ -25,6 +25,7 @@ def get_database_connection() -> extensions.connection:
 
 def get_current_ride_data(db_connection: extensions.connection) -> int:
     """Fetched the details of the current ride from the database using an SQL Select Query."""
+
     with db_connection.cursor() as db_cur:
 
         query = """
@@ -47,6 +48,7 @@ def get_current_ride_data(db_connection: extensions.connection) -> int:
 
 def get_current_rider_highest_duration(db_cur: extensions.connection.cursor, rider_id: int):
     """Returns the highest historical time_elapsed of the rider with the given rider_id."""
+
     query = """
     SELECT elapsed_time
     FROM ride
@@ -69,6 +71,7 @@ def get_current_rider_highest_duration(db_cur: extensions.connection.cursor, rid
 
 def get_current_rider_highest_heart_rate(db_cur: extensions.connection.cursor, rider_id: int):
     """Returns the highest historical heart_rate of the rider with the given rider_id."""
+
     query = """
     SELECT heart_rate
     FROM ride
@@ -89,6 +92,7 @@ def get_current_rider_highest_heart_rate(db_cur: extensions.connection.cursor, r
 
 def get_current_rider_highest_power(db_cur: extensions.connection.cursor, rider_id: int):
     """Returns the highest historical power of the rider with the given rider_id."""
+
     query = """
     SELECT power
     FROM ride
@@ -109,6 +113,7 @@ def get_current_rider_highest_power(db_cur: extensions.connection.cursor, rider_
 
 def get_current_rider_highest_resistance(db_cur: extensions.connection.cursor, rider_id: int):
     """Returns the highest historical resistance of the rider with the given rider_id."""
+
     query = """
     SELECT resistance
     FROM ride
