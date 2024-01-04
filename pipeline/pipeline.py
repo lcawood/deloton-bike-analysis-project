@@ -90,7 +90,8 @@ def reading_pipeline(log_line: str, ride_id: int, start_time: datetime, reading:
     reading = transform.get_reading_data_from_log_line(reading, log_line, start_time)
     if 'heart_rate' in reading:
         # Heart rate comes with the second of every pair of reading log lines.
-        if (reading['heart_rate'] == 0) or (user['min_heart_rate'] <= reading['heart_rate'] <= user['max_heart_rate']):
+        if (reading['heart_rate'] == 0) or \
+            (user['min_heart_rate'] <= reading['heart_rate'] <= user['max_heart_rate']):
             consecutive_extreme_hrs.clear()
         else:
             consecutive_extreme_hrs.append(reading['heart_rate'])
@@ -109,23 +110,24 @@ def save_log_line_to_s3(log_line: str, filename: str = S3_BACKUP_FILENAME):
     a crash.
     """
     try:
-        s3_client = client("s3", 
+        s3_client = client("s3",
                         aws_access_key_id=environ['AWS_ACCESS_KEY_ID_'],
                         aws_secret_access_key=environ['AWS_SECRET_ACCESS_KEY_'])
-        
+
         s3_client.put_object(Body = log_line, Bucket = environ['BUCKET_NAME'],
                             Key = filename)
     except ClientError:
         pass
-    
+
 
 def retrieve_text_from_s3_file(filename: str = S3_BACKUP_FILENAME):
     """Retrieves body of text file stores in s3_bucket."""
     try:
-        s3_client = client("s3", 
+        s3_client = client("s3",
                            aws_access_key_id=environ['AWS_ACCESS_KEY_ID_'],
                            aws_secret_access_key=environ['AWS_SECRET_ACCESS_KEY_'])
-        return s3_client.get_object(Bucket=environ['BUCKET_NAME'], Key=filename)['Body'].read().decode("utf-8")
+        return s3_client.get_object(
+            Bucket=environ['BUCKET_NAME'], Key=filename)['Body'].read().decode("utf-8")
     except ClientError:
         return None
 
@@ -137,18 +139,20 @@ def pipeline():
     """
     kafka_consumer = get_kafka_consumer(GROUP_ID)
     user = None
-    first_line = True
+    first_relevant_line = True
     while True:
         log_line = get_next_log_line(kafka_consumer)
 
-        if ('[SYSTEM]' in log_line) or (('[INFO]' in log_line) and first_line):
+        if ('[SYSTEM]' in log_line) or (('[INFO]: Ride' in log_line) and first_relevant_line):
+            # SYSTEM log_line, or the pipeline is starting mid ride.
+
             if '[INFO]' in log_line:
                 system_log_line = retrieve_text_from_s3_file()
             else:
                 system_log_line = log_line
-            
-            if system_log_line:
                 save_log_line_to_s3(system_log_line)
+
+            if system_log_line:
                 user = user_pipeline(system_log_line)
                 consecutive_extreme_hrs = []
                 bike_serial_number = transform.get_bike_serial_number_from_log_line(
@@ -157,14 +161,14 @@ def pipeline():
                 ride = ride_pipeline(system_log_line, bike_id)
                 reading = {'ride_id': ride['ride_id']}
 
-            first_line = False
+            first_relevant_line = False
 
         if ('[INFO]' in log_line) and user:
             reading = reading_pipeline(
-                log_line, ride['ride_id'], ride['start_time'], reading, user, consecutive_extreme_hrs)
+                log_line, ride['ride_id'], ride['start_time'], reading, user,
+                consecutive_extreme_hrs)
 
 
 if __name__ == "__main__":
     load_dotenv()
     pipeline()
-
