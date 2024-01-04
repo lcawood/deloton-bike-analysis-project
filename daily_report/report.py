@@ -18,8 +18,8 @@ import pandas as pd
 def get_s3_client(config: _Environ):
     """Get a connection to the relevant S3 bucket."""
     s3_client = client("s3",
-                       aws_access_key_id=config["AWS_ACCESS_KEY_ID"],
-                       aws_secret_access_key=config["AWS_SECRET_ACCESS_KEY"])
+                       aws_access_key_id=config["AWS_ACCESS"],
+                       aws_secret_access_key=config["AWS_SECRET_ACCESS"])
     return s3_client
 
 def get_database_connection() -> extensions.connection:
@@ -207,30 +207,6 @@ def create_report_data(yesterday :datetime, db_connection : extensions.connectio
 
     return {"html_body": exported_html}
 
-def create_html_file(html_string : str, yesterday : datetime) -> None:
-    """Creates a HTML document based on the html string for the report"""
-
-    # Creating the HTML file
-    file_html = open(f"daily_report_{yesterday}.html", "w")
-
-    # Adding the input data to the HTML file
-    file_html.write(html_string)
-
-    # Saving the data into the HTML file
-    file_html.close()
-
-
-def upload_file(s3_client,filename: str , bucket : str, key : str) -> None:
-    """Uploads a file to a s3 bucket"""
-
-    s3_client.upload_file(filename,bucket,key)
-
-def remove_old_file(yesterday):
-    """Removes the old data from the directory"""
-    try:
-        remove(f"././daily_report_{yesterday}.html")
-    except FileNotFoundError:
-        pass
 
 def handler(event=None, context=None) -> int:
     """Handler for the lambda function"""
@@ -244,12 +220,9 @@ def handler(event=None, context=None) -> int:
         s3_client = get_s3_client(environ)
 
         report_dict = create_report_data(yesterday,connection)
-        create_html_file(report_dict["html_body"],yesterday)
 
-        upload_file(s3_client,f"./daily_report_{yesterday}.html", "c9-deloton",
-            f"c9-deloton-daily-reports/daily_report_{yesterday}.html")
-        
-        remove_old_file(yesterday)
+        s3_client.put_object(Body = report_dict["html_body"],Bucket = "c9-deloton",
+            Key = f"c9-deloton-daily-reports/daily_report_{yesterday}.html")
 
         return {
                 'statusCode': 200,
@@ -259,7 +232,7 @@ def handler(event=None, context=None) -> int:
     except Exception as e:
         return {
             'statusCode': 200,
-            'body': json.dumps(e)
+            'body': json.dumps(str(e))
         }
 
 
