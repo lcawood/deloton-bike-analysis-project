@@ -4,6 +4,7 @@ from ast import literal_eval
 from datetime import datetime, timedelta
 import re
 
+from database_functions import get_database_connection
 
 INVALID_DATE_THRESHOLD = datetime(1900, 1, 1, 0, 0, 0)
 
@@ -107,15 +108,31 @@ def get_ride_data_from_log_line(log_line: str) -> dict:
         ride['user_id'] = None
 
     if extract_datetime_from_string(log_line):
-        ride['start_time'] = (extract_datetime_from_string(
-            log_line) - timedelta(seconds=0.5))
+        current_ride_start_time = extract_datetime_from_string(log_line) \
+            - timedelta(seconds=0.5)
+
+        conn = get_database_connection()
+        cur = conn.cursor()
+        cur.execute(
+            'SELECT start_time FROM Ride ORDER BY start_time DESC LIMIT 1;')
+        last_ride_start_time = cur.fetchone()[0]
+
+        # Current ride begins after the previous ride
+        if current_ride_start_time > last_ride_start_time:
+            ride['start_time'] = current_ride_start_time
+
+        # Current ride time before the previous ride time (error)
+        else:
+            ride['start_time'] = None
+
+    # Current ride time not found from log line (error)
     else:
         ride['start_time'] = None
 
     return ride
 
 
-def get_reading_data_from_log_line(reading: dict, log_line: str, start_time: datetime) -> dict:
+def get_reading_data_from_log_line(reading: dict, log_line: str, start_time: datetime | None) -> dict:
     """
     Takes in a kafka log line, and transforms and appends reading data
     contained within it to the given reading dictionary.
@@ -127,10 +144,13 @@ def get_reading_data_from_log_line(reading: dict, log_line: str, start_time: dat
         except IndexError:
             reading['resistance'] = None
 
-        if extract_datetime_from_string(log_line) and \
-                extract_datetime_from_string(log_line) > start_time:
-            reading['elapsed_time'] = int((extract_datetime_from_string(
-                log_line) - start_time).total_seconds())
+        if start_time:
+            if extract_datetime_from_string(log_line) and \
+                    extract_datetime_from_string(log_line) > start_time:
+                reading['elapsed_time'] = int((extract_datetime_from_string(
+                    log_line) - start_time).total_seconds())
+            else:
+                reading['elapsed_time'] = None
         else:
             reading['elapsed_time'] = None
 
