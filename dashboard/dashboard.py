@@ -79,20 +79,22 @@ if __name__ == "__main__":
     conn = get_database_connection()
 
     get_dashboard_title()
+    try:
+        while True:
+            # Auto-refresh the current ride section
+            last_updated_placeholder_current = main_current_ride(conn)
+            update_time = datetime.now()
 
-    while True:
-        # Auto-refresh the current ride section
-        last_updated_placeholder_current = main_current_ride(conn)
-        update_time = datetime.now()
+            last_updated_placeholder_recent = main_recent_rides(conn)
+            update_time = datetime.now()
 
-        last_updated_placeholder_recent = main_recent_rides(conn)
-        update_time = datetime.now()
+            for i in range(CURRENT_RIDE_REFRESH_RATE):
+                get_last_updated_current_ride(
+                    update_time, last_updated_placeholder_current)
+                get_last_updated_current_ride(
+                    update_time, last_updated_placeholder_recent)
+                time.sleep(LAST_UPDATED_COUNT_INCREMENT)
 
-        for i in range(CURRENT_RIDE_REFRESH_RATE):
-            get_last_updated_current_ride(
-                update_time, last_updated_placeholder_current)
-            get_last_updated_current_ride(
-                update_time, last_updated_placeholder_recent)
-            time.sleep(LAST_UPDATED_COUNT_INCREMENT)
-
-        st.rerun()
+            st.rerun()
+    finally:
+        conn.close()
