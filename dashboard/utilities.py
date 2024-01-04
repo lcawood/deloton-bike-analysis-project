@@ -24,7 +24,7 @@ def calculate_age(birthdate: datetime, current_date: datetime = datetime.utcnow(
     return age
 
 
-def calculate_max_heart_rate(user_details: dict) -> int:
+def calculate_max_heart_rate(user_details: list) -> int:
     """
     Returns the maximum heart rate for the given user based on their age and gender.
 
@@ -43,7 +43,7 @@ def calculate_max_heart_rate(user_details: dict) -> int:
     return round(208 - (0.7 * age))
 
 
-def calculate_min_heart_rate(user_details: dict) -> int:
+def calculate_min_heart_rate(user_details: list) -> int:
     """
     Returns the minimum heart rate for the given user based on their age and gender.
 
@@ -71,7 +71,7 @@ def calculate_min_heart_rate(user_details: dict) -> int:
     return 52
 
 
-def is_heart_rate_abnormal(user_details):
+def is_heart_rate_abnormal(user_details: list) -> bool:
     """Returns True for heart rate outside of the safe range."""
 
     min_heart_rate = calculate_min_heart_rate(user_details)

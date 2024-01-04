@@ -32,7 +32,7 @@ def get_last_updated_current_ride(last_update_time: datetime,
         f"Last updated: {time_delta} seconds ago")
 
 
-def get_current_ride_header_personal_info(user_details) -> None:
+def get_current_ride_header_personal_info(user_details: list) -> None:
     """
     Gets the main header personal_info for the current ride and displays them.
     """
@@ -69,7 +69,7 @@ def get_heart_rate_warning(heart_rate: int) -> None:
             PLEASE SLOW DOWN OR SEEK ASSISTANCE!""", icon="⚠️")
 
 
-def get_current_ride_metrics(user_details) -> None:
+def get_current_ride_metrics(user_details: list) -> None:
     """
     Gets the header metrics for the current ride and displays them.
     """
@@ -95,7 +95,7 @@ def get_current_ride_metrics(user_details) -> None:
         st.metric("Resistance", resistance)
 
 
-def get_current_ride_personal_best_metrics(user_best_details) -> None:
+def get_current_ride_personal_best_metrics(user_best_details: list) -> None:
     """
     Gets the main header metric personal bests for the current ride and displays them.
     """
