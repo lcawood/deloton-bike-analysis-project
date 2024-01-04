@@ -48,3 +48,73 @@ resource "aws_db_instance" "c9_velo_deloton" {
   
   vpc_security_group_ids = [aws_security_group.c9_velo_securitygroup.id]
 }
+
+
+
+# Report: Lambda Role and Permissions
+
+resource "aws_iam_role" "c9_deloton_lambda_report_role" {
+name   = "c9-deloton-lambda-report-role"
+assume_role_policy = <<EOF
+{
+ "Version": "2012-10-17",
+ "Statement": [
+   {
+     "Action": "sts:AssumeRole",
+     "Principal": {
+       "Service": "lambda.amazonaws.com"
+     },
+     "Effect": "Allow",
+     "Sid": ""
+   }
+ ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "iam_policy_for_lambda" {
+ 
+ name         = "aws_iam_policy_for_terraform_aws_lambda_role"
+ path         = "/"
+ description  = "AWS IAM Policy for managing aws lambda role"
+ policy = <<EOF
+{
+ "Version": "2012-10-17",
+ "Statement": [
+   {
+     "Action": [
+       "logs:CreateLogGroup",
+       "logs:CreateLogStream",
+       "logs:PutLogEvents"
+     ],
+     "Resource": "arn:aws:logs:*:*:*",
+     "Effect": "Allow"
+   }
+ ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
+ role        = aws_iam_role.lambda_role.name
+ policy_arn  = aws_iam_policy.iam_policy_for_lambda.arn
+}
+
+
+#Report : Lambda 
+
+resource "aws_lambda_function" "c9-charliedean-lambda-query-t" {
+    function_name = "c9-charliedean-lambda-query-t"
+    role = "arn:aws:iam::129033205317:role/service-role/c9-charliedean-query-function-role-4oq83pji"
+    image_uri = "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-charliedean-lambda-query:latest"
+    package_type  = "Image"
+    environment {
+      variables = {
+      DATABASE_IP = "${var.database_ip}",
+      DATABASE_NAME ="${var.database_name}",
+      DATABASE_PASSWORD = "${var.database_password}",
+      DATABASE_PORT ="${var.database_port}",
+      DATABASE_USERNAME = "${var.database_username}"
+    }
+}
+}
