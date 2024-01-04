@@ -173,6 +173,8 @@ def convert_to_age(born):
 def extract_report_data(rides : pd.DataFrame) -> dict:
     """Extracts all the data needed to populate the report"""
 
+    print(rides)
+
 
     rides['birthdate']=rides['birthdate'].astype(str)
     rides['Age'] = rides['birthdate'].apply(convert_to_age) 
