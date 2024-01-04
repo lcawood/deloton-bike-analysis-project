@@ -73,6 +73,5 @@ def get_current_ride_personal_best_metrics(user_best_details) -> None:
     """
     Gets the main header metric personal bests for the current ride and displays them.
     """
-    # with st.expander('Show graph.'):
-    #     get_current_ride_header_metrics(user_best_details)
-    pass
+    with st.expander('Personal Best ⛛'):
+        get_current_ride_metrics(user_best_details)

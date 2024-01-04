@@ -62,7 +62,9 @@ def get_current_rider_highest_duration(db_cur: extensions.connection.cursor, rid
     ;
     """
 
-    db_cur.execute(query, (rider_id, ))
+    parameters = (rider_id, )
+
+    db_cur.execute(query, parameters)
 
     highest_duration = db_cur.fetchone()
 
@@ -141,4 +143,8 @@ def get_current_ride_data_highest(db_connection: extensions.connection, rider_de
         highest_resistance = get_current_rider_highest_resistance(
             db_cur, rider_id)
 
-        return (hi)
+        # create new list with the personal best replacing the relevant readings
+        personal_best = rider_details[0:7].append(highest_heart_rate, highest_power,
+                                                  highest_resistance, highest_duration)
+
+        return personal_best
