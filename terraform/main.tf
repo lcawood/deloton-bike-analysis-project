@@ -260,3 +260,82 @@ resource "aws_sfn_state_machine" "c9_deloton_report_fsm_t" {
 }
 EOF
 }
+
+# Report: EventBridge scheduler roles and permissions
+
+
+# Create a role to attach the policy to
+resource "aws_iam_role" "iam_for_sfn_2" {
+  name = "stepFunctionSampleStepFunctionExecutionIAM_2"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "states.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+          "Service": "scheduler.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+      }
+    ]
+}
+EOF
+}
+
+## Attaching a step function to the schedule ##
+
+# Create a resource that allows running step functions
+resource "aws_iam_policy" "step-function-policy" {
+    name = "ExecuteStepFunctions_Charlie"
+    policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "states:StartExecution"
+            ],
+            "Resource": [
+                aws_sfn_state_machine.c9_deloton_report_fsm_t.arn
+            ]
+        }
+    ]
+})
+}
+
+#Report : EventBridge Schedule
+
+# Attach the policy to the role
+resource "aws_iam_role_policy_attachment" "attach-execution-policy" {
+  role       = aws_iam_role.iam_for_sfn_2.name
+  policy_arn = aws_iam_policy.step-function-policy.arn
+}
+
+resource "aws_scheduler_schedule" "c9_deloton_report_schedule_t" {
+  name        = "c9-deloton-report-schedule-t"
+  group_name  = "default"
+
+  flexible_time_window {
+    maximum_window_in_minutes = 15
+    mode = "FLEXIBLE"
+  }
+  schedule_expression_timezone = "Europe/London"
+  schedule_expression = "cron(10 15 * * ? *)" 
+
+  target{
+    arn = aws_sfn_state_machine.c9_deloton_report_fsm_t.arn
+    role_arn = aws_iam_role.iam_for_sfn_2.arn
+    input = jsonencode({
+      Payload = "Hello, ServerlessLand!"
+    })
+  }
+}
