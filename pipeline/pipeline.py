@@ -7,18 +7,23 @@ heart rate given in the readings compared against them; if it above or below the
 many times in a row (EXTREME_HR_COUNT_THRESHOLD), the validate_heart_rate function send_email is
 used to alert the user.
 """
+
 from datetime import datetime
 import json
 import logging
 from os import environ
+
+from boto3 import client
+from botocore.exceptions import ClientError
 from confluent_kafka import Consumer, KafkaException, Message
 from dotenv import load_dotenv
 import load
 import transform
 import validate_heart_rate
+
 GROUP_ID = "testing23"
 EXTREME_HR_COUNT_THRESHOLD = 3
-
+S3_BACKUP_FILENAME = "pipeline_backup.txt"
 
 def get_kafka_consumer(group_id: str) -> Consumer:
     """Function to return a consumer for the kafka cluster specified in .env."""
@@ -98,27 +103,63 @@ def reading_pipeline(log_line: str, ride_id: int, start_time: datetime, reading:
     return reading
 
 
+def save_log_line_to_s3(log_line: str, filename: str = S3_BACKUP_FILENAME):
+    """
+    Saves a log line to a text file in s3 bucket; allows the state of the pipeline to persist after
+    a crash.
+    """
+    try:
+        s3_client = client("s3", 
+                        aws_access_key_id=environ['AWS_ACCESS_KEY_ID_'],
+                        aws_secret_access_key=environ['AWS_SECRET_ACCESS_KEY_'])
+        
+        s3_client.put_object(Body = log_line, Bucket = environ['BUCKET_NAME'],
+                            Key = filename)
+    except ClientError:
+        pass
+    
+
+def retrieve_text_from_s3_file(filename: str = S3_BACKUP_FILENAME):
+    """Retrieves body of text file stores in s3_bucket."""
+    try:
+        s3_client = client("s3", 
+                           aws_access_key_id=environ['AWS_ACCESS_KEY_ID_'],
+                           aws_secret_access_key=environ['AWS_SECRET_ACCESS_KEY_'])
+        return s3_client.get_object(Bucket=environ['BUCKET_NAME'], Key=filename)['Body'].read().decode("utf-8")
+    except ClientError:
+        return None
+
+
 def pipeline():
     """
     Function to run the main pipeline; establishes connection to Kafka stream, retrieves messages,
     utilises transform module to get data, and uses load module to upload to the db.
     """
     kafka_consumer = get_kafka_consumer(GROUP_ID)
-    new_ride = False
+    user = None
+    first_line = True
     while True:
         log_line = get_next_log_line(kafka_consumer)
-        if "beginning of a new ride" in log_line:
-            new_ride = True
-        elif ('[SYSTEM]' in log_line) and new_ride:
-            user = user_pipeline(log_line)
-            consecutive_extreme_hrs = []
-            bike_serial_number = transform.get_bike_serial_number_from_log_line(
-                log_line)
-            bike_id = load.add_bike(bike_serial_number)
-            ride = ride_pipeline(log_line, bike_id)
-            reading = {'ride_id': ride['ride_id']}
-            new_ride = False
-        elif ('[INFO]' in log_line) and (not new_ride):
+
+        if ('[SYSTEM]' in log_line) or (('[INFO]' in log_line) and first_line):
+            if '[INFO]' in log_line:
+                system_log_line = retrieve_text_from_s3_file()
+            else:
+                system_log_line = log_line
+            
+            if system_log_line:
+                save_log_line_to_s3(system_log_line)
+                user = user_pipeline(system_log_line)
+                consecutive_extreme_hrs = []
+                bike_serial_number = transform.get_bike_serial_number_from_log_line(
+                    system_log_line)
+                bike_id = load.add_bike(bike_serial_number)
+                ride = ride_pipeline(system_log_line, bike_id)
+                reading = {'ride_id': ride['ride_id']}
+
+            first_line = False
+
+        if ('[INFO]' in log_line) and user:
             reading = reading_pipeline(
                 log_line, ride['ride_id'], ride['start_time'], reading, user, consecutive_extreme_hrs)
 
@@ -126,3 +167,4 @@ def pipeline():
 if __name__ == "__main__":
     load_dotenv()
     pipeline()
+
