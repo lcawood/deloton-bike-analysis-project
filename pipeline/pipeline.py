@@ -16,6 +16,9 @@ from dotenv import load_dotenv
 import load
 import transform
 import validate_heart_rate
+
+from database_functions import get_database_connection
+
 GROUP_ID = "testing23"
 EXTREME_HR_COUNT_THRESHOLD = 3
 
@@ -64,12 +67,12 @@ def user_pipeline(log_line: str) -> dict:
     return user
 
 
-def ride_pipeline(log_line: str, bike_id: int) -> dict:
+def ride_pipeline(log_line: str, bike_id: int, connection) -> dict:
     """
     Function to extract ride info from the given log line, upload it to the db, and return the id
     of the ride.
     """
-    ride_info = transform.get_ride_data_from_log_line(log_line)
+    ride_info = transform.get_ride_data_from_log_line(log_line, connection)
     ride_info['bike_id'] = bike_id
     ride_info['ride_id'] = load.add_ride(ride_info)
     return ride_info
@@ -82,7 +85,8 @@ def reading_pipeline(log_line: str, ride_id: int, start_time: datetime, reading:
     readings) upload to db and alert user by email if their heart rate has had an extreme value
     for enough consecutive readings.
     """
-    reading = transform.get_reading_data_from_log_line(reading, log_line, start_time)
+    reading = transform.get_reading_data_from_log_line(
+        reading, log_line, start_time)
     if 'heart_rate' in reading:
         # Heart rate comes with the second of every pair of reading log lines.
         if (reading['heart_rate'] == 0) or (user['min_heart_rate'] <= reading['heart_rate'] <= user['max_heart_rate']):
@@ -115,7 +119,7 @@ def pipeline():
             bike_serial_number = transform.get_bike_serial_number_from_log_line(
                 log_line)
             bike_id = load.add_bike(bike_serial_number)
-            ride = ride_pipeline(log_line, bike_id)
+            ride = ride_pipeline(log_line, bike_id, get_database_connection())
             reading = {'ride_id': ride['ride_id']}
             new_ride = False
         elif ('[INFO]' in log_line) and (not new_ride):

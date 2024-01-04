@@ -4,8 +4,6 @@ from ast import literal_eval
 from datetime import datetime, timedelta
 import re
 
-from database_functions import get_database_connection
-
 INVALID_DATE_THRESHOLD = datetime(1900, 1, 1, 0, 0, 0)
 
 
@@ -91,7 +89,7 @@ def get_user_from_log_line(log_line: str) -> dict:
     return user
 
 
-def get_ride_data_from_log_line(log_line: str) -> dict:
+def get_ride_data_from_log_line(log_line: str, connection) -> dict:
     """
     Takes in a kafka log line and returns a dictionary of ride data from it (corresponding to
     non-auto-generated attributes in ride table in db). If a given field is not found, its value
@@ -111,11 +109,10 @@ def get_ride_data_from_log_line(log_line: str) -> dict:
         current_ride_start_time = extract_datetime_from_string(log_line) \
             - timedelta(seconds=0.5)
 
-        conn = get_database_connection()
-        cur = conn.cursor()
-        cur.execute(
-            'SELECT start_time FROM Ride ORDER BY start_time DESC LIMIT 1;')
-        last_ride_start_time = cur.fetchone()[0]
+        with connection.cursor() as cur:
+            cur.execute(
+                'SELECT start_time FROM Ride ORDER BY start_time DESC LIMIT 1;')
+            last_ride_start_time = cur.fetchone()[0]
 
         # Current ride begins after the previous ride
         if current_ride_start_time > last_ride_start_time:

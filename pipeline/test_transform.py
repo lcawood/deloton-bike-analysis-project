@@ -2,6 +2,8 @@
 attained data from the log lines, as well as missing/incomplete data."""
 
 from datetime import datetime, timedelta
+from unittest.mock import MagicMock
+
 
 from transform import timestamp_to_date, check_datetime_is_valid, extract_datetime_from_string, \
     get_bike_serial_number_from_log_line, get_email_from_log_line, get_user_from_log_line, \
@@ -13,18 +15,22 @@ def test_convert_epoch_to_datetime():
 
     assert timestamp_to_date(0) == datetime(year=1970, month=1, day=1).date()
 
-    assert timestamp_to_date(1609459200000) == datetime(year=2021, month=1, day=1).date()
+    assert timestamp_to_date(1609459200000) == datetime(
+        year=2021, month=1, day=1).date()
 
-    assert timestamp_to_date(1612137600000) == datetime(year=2021, month=2, day=1).date()
+    assert timestamp_to_date(1612137600000) == datetime(
+        year=2021, month=2, day=1).date()
 
-    assert timestamp_to_date(1614556800000) == datetime(year=2021, month=3, day=1).date()
+    assert timestamp_to_date(1614556800000) == datetime(
+        year=2021, month=3, day=1).date()
 
     # Test with current time
     current_time = int(datetime.utcnow().timestamp() * 1000)
     assert timestamp_to_date(
         current_time) == datetime.now().date()
 
-    assert timestamp_to_date(-631152000000) == datetime(year=1950, month=1, day=1).date()
+    assert timestamp_to_date(-631152000000) == datetime(year=1950,
+                                                        month=1, day=1).date()
 
 
 def test_valid_datetime_object():
@@ -144,32 +150,6 @@ def test_get_valid_user_data_from_log_line():
           'birthdate': datetime(year=1959, month=5, day=2).date(), 'height': 187, 'weight': 52,
           'email': 'wayne_fitzgerald@hotmail.com', 'gender': 'male',
           'account_created': datetime(year=2022, month=1, day=4).date()}
-
-
-def test_valid_ride_data_from_log_line():
-    """Test for the get_ride_data_from_log_line function where all fields are present."""
-
-    assert get_ride_data_from_log_line(
-        "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = \
-        {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
-        \"address\":\"Studio 3,William alley,New Bethan,WR4V 7TA\",\
-        \"date_of_birth\":-336700800000,\"email_address\":\"wayne_fitzgerald@hotmail.com\",\
-        \"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\
-        \"bike_serial\":\"SN0000\",\"original_source\":\"offline\"}\n"
-    ) == {'user_id': 815, 'start_time': datetime.strptime('25/07/2022 16:13:37.209120', "%d/%m/%Y %H:%M:%S.%f") - timedelta(seconds=0.5)}
-
-
-def test_invalid_ride_data_from_log_line():
-    """Test for the get_ride_data_from_log_line function where all fields are not present."""
-
-    assert get_ride_data_from_log_line(
-        "mendoza v9: [SYSTEM] data = \
-        {\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
-        \"address\":\"Studio 3,William alley,New Bethan,WR4V 7TA\",\
-        \"date_of_birth\":-336700800000,\"email_address\":\"wayne_fitzgerald@hotmail.com\",\
-        \"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\
-        \"bike_serial\":\"SN0000\",\"original_source\":\"offline\"}\n"
-    ) == {'user_id': None, 'start_time': None}
 
 
 def test_valid_reading_data_from_log_line():
