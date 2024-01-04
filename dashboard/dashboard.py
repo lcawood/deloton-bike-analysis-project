@@ -4,13 +4,8 @@ create visualisations in a Streamlit app (using functions from the `database.py`
 files as necessary).
 """
 
-from datetime import datetime
-from os import environ
-
 from dotenv import load_dotenv
-from pandas import DataFrame
 from psycopg2 import extensions
-import streamlit as st
 
 from database import (get_database_connection,
                       get_current_ride_data, get_current_ride_data_highest)
@@ -48,19 +43,4 @@ if __name__ == "__main__":
 
     conn = get_database_connection()
 
-    fake_birthdate = datetime.strptime('1999-01-01', "%Y-%m-%d")
-    current_ride = get_current_ride_data(conn)
-    current_ride_personal_best = get_current_ride_data_highest(
-        conn, current_ride)
-
-    rider_name = get_current_rider_name(current_ride)
-
-    get_dashboard_title()
-
-    get_current_ride_header(rider_name)
-
-    get_current_ride_header_personal_info(current_ride)
-
-    get_current_ride_metrics(current_ride)
-
-    get_current_ride_personal_best_metrics(current_ride_personal_best)
+    main_current_ride(conn)

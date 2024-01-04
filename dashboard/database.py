@@ -2,12 +2,8 @@
 
 from os import environ
 
-
-from dotenv import load_dotenv
-from pandas import DataFrame
 import psycopg2
 from psycopg2 import extensions, OperationalError
-import streamlit as st
 
 
 def get_database_connection() -> extensions.connection:
