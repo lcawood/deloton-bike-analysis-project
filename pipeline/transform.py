@@ -176,6 +176,3 @@ def get_address_from_log_line(log_line: str) -> dict:
 
 if __name__ == "__main__":
     pass
-
-    print(get_user_from_log_line(
-        "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = {\"user_id\":815,\"name\":\"Mr Wayne J Fitzgerald\",\"gender\":\"male\",\"address\":\"Studio 3,William alley,New Bethan,WR4V 7TA\",\"date_of_birth\":-336700800000,\"email_address\":\"wayne_fitzgerald@hotmail.com\",\"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\"bike_serial\":\"SN0000\",\"original_source\":\"offline\"}\n"))
