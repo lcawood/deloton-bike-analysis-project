@@ -129,6 +129,7 @@ def test_reading_pipeline(mock_load_reading, mock_send_email, mock_transform_rea
     assert not consecutive_extreme_hrs
 
 
+@patch('pipeline.save_log_line_to_s3')
 @patch('pipeline.get_next_log_line')
 @patch('pipeline.get_kafka_consumer')
 @patch('pipeline.rider_pipeline')
@@ -137,7 +138,7 @@ def test_reading_pipeline(mock_load_reading, mock_send_email, mock_transform_rea
 @patch('transform.get_bike_serial_number_from_log_line')
 @patch('load.add_bike')
 def test_pipeline(mock_load_bike, mock_transform_bike, mock_reading_pipeline, mock_ride_pipeline,
-                  mock_rider_pipeline, mock_get_kafka_consumer, mock_get_next_log_line):
+                  mock_rider_pipeline, mock_get_kafka_consumer, mock_get_next_log_line, mock_save_to_s3):
     """
     Tests the function pipeline directs log lines correctly starting at the beginning of a ride.
     """
