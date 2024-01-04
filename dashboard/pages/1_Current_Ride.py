@@ -67,7 +67,6 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
         get_recent_rides_header()
 
         recent_rides = get_recent_12hr_data(db_connection)
-        print(recent_rides)
 
         # Placeholder for last updated time caption
         empty_last_updated_placeholder = st.empty()
@@ -82,22 +81,19 @@ if __name__ == "__main__":
     conn = get_database_connection()
 
     get_dashboard_title()
-    try:
-        while True:
-            # Auto-refresh the current ride section
-            last_updated_placeholder_current = main_current_ride(conn)
-            update_time = datetime.now()
+    while True:
+        # Auto-refresh the current ride section
+        last_updated_placeholder_current = main_current_ride(conn)
+        update_time = datetime.now()
 
-            last_updated_placeholder_recent = main_recent_rides(conn)
-            update_time = datetime.now()
+        last_updated_placeholder_recent = main_recent_rides(conn)
+        update_time = datetime.now()
 
-            for i in range(CURRENT_RIDE_REFRESH_RATE):
-                get_last_updated_current_ride(
-                    update_time, last_updated_placeholder_current)
-                get_last_updated_current_ride(
-                    update_time, last_updated_placeholder_recent)
-                time.sleep(LAST_UPDATED_COUNT_INCREMENT)
+        for i in range(CURRENT_RIDE_REFRESH_RATE):
+            get_last_updated_current_ride(
+                update_time, last_updated_placeholder_current)
+            get_last_updated_current_ride(
+                update_time, last_updated_placeholder_recent)
+            time.sleep(LAST_UPDATED_COUNT_INCREMENT)
 
-            st.rerun()
-    finally:
-        conn.close()
+        st.rerun()
