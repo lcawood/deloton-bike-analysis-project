@@ -223,6 +223,8 @@ def handler(event=None, context=None) -> int:
         s3_client.put_object(Body = report_dict["html_body"],Bucket = "c9-deloton",
             Key = f"c9-deloton-daily-reports/daily_report_{yesterday}.html")
 
+        connection.close()
+
         return {
                 'statusCode': 200,
                 'body': json.dumps(report_dict["html_body"])
