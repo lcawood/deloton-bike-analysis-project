@@ -78,7 +78,4 @@ def is_heart_rate_abnormal(user_details: list) -> bool:
     max_heart_rate = calculate_max_heart_rate(user_details)
     heart_rate = user_details[7]
 
-    print(min_heart_rate <= heart_rate, min_heart_rate, heart_rate)
-    print(heart_rate <= max_heart_rate, max_heart_rate, heart_rate)
-
     return (heart_rate == 0) or not (min_heart_rate <= heart_rate <= max_heart_rate)
