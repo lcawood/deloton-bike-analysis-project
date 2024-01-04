@@ -14,6 +14,7 @@ def get_dashboard_title() -> None:
     st.title("Deloton Bike Analysis")
 
 
+# CURRENT RIDE
 def get_current_ride_header(rider_name: str) -> None:
     """Returns a header for the current ride and the rider's name."""
     st.header(f"CURRENT RIDE: {rider_name}", divider='blue')
@@ -101,3 +102,22 @@ def get_current_ride_personal_best_metrics(user_best_details: list) -> None:
     """
     with st.expander('Personal Best ⛛'):
         get_current_ride_metrics(user_best_details)
+
+
+# RECENT RIDES
+def get_recent_rides_header() -> None:
+    """Returns a header for the recent rides section."""
+    st.header(f"RECENT RIDES", divider='blue')
+
+
+def get_last_updated_recent_rides(last_update_time: datetime,
+                                  last_updated_placeholder: st.empty) -> None:
+    """Returns a caption under the header with the time since the last data update."""
+
+    # time_delta = (current_time-last_update_time).total_seconds()
+
+    current_time = datetime.utcnow()
+    time_delta = int((current_time - last_update_time).total_seconds())
+
+    last_updated_placeholder.caption(
+        f"Last updated: {time_delta} seconds ago")
