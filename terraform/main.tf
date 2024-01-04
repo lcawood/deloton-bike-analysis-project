@@ -120,3 +120,143 @@ resource "aws_lambda_function" "c9-deloton-lambda-report-t" {
     }
 }
 }
+
+
+# Report : Step Function Permissions
+
+resource "aws_iam_role" "iam_for_sfn" {
+  name = "stepFunctionSampleStepFunctionExecutionIAM"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "states.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "policy_publish_ses" {
+  name        = "stepFunctionSampleSESInvocationPolicy"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+              "SES:SendEmail"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "policy_invoke_lambda" {
+  name        = "stepFunctionSampleLambdaFunctionInvocationPolicy"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:InvokeFunction",
+                "lambda:InvokeAsync"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
+
+// Attach policy to IAM Role for Step Function
+resource "aws_iam_role_policy_attachment" "iam_for_sfn_attach_policy_invoke_lambda" {
+  role       = "${aws_iam_role.iam_for_sfn.name}"
+  policy_arn = "${aws_iam_policy.policy_invoke_lambda.arn}"
+}
+
+resource "aws_iam_role_policy_attachment" "iam_for_sfn_attach_policy_publish_ses" {
+  role       = "${aws_iam_role.iam_for_sfn.name}"
+  policy_arn = "${aws_iam_policy.policy_publish_ses.arn}"
+}
+
+
+
+#Report: Step function
+
+
+resource "aws_sfn_state_machine" "c9_deloton_report_fsm_t" {
+  name     = "c9-deloton-report-fsm-t"
+  role_arn = "${aws_iam_role.iam_for_sfn.arn}"
+
+  definition = <<EOF
+{
+  "Comment": "A description of my state machine",
+  "StartAt": "Lambda Invoke",
+  "States": {
+    "Lambda Invoke": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "FunctionName":  "${aws_lambda_function.c9-deloton-lambda-report-t.arn}"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "SendEmail"
+    },
+    "SendEmail": {
+      "Type": "Task",
+      "End": true,
+      "Parameters": {
+        "Content": {
+          "Simple": {
+            "Body": {
+              "Html": {
+                "Data.$": "$.body"
+              }
+            },
+            "Subject": {
+              "Data": "Daily Report"
+            }
+          }
+        },
+        "Destination": {
+          "ToAddresses": [
+            "trainee.charlie.dean@sigmalabs.co.uk"
+          ]
+        },
+        "FromEmailAddress": "trainee.charlie.dean@sigmalabs.co.uk"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:sesv2:sendEmail"
+    }
+  }
+}
+EOF
+}
