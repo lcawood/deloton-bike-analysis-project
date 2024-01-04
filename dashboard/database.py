@@ -78,7 +78,7 @@ def get_current_rider_highest_heart_rate(db_cur: extensions.connection.cursor, r
     JOIN Rider ON Ride.rider_id = Rider.rider_id
     JOIN Reading ON Ride.ride_id = Reading.ride_id
     WHERE Ride.rider_id = %s
-    ORDER BY elapsed_time DESC
+    ORDER BY heart_rate DESC
     LIMIT 1
     ;
     """
@@ -99,7 +99,7 @@ def get_current_rider_highest_power(db_cur: extensions.connection.cursor, rider_
     JOIN Rider ON Ride.rider_id = Rider.rider_id
     JOIN Reading ON Ride.ride_id = Reading.ride_id
     WHERE Ride.rider_id = %s
-    ORDER BY elapsed_time DESC
+    ORDER BY power DESC
     LIMIT 1
     ;
     """
@@ -120,7 +120,7 @@ def get_current_rider_highest_resistance(db_cur: extensions.connection.cursor, r
     JOIN Rider ON Ride.rider_id = Rider.rider_id
     JOIN Reading ON Ride.ride_id = Reading.ride_id
     WHERE Ride.rider_id = %s
-    ORDER BY elapsed_time DESC
+    ORDER BY resistance DESC
     LIMIT 1
     ;
     """
