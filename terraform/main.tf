@@ -50,6 +50,13 @@ resource "aws_db_instance" "c9_velo_deloton" {
 }
 
 
+# ECR for Daily Report
+
+resource "aws_ecr_repository" "c9_deloton_daily_report_t" {
+  name                 = "c9-deloton-daily-report-t"
+  image_tag_mutability = "MUTABLE"
+}
+
 
 # Report: Lambda Role and Permissions
 
@@ -106,7 +113,7 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
 resource "aws_lambda_function" "c9-deloton-lambda-report-t" {
     function_name = "c9-deloton-lambda-report-t"
     role = aws_iam_role.c9_deloton_lambda_report_role.arn
-    image_uri = "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-deloton-daily-report:latest"
+    image_uri = "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-deloton-daily-report-t:latest"
     package_type  = "Image"
     timeout = 15
     environment {
