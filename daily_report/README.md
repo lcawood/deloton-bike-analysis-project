@@ -22,7 +22,7 @@ This folder contains all the code and resources used for creating the daily repo
 ## 🗂️ Files Explained
 - `report.py`
     - A script to extract the previous days data from the Deloton data warehouse then using this create useful data deliverables to present to the ceo in a report. The report is made in a html string then uploaded to a S3 Bucket as a html file. The html string is also the return from the lambda handler function as this can be used in a email to the CEO.
-- `report.py`
+- `test_report.py`
     - A script containing unit tests for the `report.py` script
 - `Dockerfile`
     - A file which is used to build a Docker image of the lambda for the `report.py` program
