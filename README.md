@@ -4,7 +4,7 @@
 ## 📝 Project Description
 Deloton Exercise Bikes are an internationally famous stationary exercise bike brand. Their aim as a company is to use cutting edge technology to enable their customers to know more about their exercise habits and their own bodies.
 
-Deloton has a range of exercise bikes on the market that track metrics such as heart rate, rotations per minute and power output every second. These metrics are shown to the user on their bike but up until this point Deloton haven't been able to get any of this information in aggregate. However - with their customers permission - a new update means that they are now collecting data about users and their rides.
+Deloton has a range of exercise bikes on the market that track metrics such as heart rate, rotations per minute and power output every second. These metrics are shown to the user on their bike but up until this point Deloton haven't been able to get any of this information in aggregate. However - with their customers' permission - a new update means that they are now collecting data about users and their rides.
 
 Unfortunately, the data that Deloton are collecting from their bikes is unstructured and not clean. 
 
