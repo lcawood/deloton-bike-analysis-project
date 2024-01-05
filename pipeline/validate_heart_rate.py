@@ -73,6 +73,9 @@ def calculate_min_heart_rate(user_details: dict) -> int:
 
     'birthdate' and 'gender' are assumed to be cleaned and
     always as datetime and str types, respectively.
+
+    'other' and 'None' gender heart rates are treated conservatively using the formula
+    for females as a safety precaution.
     """
     birthdate = user_details.get('birthdate')
     age = calculate_age(birthdate)
