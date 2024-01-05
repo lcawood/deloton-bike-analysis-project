@@ -109,6 +109,7 @@ def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame) -> pd.Data
     df["reading_time"] = df.apply(
         lambda x: (x['start_time'] + timedelta(seconds=x['elapsed_time'])).round('min'), axis=1)
 
+    print(df.sort_values('reading_time', ascending=True))
     return df
 
 
@@ -131,6 +132,10 @@ def process_dataframe_resistance_output_avg(ride_data: pd.DataFrame) -> pd.DataF
     grouped_df = ride_data.groupby(
         ['reading_time'])['resistance'].mean().astype(int)
 
+    grouped_df = grouped_df.reset_index()
+
+    grouped_df.columns = ['reading_time', 'resistance']
+
     return grouped_df
 
 
@@ -140,6 +145,10 @@ def process_dataframe_power_output_cumul(ride_data: pd.DataFrame) -> pd.DataFram
     grouped_df = ride_data.groupby(
         ['reading_time'])['power'].cumsum().astype(int)
 
+    grouped_df = grouped_df.reset_index()
+
+    grouped_df.columns = ['reading_time', 'power']
+
     return grouped_df
 
 
@@ -148,5 +157,9 @@ def process_dataframe_resistance_output_cumul(ride_data: pd.DataFrame) -> pd.Dat
 
     grouped_df = ride_data.groupby(
         ['reading_time'])['resistance'].cumsum().astype(int)
+
+    grouped_df = grouped_df.reset_index()
+
+    grouped_df.columns = ['reading_time', 'resistance']
 
     return grouped_df

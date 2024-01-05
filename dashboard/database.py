@@ -180,7 +180,6 @@ def get_recent_12hr_data(db_connection: extensions.connection) -> pd.DataFrame:
 
     twelve_hours_ago = (datetime.now() - timedelta(hours=12))
 
-    print(twelve_hours_ago)
     with db_connection.cursor() as db_cur:
 
         query = """

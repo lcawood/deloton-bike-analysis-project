@@ -8,6 +8,7 @@ from datetime import datetime
 import time
 
 from dotenv import load_dotenv
+import pandas as pd
 from psycopg2 import extensions
 import streamlit as st
 
@@ -20,11 +21,59 @@ from utilities import (process_dataframe_types,
 from visualisations import (get_dashboard_title, get_total_ride_count_age_bar_chart,
                             get_recent_rides_header, get_last_updated_recent_rides,
                             get_total_duration_gender_bar_chart, get_total_ride_count_gender_bar_chart,
-                            get_power_output_avg_line_chart,)
+                            get_power_output_avg_line_chart, get_resistance_output_avg_line_chart,)
 
 
 RECENT_RIDE_REFRESH_RATE = 3
 LAST_UPDATED_COUNT_INCREMENT = 1
+
+
+def generate_bar_charts(recent_rides: pd.DataFrame, ride_count_by_gender: pd.DataFrame, ride_count_by_age: pd.DataFrame) -> None:
+    """Generates the bar charts for the dashboard."""
+
+    # Generate bar charts
+    bar_col_1, bar_col_2, bar_col_3 = st.columns([1, 1, 2], gap='large')
+    with bar_col_1:
+
+        total_duration_gender_chart = get_total_duration_gender_bar_chart(
+            recent_rides)
+        st.altair_chart(total_duration_gender_chart,
+                        use_container_width=True)
+
+    with bar_col_2:
+
+        ride_count_by_gender_chart = get_total_ride_count_gender_bar_chart(
+            ride_count_by_gender)
+        st.altair_chart(ride_count_by_gender_chart,
+                        use_container_width=True)
+
+    with bar_col_3:
+
+        ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
+            ride_count_by_age)
+
+        st.altair_chart(ride_count_by_age_chart,
+                        use_container_width=True)
+
+
+def generate_line_charts(avg_power_over_time: pd.DataFrame,
+                         avg_resistance_over_time: pd.DataFrame) -> None:
+    """Generates the line charts for the dashboard."""
+
+    line_col_1, line_col_2 = st.columns(2, gap='small')
+    with line_col_1:
+        avg_power_chart = get_power_output_avg_line_chart(
+            avg_power_over_time)
+
+        st.altair_chart(avg_power_chart,
+                        use_container_width=True)
+
+    with line_col_2:
+        avg_resistance_chart = get_resistance_output_avg_line_chart(
+            avg_resistance_over_time)
+
+        st.altair_chart(avg_resistance_chart,
+                        use_container_width=True)
 
 
 def main_recent_rides(db_connection: extensions.connection) -> None:
@@ -42,49 +91,24 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
         ride_count_by_age = get_ride_count_age(db_connection)
         line_chart_data = get_dataframe_columns_for_line_charts(recent_rides)
 
-        print(line_chart_data['reading_time'].sort_values(ascending=True))
         avg_power_over_time = process_dataframe_power_output_avg(
             line_chart_data)
-        avg_resistance_over_time = process_dataframe_resistance_output_avg
-        cumul_power_over_time = process_dataframe_power_output_cumul
-        cumul_resistance_over_time = process_dataframe_resistance_output_cumul
+        avg_resistance_over_time = process_dataframe_resistance_output_avg(
+            line_chart_data)
+
+        # print(avg_power_over_time.sort_values('reading_time', ascending=True))
+        cumul_power_over_time = process_dataframe_power_output_cumul(
+            line_chart_data)
+        cumul_resistance_over_time = process_dataframe_resistance_output_cumul(
+            line_chart_data)
 
         # Placeholder for last updated time caption
         empty_last_updated_placeholder = st.empty()
 
-        # Generate bar charts
-        bar_col_1, bar_col_2, bar_col_3 = st.columns([1, 1, 2], gap='large')
-        with bar_col_1:
+        generate_bar_charts(
+            recent_rides, ride_count_by_gender, ride_count_by_age)
 
-            total_duration_gender_chart = get_total_duration_gender_bar_chart(
-                recent_rides)
-            st.altair_chart(total_duration_gender_chart,
-                            use_container_width=True)
-
-        with bar_col_2:
-
-            ride_count_by_gender_chart = get_total_ride_count_gender_bar_chart(
-                ride_count_by_gender)
-            st.altair_chart(ride_count_by_gender_chart,
-                            use_container_width=True)
-
-        with bar_col_3:
-
-            ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
-                ride_count_by_age)
-
-            st.altair_chart(ride_count_by_age_chart,
-                            use_container_width=True)
-
-        # Generate line charts
-        line_col_1, line_col_2 = st.columns(2, gap='large')
-        with line_col_1:
-            avg_power_chart = get_power_output_avg_line_chart(
-                avg_power_over_time)
-
-            st.altair_chart(avg_power_chart,
-                            use_container_width=True)
-        # with line_col_2:
+        generate_line_charts(avg_power_over_time, avg_resistance_over_time)
 
         return empty_last_updated_placeholder
 

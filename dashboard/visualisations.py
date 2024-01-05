@@ -124,7 +124,7 @@ def get_last_updated_recent_rides(last_update_time: datetime,
         f"Last updated: {time_delta} seconds ago")
 
 
-def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame) -> None:
+def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame) -> alt.Chart:
     """
     Generates a bar chart for the total elapsed_time grouped by gender
     over the past 12 hours.
@@ -145,7 +145,7 @@ def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame) -> None:
     return chart
 
 
-def get_total_ride_count_gender_bar_chart(ride_counts: pd.DataFrame) -> None:
+def get_total_ride_count_gender_bar_chart(ride_counts: pd.DataFrame) -> alt.Chart:
     """
     Generates a bar chart for the total number of rides grouped by gender
     over the past 12 hours.
@@ -159,7 +159,7 @@ def get_total_ride_count_gender_bar_chart(ride_counts: pd.DataFrame) -> None:
     return chart
 
 
-def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame) -> None:
+def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame) -> alt.Chart:
     """
     Generates a bar chart for the total number of rides grouped by age brackets
     over the past 12 hours.
@@ -173,23 +173,23 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame) -> None:
     return chart
 
 
-def get_power_output_avg_line_chart(recent_data: pd.DataFrame) -> None:
+def get_power_output_avg_line_chart(recent_data: pd.DataFrame) -> alt.Chart:
     """Generates a line chart for the average power output over the past 12 hours."""
 
-    x_min = recent_data['reading_time'].min()
-    x_max = recent_data['reading_time'].max()
-
-    print(x_min, x_max)
-
-    chart = alt.Chart(recent_data, title='Average power output').mark_line().encode(
-        x=alt.X('reading_time:T', scale=alt.Scale(
-            domain=[x_min, x_max]), axis=alt.Axis(title='Time')),
-        y=alt.Y('power:Q', title='Average Power'),
+    chart = alt.Chart(recent_data, title='Average Power Output').mark_line().encode(
+        x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
+        y=alt.Y('power:Q', title='Average Power (W)'),
     )
 
     return chart
 
 
-def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame) -> None:
-    """Generates a line chart for the average resistance over the past 12 hours."""
-    pass
+def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame) -> alt.Chart:
+    """Generates a line chart for the average power output over the past 12 hours."""
+
+    chart = alt.Chart(recent_data, title='Average Resistance output').mark_line().encode(
+        x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
+        y=alt.Y('resistance:Q', title='Average Resistance'),
+    )
+
+    return chart
