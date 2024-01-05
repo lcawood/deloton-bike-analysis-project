@@ -17,7 +17,7 @@ from visualisations import (get_dashboard_title, get_last_updated_current_ride,
                             get_recent_rides_header, get_last_updated_recent_rides)
 
 
-RECENT_RIDE_REFRESH_RATE = 5
+RECENT_RIDE_REFRESH_RATE = 20
 LAST_UPDATED_COUNT_INCREMENT = 1
 
 
