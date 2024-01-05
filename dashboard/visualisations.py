@@ -145,26 +145,32 @@ def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame) -> None:
     return chart
 
 
-def get_total_ride_count_gender_bar_chart(ride_counts: list[dict]) -> None:
+def get_total_ride_count_gender_bar_chart(ride_counts: pd.DataFrame) -> None:
     """
     Generates a bar chart for the total number of rides grouped by gender
     over the past 12 hours.
     """
 
-    chart = alt.Chart(ride_counts, title='Number of rides (by gender)').mark_bar().encode(
+    chart = alt.Chart(ride_counts, title='Total Number of rides (by gender)').mark_bar().encode(
         x=alt.X('gender:N', title='Gender'),
-        y=alt.Y('count:Q', title='Total Ride Count'),
+        y=alt.Y('count:Q', title='Number of Rides'),
     ).interactive()
 
     return chart
 
 
-def get_total_ride_count_age_bar_chart(recent_data: pd.DataFrame) -> None:
+def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame) -> None:
     """
     Generates a bar chart for the total number of rides grouped by age brackets
     over the past 12 hours.
     """
-    pass
+
+    chart = alt.Chart(ride_counts, title='Total Number of rides (by age)').mark_bar().encode(
+        x=alt.X('age_bracket:N', title='Ages'),
+        y=alt.Y('count:Q', title='Number of Rides'),
+    ).interactive()
+
+    return chart
 
 
 def get_power_output_line_chart(recent_data: pd.DataFrame) -> None:

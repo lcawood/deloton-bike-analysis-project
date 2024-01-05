@@ -203,7 +203,7 @@ def get_recent_12hr_data(db_connection: extensions.connection) -> pd.DataFrame:
         return pd.DataFrame(recent_rides, columns=columns)
 
 
-def get_ride_count_gender(db_connection: extensions.connection) -> list[dict]:
+def get_ride_count_gender(db_connection: extensions.connection) -> pd.DataFrame:
     """
     Retrieves data from the last 12 hours (by attribute 'start_time') from the database
     as a Pandas Dataframe.
@@ -230,7 +230,7 @@ def get_ride_count_gender(db_connection: extensions.connection) -> list[dict]:
         return pd.DataFrame(ride_counts, columns=columns)
 
 
-def get_ride_count_age(db_connection: extensions.connection) -> list[dict]:
+def get_ride_count_age(db_connection: extensions.connection) -> pd.DataFrame:
     """
     Retrieves data from the last 12 hours (by attribute 'start_time') from the database
     as a Pandas Dataframe.
@@ -256,8 +256,12 @@ def get_ride_count_age(db_connection: extensions.connection) -> list[dict]:
 
         db_cur.execute(query, parameters)
 
-        ride_counts = db_cur.fetchall()
+        response = db_cur.fetchall()[0]
 
-        columns = ['gender', 'count']
+        age_brackets = ["0-18", "18-24", "25-34",
+                        "35-44", "45-54", "55-64", "65+"]
 
-        return pd.DataFrame(ride_counts, columns=columns)
+        return pd.DataFrame({
+            'age_bracket': age_brackets,
+            'count': response
+        })

@@ -12,11 +12,11 @@ from psycopg2 import extensions
 import streamlit as st
 
 from database import (get_database_connection, get_recent_12hr_data,
-                      get_ride_count_gender)
+                      get_ride_count_gender, get_ride_count_age)
 from utilities import (process_dataframe_types)
-from visualisations import (get_dashboard_title, get_last_updated_current_ride,
+from visualisations import (get_dashboard_title, get_total_ride_count_age_bar_chart,
                             get_recent_rides_header, get_last_updated_recent_rides,
-                            get_total_duration_gender_bar_chart, get_total_ride_count_gender_bar_chart)
+                            get_total_duration_gender_bar_chart, get_total_ride_count_gender_bar_chart,)
 
 
 RECENT_RIDE_REFRESH_RATE = 3
@@ -29,18 +29,19 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
     displaying the recent rides visualisations.
     """
     with st.container():
+
         get_recent_rides_header()
 
         recent_rides = get_recent_12hr_data(db_connection)
         recent_rides = process_dataframe_types(recent_rides)
         ride_count_by_gender = get_ride_count_gender(db_connection)
-
-        print(ride_count_by_gender)
+        ride_count_by_age = get_ride_count_age(db_connection)
 
         # Placeholder for last updated time caption
         empty_last_updated_placeholder = st.empty()
 
-        col1, col2, col3 = st.columns([1, 1, 3], gap='large')
+        # Generate bar charts
+        col1, col2, col3 = st.columns([1, 1, 2], gap='large')
         with col1:
             total_duration_gender_chart = get_total_duration_gender_bar_chart(
                 recent_rides)
@@ -51,6 +52,14 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
             ride_count_by_gender_chart = get_total_ride_count_gender_bar_chart(
                 ride_count_by_gender)
             st.altair_chart(ride_count_by_gender_chart,
+                            use_container_width=True)
+
+        with col3:
+
+            ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
+                ride_count_by_age)
+
+            st.altair_chart(ride_count_by_age_chart,
                             use_container_width=True)
 
         return empty_last_updated_placeholder
