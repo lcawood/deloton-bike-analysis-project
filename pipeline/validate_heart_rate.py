@@ -78,7 +78,7 @@ def calculate_min_heart_rate(user_details: dict) -> int:
     age = calculate_age(birthdate)
     gender = user_details.get('gender')
 
-    if gender == "female":
+    if gender in ("female", "other", None):
 
         if 18 <= age <= 39:
             return 45
