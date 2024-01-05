@@ -31,11 +31,10 @@ def check_datetime_is_valid(dt: datetime) -> bool:
 def extract_datetime_from_string(input_string: str) -> datetime | None:
     """Helper function to extract a datetime object from a string that contains
     a datetime in the format 'YYYY-MM-DD HH:MM:SS.microseconds'."""
-    pattern = r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+'
-    match = re.search(pattern, input_string)
+    datetime_str = " ".join(input_string.split(" ")[:2])
     try:
         datetime_obj = datetime.strptime(
-            match.group(), '%Y-%m-%d %H:%M:%S.%f')
+            datetime_str, '%Y-%m-%d %H:%M:%S.%f')
         if check_datetime_is_valid(datetime_obj):
             return datetime_obj
     except (ValueError, AttributeError):
@@ -47,35 +46,34 @@ def get_bike_serial_number_from_log_line(log_line: str) -> str | None:
     """Takes in a kafka log line, and returns the bike serial number if found."""
 
     log_line_dict = literal_eval(log_line.split('=')[1])
-    if 'bike_serial' in log_line_dict.keys():
-        return log_line_dict['bike_serial']
-    return None
+    return log_line_dict.get('bike_serial')
 
 
 def get_email_from_log_line(log_line: str) -> str | None:
     """Helper function to extract an email address from a log line using if found."""
 
     log_line_dict = literal_eval(log_line.split('=')[1])
-    return log_line_dict.get('email_address', None)
+    return log_line_dict.get('email_address')
 
 
 def get_rider_from_log_line(log_line: str) -> dict:
     """Takes in a kafka log line and returns a dictionary of rider data from it (excluding address).
     If any rider information is missing, this field is given as None in the returned dictionary."""
 
-
     rider = {}
-    
     log_line_data = literal_eval(log_line.split('=')[1])
 
     # Obtain rider data from the log line directly
     rider['rider_id'] = int(log_line_data.get('user_id', -1))
 
-    # If a full name is found in the log line, get the first and last name
-    if log_line_data.get('name'):
-        rider['first_name'] = log_line_data['name'].split()[0]
-        rider['last_name'] = " ".join(log_line_data['name'].split()[1:])
+    name =log_line_data.get('name')
+    if name:
+        name_parts = name.split()
+        if name_parts[0].lower() in PREFIXES:
+            name = ' '.join(name_parts[1:])
 
+        rider['first_name'] = name[:name.rfind(' ')]
+        rider['last_name'] = name.split()[-1]
     else:
         rider['first_name'] = None
         rider['last_name'] = None
@@ -112,9 +110,9 @@ def get_ride_data_from_log_line(log_line: str) -> dict:
     except KeyError:
         ride['rider_id'] = None
 
-    if extract_datetime_from_string(log_line):
-        ride['start_time'] = (extract_datetime_from_string(
-            log_line) - timedelta(seconds=0.5))
+    log_datetime = extract_datetime_from_string(log_line)
+    if log_datetime:
+        ride['start_time'] = (log_datetime - timedelta(seconds=0.5))
     else:
         ride['start_time'] = None
 
@@ -126,6 +124,7 @@ def get_reading_data_from_log_line(reading: dict, log_line: str, start_time: dat
     Takes in a kafka log line, and transforms and appends reading data
     contained within it to the given reading dictionary.
     """
+
     if 'Ride' in log_line:
         try:
             reading['resistance'] = int(
@@ -133,18 +132,19 @@ def get_reading_data_from_log_line(reading: dict, log_line: str, start_time: dat
         except IndexError:
             reading['resistance'] = None
 
-        if extract_datetime_from_string(log_line) and \
-                extract_datetime_from_string(log_line) > start_time:
-            reading['elapsed_time'] = int((extract_datetime_from_string(
-                log_line) - start_time).total_seconds())
+        log_datetime = extract_datetime_from_string(log_line)
+        if log_datetime and log_datetime > start_time:
+            reading['elapsed_time'] = int((log_datetime - start_time).total_seconds())
         else:
             reading['elapsed_time'] = None
 
     elif 'Telemetry' in log_line:
+        str_attributes = log_line.split(';')
         reading['heart_rate'] = int(
-            log_line.split(';')[0].split('=')[1].strip())
+            str_attributes[0].split('=')[1].strip())
         reading['power'] = float(log_line.split('=')[-1].strip())
-        reading['rpm'] = int(log_line.split(';')[1].split('=')[1].strip())
+        reading['rpm'] = int(str_attributes[1].split('=')[1].strip())
+        
     return reading
 
 
