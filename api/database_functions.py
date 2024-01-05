@@ -109,6 +109,7 @@ def delete_ride_by_id(db_connection: connection, ride_id: int) -> dict:
         db_cur.execute(query,parameters)
 
         ride = db_cur.fetchone()
+        db_connection.commit()
 
         if ride:
             return dict(ride)
