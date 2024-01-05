@@ -48,3 +48,295 @@ resource "aws_db_instance" "c9_velo_deloton" {
   
   vpc_security_group_ids = [aws_security_group.c9_velo_securitygroup.id]
 }
+
+
+
+# Report: Lambda Role and Permissions
+
+resource "aws_iam_role" "c9_deloton_lambda_report_role" {
+name   = "c9-deloton-lambda-report-role"
+assume_role_policy = <<EOF
+{
+ "Version": "2012-10-17",
+ "Statement": [
+   {
+     "Action": "sts:AssumeRole",
+     "Principal": {
+       "Service": "lambda.amazonaws.com"
+     },
+     "Effect": "Allow",
+     "Sid": ""
+   }
+ ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "iam_policy_for_lambda" {
+ 
+ name         = "aws_iam_policy_for_terraform_aws_lambda_role"
+ path         = "/"
+ description  = "AWS IAM Policy for managing aws lambda role"
+ policy = <<EOF
+{
+ "Version": "2012-10-17",
+ "Statement": [
+   {
+     "Action": [
+       "logs:CreateLogGroup",
+       "logs:CreateLogStream",
+       "logs:PutLogEvents"
+     ],
+     "Resource": "arn:aws:logs:*:*:*",
+     "Effect": "Allow"
+   }
+ ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role" {
+ role        = aws_iam_role.c9_deloton_lambda_report_role.name
+ policy_arn  = aws_iam_policy.iam_policy_for_lambda.arn
+}
+
+
+#Report : Lambda 
+
+resource "aws_lambda_function" "c9-deloton-lambda-report-t" {
+    function_name = "c9-deloton-lambda-report-t"
+    role = aws_iam_role.c9_deloton_lambda_report_role.arn
+    image_uri = "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-deloton-daily-report:latest"
+    package_type  = "Image"
+    timeout = 15
+    environment {
+      variables = {
+      DATABASE_IP = "${var.database_ip}",
+      DATABASE_NAME ="${var.database_name}",
+      DATABASE_PASSWORD = "${var.database_password}",
+      DATABASE_PORT ="${var.database_port}",
+      DATABASE_USERNAME = "${var.database_username}",
+      AWS_ACCESS = "${var.aws_access_key_id}",
+      AWS_SECRET_ACCESS = "${var.aws_secret_access_key}"
+    }
+}
+}
+
+
+# Report : Step Function Permissions
+
+resource "aws_iam_role" "iam_for_sfn" {
+  name = "stepFunctionSampleStepFunctionExecutionIAM"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "states.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "policy_publish_ses" {
+  name        = "stepFunctionSampleSESInvocationPolicy"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+              "SES:SendEmail"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "policy_invoke_lambda" {
+  name        = "stepFunctionSampleLambdaFunctionInvocationPolicy"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:InvokeFunction",
+                "lambda:InvokeAsync"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
+
+// Attach policy to IAM Role for Step Function
+resource "aws_iam_role_policy_attachment" "iam_for_sfn_attach_policy_invoke_lambda" {
+  role       = "${aws_iam_role.iam_for_sfn.name}"
+  policy_arn = "${aws_iam_policy.policy_invoke_lambda.arn}"
+}
+
+resource "aws_iam_role_policy_attachment" "iam_for_sfn_attach_policy_publish_ses" {
+  role       = "${aws_iam_role.iam_for_sfn.name}"
+  policy_arn = "${aws_iam_policy.policy_publish_ses.arn}"
+}
+
+
+
+#Report: Step function
+
+
+resource "aws_sfn_state_machine" "c9_deloton_report_fsm_t" {
+  name     = "c9-deloton-report-fsm-t"
+  role_arn = "${aws_iam_role.iam_for_sfn.arn}"
+
+  definition = <<EOF
+{
+  "Comment": "A description of my state machine",
+  "StartAt": "Lambda Invoke",
+  "States": {
+    "Lambda Invoke": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "FunctionName":  "${aws_lambda_function.c9-deloton-lambda-report-t.arn}"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "SendEmail"
+    },
+    "SendEmail": {
+      "Type": "Task",
+      "End": true,
+      "Parameters": {
+        "Content": {
+          "Simple": {
+            "Body": {
+              "Html": {
+                "Data.$": "$.body"
+              }
+            },
+            "Subject": {
+              "Data": "Daily Report"
+            }
+          }
+        },
+        "Destination": {
+          "ToAddresses": [
+            "trainee.charlie.dean@sigmalabs.co.uk"
+          ]
+        },
+        "FromEmailAddress": "trainee.charlie.dean@sigmalabs.co.uk"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:sesv2:sendEmail"
+    }
+  }
+}
+EOF
+}
+
+# Report: EventBridge scheduler roles and permissions
+
+
+# Create a role to attach the policy to
+resource "aws_iam_role" "iam_for_sfn_2" {
+  name = "stepFunctionSampleStepFunctionExecutionIAM_2"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "states.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+          "Service": "scheduler.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+      }
+    ]
+}
+EOF
+}
+
+## Attaching a step function to the schedule ##
+
+# Create a resource that allows running step functions
+resource "aws_iam_policy" "step-function-policy" {
+    name = "ExecuteStepFunctions_Charlie"
+    policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "states:StartExecution"
+            ],
+            "Resource": [
+                aws_sfn_state_machine.c9_deloton_report_fsm_t.arn
+            ]
+        }
+    ]
+})
+}
+
+#Report : EventBridge Schedule
+
+# Attach the policy to the role
+resource "aws_iam_role_policy_attachment" "attach-execution-policy" {
+  role       = aws_iam_role.iam_for_sfn_2.name
+  policy_arn = aws_iam_policy.step-function-policy.arn
+}
+
+resource "aws_scheduler_schedule" "c9_deloton_report_schedule_t" {
+  name        = "c9-deloton-report-schedule-t"
+  group_name  = "default"
+
+  flexible_time_window {
+    maximum_window_in_minutes = 15
+    mode = "FLEXIBLE"
+  }
+  schedule_expression_timezone = "Europe/London"
+  schedule_expression = "cron(30 09 * * ? *)" 
+
+  target{
+    arn = aws_sfn_state_machine.c9_deloton_report_fsm_t.arn
+    role_arn = aws_iam_role.iam_for_sfn_2.arn
+    input = jsonencode({
+      Payload = "Hello, ServerlessLand!"
+    })
+  }
+}

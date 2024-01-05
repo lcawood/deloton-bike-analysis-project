@@ -1,11 +1,11 @@
-"""Module to add the transformed data extracted from the kafka stream to the db."""
+"""Module to add the transformed data extracted from the kafka stream to the database."""
 
 # pylint: disable=C0301
 # pylint: disable=E1101
 
 from psycopg2 import errors
 
-from database_functions import get_database_connection,load_user_into_database,load_address_into_database,select_address_from_database,load_ride_into_database,select_ride_from_database,load_reading_into_database,select_reading_from_database,load_bike_into_database,select_bike_from_database
+from database_functions import get_database_connection,load_rider_into_database,load_address_into_database,select_address_from_database,load_ride_into_database,select_ride_from_database,load_reading_into_database,select_reading_from_database,load_bike_into_database,select_bike_from_database
 
 
 def add_address(address : dict) -> int:
@@ -23,16 +23,16 @@ def add_address(address : dict) -> int:
         return address_id
 
 
-def add_user(user: dict) -> int:
-    """Adds user dictionary as a record in the Rider table in the db."""
+def add_rider(rider: dict) -> int:
+    """Adds rider dictionary as a record in the Rider table in the db."""
     connection = get_database_connection()
 
     try:
-        rider_id = load_user_into_database(connection,user)
+        rider_id = load_rider_into_database(connection,rider)
         return rider_id
 
     except errors.UniqueViolation:
-        return user["user_id"]
+        return rider["rider_id"]
 
 
 def add_ride(ride: dict) -> int:

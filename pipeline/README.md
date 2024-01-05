@@ -17,6 +17,9 @@ User's max and min heart rates are calculated using functions from `validate_hea
     - SASL_MECHANISM
     - USERNAME
     - PASSWORD
+    - AWS_ACCESS_KEY_ID_
+    - AWS_SECRET_ACCESS_KEY_
+    - BUCKET_NAME
 
 ### Dependencies:
  - `transform.py`
