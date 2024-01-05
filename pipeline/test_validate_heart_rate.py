@@ -4,7 +4,7 @@ Testing suite for the validate_heart_rate script.
 The global constant ages are valid as of January 2024.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from unittest.mock import patch
 
 import pytest
