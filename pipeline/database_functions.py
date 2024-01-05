@@ -16,7 +16,7 @@ def get_database_connection() -> extensions.connection:
                             host=environ["DATABASE_IP"],
                             port=environ["DATABASE_PORT"],
                             database=environ["DATABASE_NAME"],
-                            connection_timeout=0
+                            connect_timeout=0
                             )
 
 
@@ -150,11 +150,12 @@ def load_readings_into_database_from_csv(db_connection : extensions.connection, 
     with db_connection.cursor() as db_cur:
 
         with open(readings_file, 'r', encoding='UTF-8') as file:
+            next(file)
             db_cur.copy_from(
                 file,
                 'reading',
                 sep=',',
-                columns=('resistance', 'elapsed_time', 'heart_rate', 'power', 'rpm', 'ride_id')
+                columns=('ride_id', 'resistance', 'elapsed_time', 'heart_rate', 'power', 'rpm')
                 )
 
         db_connection.commit()
