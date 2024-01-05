@@ -63,6 +63,12 @@ def main_current_ride(db_connection: extensions.connection) -> None:
 
 if __name__ == "__main__":
 
+    st.set_page_config(
+        page_title="Current Rides",
+        page_icon="🚲",
+        layout="wide"
+    )
+
     load_dotenv()
 
     conn = get_database_connection()

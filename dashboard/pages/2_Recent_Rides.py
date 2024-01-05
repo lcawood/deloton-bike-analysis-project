@@ -40,21 +40,29 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
         # Placeholder for last updated time caption
         empty_last_updated_placeholder = st.empty()
 
-        col1, col2, col3 = st.columns([1, 1, 2], gap='medium')
+        col1, col2, col3 = st.columns([1, 1, 3], gap='large')
         with col1:
             total_duration_gender_chart = get_total_duration_gender_bar_chart(
                 recent_rides)
-            st.altair_chart(total_duration_gender_chart)
+            st.altair_chart(total_duration_gender_chart,
+                            use_container_width=True)
 
         with col2:
             ride_count_by_gender_chart = get_total_ride_count_gender_bar_chart(
                 ride_count_by_gender)
-            st.altair_chart(ride_count_by_gender_chart)
+            st.altair_chart(ride_count_by_gender_chart,
+                            use_container_width=True)
 
         return empty_last_updated_placeholder
 
 
 if __name__ == "__main__":
+
+    st.set_page_config(
+        page_title="Recent Rides",
+        page_icon="🚲",
+        layout="wide"
+    )
 
     load_dotenv()
 

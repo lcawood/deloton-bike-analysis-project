@@ -38,9 +38,6 @@ def get_current_ride_data(db_connection: extensions.connection) -> int:
     with db_connection.cursor() as db_cur:
 
         query = """
-        """
-
-        """
         WITH current_rider_id AS (
         SELECT Ride.rider_id
         FROM Ride
