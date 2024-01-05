@@ -40,7 +40,11 @@ def test_calculate_age_valid(birthdate: datetime, age: int):
     ({"birthdate": BIRTHDATE_AGE_64, "gender": 'male'}, 163),  # age = 64
     ({"birthdate": BIRTHDATE_AGE_45, "gender": 'male'}, 176),  # age = 45
     ({"birthdate": BIRTHDATE_AGE_64, "gender": 'female'}, 150),  # age = 64
-    ({"birthdate": BIRTHDATE_AGE_45, "gender": 'female'}, 166)  # age = 45
+    ({"birthdate": BIRTHDATE_AGE_45, "gender": 'other'}, 166),  # age = 45
+    ({"birthdate": BIRTHDATE_AGE_18, "gender": 'other'}, 190),  # age = 18
+    ({"birthdate": BIRTHDATE_AGE_35, "gender": 'other'}, 175),  # age = 35
+    ({"birthdate": BIRTHDATE_AGE_64, "gender": 'other'}, 150),  # age = 64
+    ({"birthdate": BIRTHDATE_AGE_45, "gender": 'other'}, 166)  # age = 45
 ])
 def test_calculate_max_heart_rate_valid(user_details: dict, threshold: int):
     """Test that the expected maximum heart rates are returned for the given users."""
