@@ -34,13 +34,13 @@ def rider_pipeline(log_line: str) -> dict:
     return rider
 
 
-def reading_pipeline(log_line_pair: str, ride_id: int, start_time: datetime):
+def reading_pipeline(reading_line_pair: str, ride_id: int, start_time: datetime):
     """
-    Function to extract reading data from a pair of log_lines (concatenated), and return as dict.
+    Function to extract reading data from a pair of reading_lines (concatenated), and return as dict.
     """
     reading = {'ride_id': ride_id}
-    for log_line in log_line_pair.split('\n'):
-        reading = transform.get_reading_data_from_log_line(reading, log_line, start_time)
+    for reading_line in reading_line_pair.split('\n'):
+        reading = transform.get_reading_data_from_log_line(reading, reading_line, start_time)
     return reading
 
 
@@ -58,7 +58,7 @@ def process_readings(reading_log_lines: list[str], ride_id: int, start_time: dat
     readings.to_csv("readings.csv", index=False)
     load.add_readings_from_csv("readings.csv")
 
-    print(start_time)
+    print("Start time of ride being processed: ", start_time)
 
 
 def historical_pipeline(str_stop_date: str):
