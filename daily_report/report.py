@@ -268,7 +268,5 @@ def handler(event=None, context=None) -> int:
             'body': json.dumps(str(e))
         }
 
-
-
 if __name__ == "__main__":
     print(handler())
