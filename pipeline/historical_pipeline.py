@@ -107,9 +107,9 @@ def historical_pipeline(str_stop_date: str):
 
                 except BaseException as e:
                     # Saves readings already received from kafka stream to db before program ends.
-                    print("Two secs....")
+                    print("\n\nTwo secs....")
                     process_readings(reading_log_lines, ride['ride_id'], ride['start_time'])
-                    print("Data saved; program end.")
+                    print("Data saved; program end.\n")
                     raise e
 
                 reading_log_lines.clear()
