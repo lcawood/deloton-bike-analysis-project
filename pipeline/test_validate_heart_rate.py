@@ -66,7 +66,17 @@ def test_calculate_max_heart_rate_valid(user_details: dict, threshold: int):
     ({"birthdate": BIRTHDATE_AGE_64, "gender": 'female'}, 52),  # age = 64
     ({"birthdate": BIRTHDATE_AGE_45, "gender": 'female'}, 52),  # age = 45
     ({"birthdate": BIRTHDATE_AGE_65, "gender": 'male'}, 52),  # age = 65
-    ({"birthdate": BIRTHDATE_AGE_65, "gender": 'female'}, 57)  # age = 65
+    ({"birthdate": BIRTHDATE_AGE_65, "gender": 'female'}, 57),  # age = 65
+    ({"birthdate": BIRTHDATE_AGE_18, "gender": 'other'}, 45),  # age = 18
+    ({"birthdate": BIRTHDATE_AGE_35, "gender": 'other'}, 45),  # age = 35
+    ({"birthdate": BIRTHDATE_AGE_64, "gender": 'other'}, 52),  # age = 64
+    ({"birthdate": BIRTHDATE_AGE_45, "gender": 'other'}, 52),  # age = 45
+    ({"birthdate": BIRTHDATE_AGE_65, "gender": 'other'}, 57),  # age = 65
+    ({"birthdate": BIRTHDATE_AGE_18, "gender": None}, 45),  # age = 18
+    ({"birthdate": BIRTHDATE_AGE_35, "gender": None}, 45),  # age = 35
+    ({"birthdate": BIRTHDATE_AGE_64, "gender": None}, 52),  # age = 64
+    ({"birthdate": BIRTHDATE_AGE_45, "gender": None}, 52),  # age = 45
+    ({"birthdate": BIRTHDATE_AGE_65, "gender": None}, 57)  # age = 65
 ])
 def test_calculate_min_heart_rate_valid(user_details: dict, threshold: int):
     """Test that the expected minimum heart rates are returned for the given users."""
