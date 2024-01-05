@@ -12,7 +12,7 @@ from psycopg2 import extensions
 import streamlit as st
 
 from database import (get_database_connection, get_recent_12hr_data,
-                      get_ride_count)
+                      get_ride_count_gender)
 from utilities import (process_dataframe_types)
 from visualisations import (get_dashboard_title, get_last_updated_current_ride,
                             get_recent_rides_header, get_last_updated_recent_rides,
@@ -33,7 +33,7 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
 
         recent_rides = get_recent_12hr_data(db_connection)
         recent_rides = process_dataframe_types(recent_rides)
-        ride_count_by_gender = get_ride_count(db_connection)
+        ride_count_by_gender = get_ride_count_gender(db_connection)
 
         print(ride_count_by_gender)
 

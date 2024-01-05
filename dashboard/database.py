@@ -203,7 +203,7 @@ def get_recent_12hr_data(db_connection: extensions.connection) -> pd.DataFrame:
         return pd.DataFrame(recent_rides, columns=columns)
 
 
-def get_ride_count(db_connection: extensions.connection) -> list[dict]:
+def get_ride_count_gender(db_connection: extensions.connection) -> list[dict]:
     """
     Retrieves data from the last 12 hours (by attribute 'start_time') from the database
     as a Pandas Dataframe.
@@ -216,6 +216,39 @@ def get_ride_count(db_connection: extensions.connection) -> list[dict]:
         JOIN Rider ON Ride.rider_id = Rider.rider_id
         WHERE start_time > '2024-01-01'
         GROUP BY gender
+        ;
+        """
+
+        parameters = (TWELVE_HOURS_AGO, )
+
+        db_cur.execute(query, parameters)
+
+        ride_counts = db_cur.fetchall()
+
+        columns = ['gender', 'count']
+
+        return pd.DataFrame(ride_counts, columns=columns)
+
+
+def get_ride_count_age(db_connection: extensions.connection) -> list[dict]:
+    """
+    Retrieves data from the last 12 hours (by attribute 'start_time') from the database
+    as a Pandas Dataframe.
+    """
+
+    with db_connection.cursor() as db_cur:
+        query = """
+        SELECT
+            SUM(CASE WHEN DATE_PART('YEAR', AGE(CURRENT_DATE, birthdate)) < 18 THEN 1 ELSE 0 END) AS "0-18",
+            SUM(CASE WHEN DATE_PART('YEAR', AGE(CURRENT_DATE, birthdate)) BETWEEN 18 AND 24 THEN 1 ELSE 0 END) AS "18-24",
+            SUM(CASE WHEN DATE_PART('YEAR', AGE(CURRENT_DATE, birthdate)) BETWEEN 25 AND 34 THEN 1 ELSE 0 END) AS "25-34",
+            SUM(CASE WHEN DATE_PART('YEAR', AGE(CURRENT_DATE, birthdate)) BETWEEN 35 AND 44 THEN 1 ELSE 0 END) AS "35-44",
+            SUM(CASE WHEN DATE_PART('YEAR', AGE(CURRENT_DATE, birthdate)) BETWEEN 45 AND 54 THEN 1 ELSE 0 END) AS "45-54",
+            SUM(CASE WHEN DATE_PART('YEAR', AGE(CURRENT_DATE, birthdate)) BETWEEN 55 AND 64 THEN 1 ELSE 0 END) AS "55-64",
+            SUM(CASE WHEN DATE_PART('YEAR', AGE(CURRENT_DATE, birthdate)) > 64 THEN 1 ELSE 0 END) AS "65+"
+        FROM Ride
+        JOIN Rider ON Ride.rider_id = Rider.rider_id
+        WHERE start_time > '2024-01-01'
         ;
         """
 
