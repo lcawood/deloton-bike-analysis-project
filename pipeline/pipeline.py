@@ -15,6 +15,7 @@ from os import environ
 
 from boto3 import client
 from botocore.exceptions import ClientError
+
 from confluent_kafka import Consumer, KafkaException, Message
 from dotenv import load_dotenv
 import load
@@ -90,21 +91,34 @@ def reading_pipeline(log_line: str, ride_id: int, start_time: datetime, reading:
     reading = transform.get_reading_data_from_log_line(reading, log_line, start_time)
     if 'heart_rate' in reading:
         # Heart rate comes with the second of every pair of reading log lines.
+        load.add_reading(reading)
+
         if (reading['heart_rate'] == 0) or \
             (rider['min_heart_rate'] <= reading['heart_rate'] <= rider['max_heart_rate']):
             consecutive_extreme_hrs.clear()
         else:
             consecutive_extreme_hrs.append(reading['heart_rate'])
+
         if len(consecutive_extreme_hrs) == EXTREME_HR_COUNT_THRESHOLD:
             try:
                 validate_heart_rate.send_email(rider, consecutive_extreme_hrs)
-            except Exception:
+            except ClientError:
                 print('Unable to send email.')
             consecutive_extreme_hrs.clear()
-        load.add_reading(reading)
+
         reading.clear()
         reading['ride_id'] = ride_id
     return reading
+
+
+def get_s3_client():
+    """Function to return boto3 s3 client; returns None if connection can't be made."""
+    try:
+        return client("s3",
+                        aws_access_key_id=environ['AWS_ACCESS_KEY_ID_'],
+                        aws_secret_access_key=environ['AWS_SECRET_ACCESS_KEY_'])
+    except ClientError:
+        return None
 
 
 def save_log_line_to_s3(log_line: str, filename: str = S3_BACKUP_FILENAME):
@@ -112,23 +126,24 @@ def save_log_line_to_s3(log_line: str, filename: str = S3_BACKUP_FILENAME):
     Saves a log line to a text file in s3 bucket; allows the state of the pipeline to persist after
     a crash.
     """
+    s3_client = get_s3_client()
+    if s3_client is None:
+        return None
+    
     try:
-        s3_client = client("s3",
-                        aws_access_key_id=environ['AWS_ACCESS_KEY_ID_'],
-                        aws_secret_access_key=environ['AWS_SECRET_ACCESS_KEY_'])
-
         s3_client.put_object(Body = log_line, Bucket = environ['BUCKET_NAME'],
-                            Key = filename)
+                             Key = filename)
     except ClientError:
         pass
 
 
 def retrieve_text_from_s3_file(filename: str = S3_BACKUP_FILENAME):
     """Retrieves body of text file stores in s3_bucket."""
+    s3_client = get_s3_client()
+    if s3_client is None:
+        return None
+    
     try:
-        s3_client = client("s3",
-                           aws_access_key_id=environ['AWS_ACCESS_KEY_ID_'],
-                           aws_secret_access_key=environ['AWS_SECRET_ACCESS_KEY_'])
         return s3_client.get_object(
             Bucket=environ['BUCKET_NAME'], Key=filename)['Body'].read().decode("utf-8")
     except ClientError:
