@@ -26,7 +26,7 @@ CREATE TABLE Rider(
     height SMALLINT NOT NULL,
     weight SMALLINT NOT NULL,
     email TEXT NOT NULL,
-    gender TEXT NOT NULL,
+    gender TEXT,
     account_created DATE NOT NULL,
     UNIQUE (first_name,last_name,email)
 );
