@@ -1,6 +1,6 @@
 """Module containing functions used to interact with the RDS database."""
 
-from os import environ
+from os import environ, remove
 
 from dotenv import load_dotenv
 import psycopg2
@@ -15,7 +15,8 @@ def get_database_connection() -> extensions.connection:
                             password=environ["DATABASE_PASSWORD"],
                             host=environ["DATABASE_IP"],
                             port=environ["DATABASE_PORT"],
-                            database=environ["DATABASE_NAME"]
+                            database=environ["DATABASE_NAME"],
+                            connection_timeout=0
                             )
 
 
@@ -59,7 +60,6 @@ def select_address_from_database(db_connection : extensions.connection, address 
         db_connection.commit()
 
         return address_id[0]
-
 
 
 def load_rider_into_database(db_connection : extensions.connection, rider : dict) -> int:
@@ -142,6 +142,22 @@ def load_reading_into_database(db_connection : extensions.connection, reading : 
         db_connection.commit()
 
         return reading_id[0]
+
+
+def load_readings_into_database_from_csv(db_connection : extensions.connection, readings_file: str):
+    """Loads a list of readings into the database using SQL."""
+
+    with db_connection.cursor() as db_cur:
+
+        with open(readings_file, 'r', encoding='UTF-8') as file:
+            db_cur.copy_from(
+                file,
+                'reading',
+                sep=',',
+                columns=('resistance', 'elapsed_time', 'heart_rate', 'power', 'rpm', 'ride_id')
+                )
+
+        db_connection.commit()
 
 
 def select_reading_from_database(db_connection : extensions.connection, reading : dict) -> int:
