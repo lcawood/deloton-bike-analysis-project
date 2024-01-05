@@ -3,7 +3,7 @@
 # pylint: disable=C0301
 # pylint: disable=E1101
 
-import os
+from os import remove 
 
 from psycopg2 import errors
 
