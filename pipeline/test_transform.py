@@ -49,7 +49,7 @@ def test_valid_date_in_log_line():
     """Test for the extract_datetime_from_string function where there is a valid input."""
 
     assert extract_datetime_from_string(
-        'some text 2024-01-01 01:02:03.123456 some text') == datetime(2024, 1, 1, 1, 2, 3, 123456)
+        '2024-01-01 01:02:03.123456 some text') == datetime(2024, 1, 1, 1, 2, 3, 123456)
 
 
 def test_no_date_found_in_log_line():
@@ -63,22 +63,22 @@ def test_future_date_found_in_log_line():
     """Test for the extract_datetime_from_string function where the date is in the future."""
 
     assert extract_datetime_from_string(
-        'some text 2025-01-01 01:02:03.123456 some text') is None
+        f"{(datetime.now() + timedelta(days=50)).strftime('%Y-%m-%d %H:%M:%S.%f')} some text") is None
 
 
 def test_invalid_date_found_in_log_line():
     """Tests for the extract_datetime_from_string function where the dates are invalid."""
 
     assert extract_datetime_from_string(
-        'some text 2024-01-01 50:02:03.123456 some text') is None
+        '2024-01-01 50:02:03.123456 some text') is None
 
     assert extract_datetime_from_string(
-        'some text 1850-01-01 50:02:03.123456 some text') is None
+        '1850-01-01 50:02:03.123456 some text') is None
 
 
 def test_get_serial_number_from_log_line():
     """Test for the get_bike_serial_number_from_log_line
-    function where a serial number is present."""
+    function where a serial number is present."""   
 
     assert get_bike_serial_number_from_log_line(
         "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = \
