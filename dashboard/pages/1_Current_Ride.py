@@ -36,7 +36,11 @@ def main_current_ride(db_connection: extensions.connection) -> None:
 
         rider_name = get_current_rider_name(current_ride)
 
+        print('getting current ride')
+
         get_current_ride_header(rider_name)
+
+        print('got current ride')
 
         # Placeholder for last updated time caption
         empty_last_updated_placeholder = st.empty()

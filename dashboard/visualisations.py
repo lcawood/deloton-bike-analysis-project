@@ -2,9 +2,9 @@
 
 from datetime import datetime
 
+import altair as alt
 import pandas as pd
 import streamlit as st
-import altair as alt
 
 from utilities import calculate_age
 from database import (get_recent_12hr_data)
@@ -129,15 +129,34 @@ def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame) -> None:
     Generates a bar chart for the total elapsed_time grouped by gender
     over the past 12 hours.
     """
-    pass
+
+    grouped_data = recent_data.groupby(
+        'gender')['elapsed_time'].sum().reset_index()
+    grouped_data['elapsed_time'] = (
+        grouped_data['elapsed_time'] / (60 * 60)).round()
+
+    chart = alt.Chart(grouped_data, title='Total Duration (by gender)').mark_bar().encode(
+        x=alt.X('gender:N', title='Gender'),
+        y=alt.Y('elapsed_time:Q', title='Total Elapsed Time (hours)'),
+        tooltip=[alt.Tooltip('gender:N', title='Gender'), alt.Tooltip(
+            'elapsed_time:Q', title='Total Elapsed Time')]
+    ).interactive()
+
+    return chart
 
 
-def get_total_ride_count_gender_bar_chart(recent_data: pd.DataFrame) -> None:
+def get_total_ride_count_gender_bar_chart(ride_counts: list[dict]) -> None:
     """
     Generates a bar chart for the total number of rides grouped by gender
     over the past 12 hours.
     """
-    pass
+
+    chart = alt.Chart(ride_counts, title='Number of rides (by gender)').mark_bar().encode(
+        x=alt.X('gender:N', title='Gender'),
+        y=alt.Y('count:Q', title='Total Ride Count'),
+    ).interactive()
+
+    return chart
 
 
 def get_total_ride_count_age_bar_chart(recent_data: pd.DataFrame) -> None:

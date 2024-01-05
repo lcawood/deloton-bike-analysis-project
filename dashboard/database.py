@@ -38,11 +38,21 @@ def get_current_ride_data(db_connection: extensions.connection) -> int:
     with db_connection.cursor() as db_cur:
 
         query = """
+        """
+
+        """
+        WITH current_rider_id AS (
+        SELECT Ride.rider_id
+        FROM Ride
+        ORDER BY start_time DESC
+        LIMIT 1
+        )
         SELECT Ride.rider_id, first_name, last_name, height, weight, gender, birthdate,
-        heart_rate, power, resistance, elapsed_time, start_time
+        heart_rate, power, resistance, elapsed_time
         FROM Ride
         JOIN Rider ON Ride.rider_id = Rider.rider_id
         JOIN Reading ON Ride.ride_id = Reading.ride_id
+        WHERE Ride.rider_id = (select * FROM current_rider_id)
         ORDER BY start_time DESC, elapsed_time DESC
         LIMIT 1;
         """
@@ -180,11 +190,44 @@ def get_recent_12hr_data(db_connection: extensions.connection) -> pd.DataFrame:
         FROM Ride
         JOIN Rider ON Ride.rider_id = Rider.rider_id
         JOIN Reading ON Ride.ride_id = Reading.ride_id
+        WHERE start_time > %s
         ;
         """
 
-        db_cur.execute(query)
+        parameters = (TWELVE_HOURS_AGO, )
+
+        db_cur.execute(query, parameters)
 
         recent_rides = db_cur.fetchall()
 
-        return pd.DataFrame(recent_rides)
+        columns = ["rider_id", "first_name", "last_name", "height", "weight", "gender",
+                   "birthdate", "heart_rate", "power", "resistance", "elapsed_time", "start_time"]
+
+        return pd.DataFrame(recent_rides, columns=columns)
+
+
+def get_ride_count(db_connection: extensions.connection) -> list[dict]:
+    """
+    Retrieves data from the last 12 hours (by attribute 'start_time') from the database
+    as a Pandas Dataframe.
+    """
+
+    with db_connection.cursor() as db_cur:
+        query = """
+        SELECT gender, count(Ride.ride_id)
+        FROM Ride
+        JOIN Rider ON Ride.rider_id = Rider.rider_id
+        WHERE start_time > '2024-01-01'
+        GROUP BY gender
+        ;
+        """
+
+        parameters = (TWELVE_HOURS_AGO, )
+
+        db_cur.execute(query, parameters)
+
+        ride_counts = db_cur.fetchall()
+
+        columns = ['gender', 'count']
+
+        return pd.DataFrame(ride_counts, columns=columns)

@@ -2,6 +2,8 @@
 
 from datetime import datetime
 
+import pandas as pd
+
 
 def get_current_rider_name(current_ride: list) -> str:
     """Returns a string containing the rider first and last name."""
@@ -85,3 +87,10 @@ def is_heart_rate_abnormal(user_details: list) -> bool:
     heart_rate = user_details[7]
 
     return (heart_rate == 0) or not (min_heart_rate <= heart_rate <= max_heart_rate)
+
+
+def process_dataframe_types(recent_rides: pd.DataFrame) -> pd.DataFrame:
+    """Modifies by reference the given DataFrame column types"""
+    recent_rides['elapsed_time'] = pd.to_numeric(recent_rides['elapsed_time'])
+
+    return recent_rides
