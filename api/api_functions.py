@@ -12,7 +12,8 @@ import database_functions
 from api_helper_functions import format_seconds_as_readable_time
 
 
-def get_ride(db_conn: connection, ride_id: int) -> (dict, int):
+def get_ride(db_conn: connection, ride_id: int, expanded: str = 'False',
+             summary: str = 'False') -> (dict, int):
     """
     Function to attempt to retrieve ride with specified id from database using relevant
     database_functions, returning a dictionary of said ride with status code 200 if successful,
@@ -20,9 +21,26 @@ def get_ride(db_conn: connection, ride_id: int) -> (dict, int):
     """
     if (type(ride_id) != int) or (ride_id < 0):
         return {'error': 'Invalid url; ride_id must be a positive integer.'}, 400
+    
+    if expanded not in ['True', 'False']:
+        return {'error': 'Invalid url; expanded must be a boolean value (True/False).'}, 400
+
+    if summary not in ['True', 'False']:
+        return {'error': 'Invalid url; summary must be a boolean value (True/False).'}, 400
 
     try:
         ride = database_functions.get_ride_by_id(db_conn, ride_id)
+
+        if expanded == 'True':
+            ride['readings'] = database_functions.get_readings_by_ride_id(
+                db_conn, ride['ride_id'])
+
+        if summary == 'True':
+            ride['reading_summary'] = database_functions.get_readings_summary_for_ride_id(
+                db_conn, ride['ride_id'])
+            ride['reading_summary']['duration'] = format_seconds_as_readable_time(
+                ride['reading_summary']['duration'])
+                
     except Error as e:
         return {'error': str(e)}, 500
 

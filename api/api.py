@@ -24,6 +24,25 @@ def is_not_get_request(*args, **kwargs) -> bool:
         return False
     return True
 
+@app.route("/ride", methods=["GET"])
+@cache.cached(query_string=True)
+def default_ride_endpoint():
+    """Default ride endpoint"""
+    return """
+Enter a ride number to see its details: <ul>
+    <li> Follow this with '/rides' to see all of their logged rides: </li>
+    <ul>
+        <li> Follow this with "?" and: </li>
+        <ul>
+            <li> "expanded=True" to see all the readings from each ride; </li>
+            <li> "summary=True" to see a summary of the readings from each ride; </li>
+            <li> "expanded=True&summary=True" to see all the readings, with a summary, from each ride. </li>
+        </ul>
+    </ul>
+</ul>
+example:  /rider/1/rides?expanded=True&summary=True
+            """, 200, 200
+        
 
 @app.route("/ride/<int:ride_id>", methods=["GET", "DELETE"])
 @cache.cached(query_string=True, unless = is_not_get_request)
@@ -31,9 +50,31 @@ def ride_endpoint(ride_id: int):
     """GET or DELETE ride with specified id."""
     match request.method:
         case "GET":
-            return api_functions.get_ride(db_conn, ride_id)
+            expanded = request.args.get('expanded', 'False').title()
+            summary = request.args.get('summary', 'False').title()
+            return api_functions.get_ride(db_conn, ride_id, expanded, summary)
         case "DELETE":
             return api_functions.delete_ride(db_conn, ride_id)
+
+
+@app.route("/rider", methods=["GET"])
+@cache.cached(query_string=True)
+def default_rider_endpoint():
+    """Default ride endpoint"""
+    return """
+Enter a rider number to see their details: <ul>
+    <li> Follow this with '/rides' to see all of their logged rides: </li>
+    <ul>
+        <li> Follow this with "?" and: </li>
+        <ul>
+            <li> "expanded=True" to see all the readings from each ride; </li>
+            <li> "summary=True" to see a summary of the readings from each ride; </li>
+            <li> "expanded=True&summary=True" to see all the readings, with a summary, from each ride. </li>
+        </ul>
+    </ul>
+</ul>
+example:  /rider/1/rides?expanded=True&summary=True
+            """, 200
 
 
 @app.route("/rider/<int:rider_id>", methods=["GET"])
@@ -47,8 +88,8 @@ def rider_endpoint(rider_id: int):
 @cache.cached(query_string=True)
 def rider_rides_endpoint(rider_id: int):
     """Endpoint to return a JSON of all rides belonging to a rider of specified id."""
-    expanded = request.args.get('expanded')
-    summary = request.args.get('summary')
+    expanded = request.args.get('expanded', 'False').title()
+    summary = request.args.get('summary', 'False').title()
     return api_functions.get_rider_rides(db_conn, rider_id, expanded, summary)
 
 
