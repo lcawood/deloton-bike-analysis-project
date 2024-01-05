@@ -59,8 +59,8 @@ CREATE TABLE Reading(
         REFERENCES Ride(ride_id)
         ON DELETE CASCADE,
     heart_rate SMALLINT NOT NULL,
-    power SMALLINT NOT NULL,
-    rpm SMALLINT NOT NULL,
+    power FLOAT NOT NULL,
+    rpm SMALLINT NOT NULL, 
     resistance SMALLINT NOT NULL,
     elapsed_time INT NOT NULL,
     UNIQUE (ride_id,elapsed_time)
