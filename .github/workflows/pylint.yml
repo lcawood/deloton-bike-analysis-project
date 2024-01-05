@@ -58,6 +58,7 @@ jobs:
         id: test-report
         run: |
           cd daily_report
+          pip install -r requirements.txt
           pytest 
   pylint:
     runs-on: ubuntu-latest
