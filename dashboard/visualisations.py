@@ -175,6 +175,11 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame) -> None:
 
 def get_power_output_line_chart(recent_data: pd.DataFrame) -> None:
     """Generates a line chart for the cumulative/average power output over the past 12 hours."""
+
+    chart = alt.Chart(recent_data, title='Total Number of rides (by age)').mark_line().encode(
+        x=alt.X('reading_time:N', title='Ages'),
+        y=alt.Y('sum(power):Q', title='Number of Rides'),
+    ).interactive()
     pass
 
 

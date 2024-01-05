@@ -183,7 +183,7 @@ def get_recent_12hr_data(db_connection: extensions.connection) -> pd.DataFrame:
     with db_connection.cursor() as db_cur:
         query = """
         SELECT Ride.rider_id, first_name, last_name, height, weight, gender, birthdate,
-        heart_rate, power, resistance, elapsed_time, start_time
+        heart_rate, power, resistance, elapsed_time, start_time, Ride.ride_id
         FROM Ride
         JOIN Rider ON Ride.rider_id = Rider.rider_id
         JOIN Reading ON Ride.ride_id = Reading.ride_id
@@ -198,7 +198,7 @@ def get_recent_12hr_data(db_connection: extensions.connection) -> pd.DataFrame:
         recent_rides = db_cur.fetchall()
 
         columns = ["rider_id", "first_name", "last_name", "height", "weight", "gender",
-                   "birthdate", "heart_rate", "power", "resistance", "elapsed_time", "start_time"]
+                   "birthdate", "heart_rate", "power", "resistance", "elapsed_time", "start_time", "ride_id"]
 
         return pd.DataFrame(recent_rides, columns=columns)
 

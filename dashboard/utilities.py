@@ -1,6 +1,6 @@
 """Utility functions to transform data fetched from SQL for use in visualisations."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 
@@ -94,3 +94,39 @@ def process_dataframe_types(recent_rides: pd.DataFrame) -> pd.DataFrame:
     recent_rides['elapsed_time'] = pd.to_numeric(recent_rides['elapsed_time'])
 
     return recent_rides
+
+
+def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame) -> pd.DataFrame:
+    """Returns a dataframe containing only relevant columns to speed up aggregation of data."""
+
+    df = recent_rides[['elapsed_time',
+                       'start_time', 'power', 'resistance']].copy()
+
+    df["reading_time"] = df.apply(
+        lambda x: (x['start_time'] + timedelta(seconds=x['elapsed_time'])).round('min'), axis=1)
+
+    return df
+
+
+def process_dataframe_power_output_avg_per_minute(ride_data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Returns a DataFrame that calculates the reading_time from the
+    start_time and elapsed_time columns, and returns the resulting dataframe.
+    """
+
+    grouped_df = ride_data.groupby(
+        ['reading_time'])['power'].sum().astype(int)
+
+    return grouped_df
+
+
+def process_dataframe_resistance_output_avg_per_minute(ride_data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Returns a DataFrame that calculates the reading_time from the
+    start_time and elapsed_time columns, and returns the resulting dataframe.
+    """
+
+    grouped_df = ride_data.groupby(
+        ['reading_time'])['resistance'].sum().astype(int)
+
+    return grouped_df

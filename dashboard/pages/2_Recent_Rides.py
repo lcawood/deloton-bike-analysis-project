@@ -13,7 +13,7 @@ import streamlit as st
 
 from database import (get_database_connection, get_recent_12hr_data,
                       get_ride_count_gender, get_ride_count_age)
-from utilities import (process_dataframe_types)
+from utilities import (process_dataframe_types, process_dataframe_power_output)
 from visualisations import (get_dashboard_title, get_total_ride_count_age_bar_chart,
                             get_recent_rides_header, get_last_updated_recent_rides,
                             get_total_duration_gender_bar_chart, get_total_ride_count_gender_bar_chart,)
@@ -36,31 +36,38 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
         recent_rides = process_dataframe_types(recent_rides)
         ride_count_by_gender = get_ride_count_gender(db_connection)
         ride_count_by_age = get_ride_count_age(db_connection)
+        powers = process_dataframe_power_output(recent_rides)
+
+        print(powers)
 
         # Placeholder for last updated time caption
         empty_last_updated_placeholder = st.empty()
 
         # Generate bar charts
-        col1, col2, col3 = st.columns([1, 1, 2], gap='large')
-        with col1:
+        col11, col12, col13 = st.columns([1, 1, 2], gap='large')
+        with col11:
             total_duration_gender_chart = get_total_duration_gender_bar_chart(
                 recent_rides)
             st.altair_chart(total_duration_gender_chart,
                             use_container_width=True)
 
-        with col2:
+        with col12:
             ride_count_by_gender_chart = get_total_ride_count_gender_bar_chart(
                 ride_count_by_gender)
             st.altair_chart(ride_count_by_gender_chart,
                             use_container_width=True)
 
-        with col3:
+        with col13:
 
             ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
                 ride_count_by_age)
 
             st.altair_chart(ride_count_by_age_chart,
                             use_container_width=True)
+
+        # # Generate line charts
+        # col21, col22 = st.columns(2, gap='large')
+        # with col21:
 
         return empty_last_updated_placeholder
 
