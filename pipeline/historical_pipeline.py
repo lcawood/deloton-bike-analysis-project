@@ -70,7 +70,6 @@ def historical_pipeline(str_stop_date: str):
 
     kafka_consumer = pipeline.get_kafka_consumer(GROUP_ID)
     first_relevant_line = True
-    readings = pd.DataFrame()
     log_line = pipeline.get_next_log_line(kafka_consumer)
     while True:
         reading_log_lines = []
@@ -102,7 +101,8 @@ def historical_pipeline(str_stop_date: str):
                         reading_log_lines.append(log_line)
                         log_line = pipeline.get_next_log_line(kafka_consumer)
 
-                    p = Process(target=process_readings, args=(reading_log_lines, ride['ride_id'], ride['start_time']))
+                    p = Process(target=process_readings,
+                                args=(reading_log_lines, ride['ride_id'], ride['start_time']))
                     p.start()
 
                 except BaseException as e:
@@ -126,7 +126,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--stop_date", "-d", default=datetime.today().strftime('%Y-%m-%d'),
-                        help="Optional argument for the timestamp date on which to stop the pipeline; defaults to current day.")
+                        help="Optional argument for the timestamp date on which to stop the \
+                            pipeline; defaults to current day.")
     
     args = parser.parse_args()
 
@@ -135,5 +136,3 @@ if __name__ == "__main__":
         historical_pipeline(args.stop_date)
     except ValueError:
         print("Invalid stop date; must be date string of format yyyy-mm-dd.")
-
-
