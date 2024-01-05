@@ -1,5 +1,6 @@
 """Module to contain and run the endpoints for the Deloton staff API"""
 
+from datetime import datetime
 from flask import Flask, request
 from flask_caching import Cache
 import json
@@ -29,19 +30,19 @@ def is_not_get_request(*args, **kwargs) -> bool:
 def default_ride_endpoint():
     """Default ride endpoint"""
     return """
-Enter a ride number to see its details: <ul>
-    <li> Follow this with '/rides' to see all of their logged rides: </li>
+Enter a ride number to see its details:
+<ul>
+    <li> Follow this with <i>?</i> and: </li>
     <ul>
-        <li> Follow this with "?" and: </li>
-        <ul>
-            <li> "expanded=True" to see all the readings from each ride; </li>
-            <li> "summary=True" to see a summary of the readings from each ride; </li>
-            <li> "expanded=True&summary=True" to see all the readings, with a summary, from each ride. </li>
-        </ul>
+        <li> <i>expanded=True</i> to see all the readings for the ride; </li>
+        <li> <i>summary=True</i> to see a summary of the readings for the ride; </li>
+        <li> <i>expanded=True&summary=True</i> to see all the readings and a summary for the ride. </li>
     </ul>
 </ul>
-example:  /rider/1/rides?expanded=True&summary=True
-            """, 200, 200
+<br>
+Example:
+<pre><i>    /ride/1?expanded=True&summary=True</i></pre>
+""", 200
         
 
 @app.route("/ride/<int:ride_id>", methods=["GET", "DELETE"])
@@ -60,21 +61,24 @@ def ride_endpoint(ride_id: int):
 @app.route("/rider", methods=["GET"])
 @cache.cached(query_string=True)
 def default_rider_endpoint():
-    """Default ride endpoint"""
+    """Default rider endpoint"""
     return """
-Enter a rider number to see their details: <ul>
-    <li> Follow this with '/rides' to see all of their logged rides: </li>
+Enter a rider number to see their details:
+<ul>
+    <li> Follow this with <i>/rides</i> to see all of their logged rides: </li>
     <ul>
-        <li> Follow this with "?" and: </li>
+        <li> Follow this with <i>?</i> and: </li>
         <ul>
-            <li> "expanded=True" to see all the readings from each ride; </li>
-            <li> "summary=True" to see a summary of the readings from each ride; </li>
-            <li> "expanded=True&summary=True" to see all the readings, with a summary, from each ride. </li>
+            <li> <i>expanded=True</i> to see all the readings from each ride; </li>
+            <li> <i>summary=True</i> to see a summary of the readings from each ride; </li>
+            <li> <i>expanded=True&summary=True</i> to see all the readings, with a summary, from each ride. </li>
         </ul>
     </ul>
 </ul>
-example:  /rider/1/rides?expanded=True&summary=True
-            """, 200
+<br>
+Example:
+<pre><i>    /rider/1/rides?expanded=True&summary=True</i></pre>
+""", 200
 
 
 @app.route("/rider/<int:rider_id>", methods=["GET"])
@@ -95,13 +99,33 @@ def rider_rides_endpoint(rider_id: int):
 
 @app.route("/daily", methods=["GET"])
 @cache.cached(query_string=True)
+def default_daily_rides_endpoint():
+    """Default daily rides endpoint"""
+    return """
+Enter <i>?</i> followed by a date (yyyy-mm-dd) to get a list of all the rides on that day:
+<ul>
+    <li> Follow this with <i>&</i> and: </li>
+    <ul>
+        <li> <i>expanded=True</i> to see all the readings from each ride; </li>
+        <li> <i>summary=True</i> to see a summary of the readings from each ride; </li>
+        <li> <i>expanded=True&summary=True</i> to see all the readings, with a summary, from each ride. </li>
+    </ul>
+</ul>
+<br>
+Example:
+<pre><i>    /daily?date=01-01-2024&expanded=True&summary=True</i></pre>
+""", 200
+
+
+@app.route("/daily", methods=["GET"])
+@cache.cached(query_string=True)
 def daily_rides_endpoint():
     """Get all of the rides in the specified day - defaults to current day."""
-    date = request.args.get('date')
-    if date is None:
-        return api_functions.get_daily_rides(db_conn)
+    date = request.args.get('date', datetime.today().strftime("%d-%m-%Y"))
+    expanded = request.args.get('expanded', 'False').title()
+    summary = request.args.get('summary', 'False').title()
 
-    return api_functions.get_daily_rides(db_conn, date)
+    return api_functions.get_daily_rides(db_conn, date, expanded, summary)
 
 
 if __name__ == "__main__":

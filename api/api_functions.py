@@ -111,8 +111,8 @@ def get_rider_rides(db_conn: connection, rider_id: int, expanded: str = 'False',
     return {'error': f'Unable to locate any rides belonging to a rider with id {rider_id}.'}, 404
 
 
-def get_daily_rides(db_conn: connection,
-                    date: str = datetime.today().strftime("%d-%m-%Y")) -> (dict, int):
+def get_daily_rides(db_conn: connection, date: str = datetime.today().strftime("%d-%m-%Y"),
+                    expanded: str = 'False', summary: str = 'False') -> (dict, int):
     """
     Function to attempt to retrieve a list of all rides starting on a specified date (defaulting
     to the current date) from database using relevant database_functions, returning a list of
@@ -125,9 +125,28 @@ def get_daily_rides(db_conn: connection,
         return {
             'error': 'Invalid url; date must be a datetime string matching the format dd-mm-yyyy.'
             }, 400
+    
+    if expanded not in ['True', 'False']:
+        return {'error': 'Invalid url; expanded must be a boolean value (True/False).'}, 400
+
+    if summary not in ['True', 'False']:
+        return {'error': 'Invalid url; summary must be a boolean value (True/False).'}, 400
 
     try:
         rides = database_functions.get_daily_rides(db_conn, date)
+
+        if expanded == 'True':
+            for i, ride in enumerate(rides):
+                rides[i]['readings'] = database_functions.get_readings_by_ride_id(
+                    db_conn, ride['ride_id'])
+
+        if summary == 'True':
+            for i, ride in enumerate(rides):
+                rides[i]['reading_summary'] = database_functions.get_readings_summary_for_ride_id(
+                    db_conn, ride['ride_id'])
+                rides[i]['reading_summary']['duration'] = format_seconds_as_readable_time(
+                    rides[i]['reading_summary']['duration'])
+                
     except Error as e:
         return {'error': str(e)}, 500
 
