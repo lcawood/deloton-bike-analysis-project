@@ -1,6 +1,6 @@
 """Module containing functions used to interact with the RDS database."""
 
-from os import environ
+from os import environ, remove
 
 from dotenv import load_dotenv
 import psycopg2
@@ -15,7 +15,8 @@ def get_database_connection() -> extensions.connection:
                             password=environ["DATABASE_PASSWORD"],
                             host=environ["DATABASE_IP"],
                             port=environ["DATABASE_PORT"],
-                            database=environ["DATABASE_NAME"]
+                            database=environ["DATABASE_NAME"],
+                            connect_timeout=0
                             )
 
 
@@ -90,7 +91,7 @@ def load_ride_into_database(db_connection : extensions.connection, ride : dict) 
 
         query = """INSERT INTO Ride(rider_id,bike_id,start_time)
           VALUES (%s,%s,%s) RETURNING ride_id;"""
-        
+
         parameters = (ride["rider_id"],ride["bike_id"],ride["start_time"])
 
         db_cur.execute(query,parameters)
@@ -142,19 +143,20 @@ def load_reading_into_database(db_connection : extensions.connection, reading : 
         db_connection.commit()
 
         return reading_id[0]
-    
 
-def load_readings_into_database(db_connection : extensions.connection, readings : list[dict]):
+
+def load_readings_into_database(db_connection : extensions.connection, readings_file: str):
     """Loads a list of readings into the database using SQL."""
 
     with db_connection.cursor() as db_cur:
 
-        query = """INSERT INTO Reading(resistance, elapsed_time, heart_rate, power, rpm, ride_id)
-          VALUES (%s,%s,%s,%s,%s,%s);"""
-
-        parameters = [tuple(reading.values()) for reading in readings]
-
-        db_cur.executemany(query, parameters)
+        with open(readings_file, 'r', encoding='UTF-8') as file:
+            db_cur.copy_from(
+                file,
+                'reading',
+                sep=',',
+                columns=('resistance', 'elapsed_time', 'heart_rate', 'power', 'rpm', 'ride_id')
+                )
 
         db_connection.commit()
 

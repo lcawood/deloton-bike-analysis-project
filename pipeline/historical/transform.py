@@ -2,7 +2,6 @@
 
 from ast import literal_eval
 from datetime import datetime, timedelta
-import re
 
 
 INVALID_DATE_THRESHOLD = datetime(1900, 1, 1, 0, 0, 0)
@@ -71,7 +70,7 @@ def get_rider_from_log_line(log_line: str) -> dict:
         name_parts = name.split()
         if name_parts[0].lower() in PREFIXES:
             name = ' '.join(name_parts[1:])
-        
+
         rider['first_name'] = name[:name.rfind(' ')]
         rider['last_name'] = name.split()[-1]
     else:
