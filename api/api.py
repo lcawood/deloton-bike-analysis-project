@@ -3,7 +3,6 @@
 from datetime import datetime
 from flask import Flask, request
 from flask_caching import Cache
-import json
 
 import api_functions
 from database_functions import get_database_connection
@@ -95,26 +94,6 @@ def rider_rides_endpoint(rider_id: int):
     expanded = request.args.get('expanded', 'False').title()
     summary = request.args.get('summary', 'False').title()
     return api_functions.get_rider_rides(db_conn, rider_id, expanded, summary)
-
-
-@app.route("/daily", methods=["GET"])
-@cache.cached(query_string=True)
-def default_daily_rides_endpoint():
-    """Default daily rides endpoint"""
-    return """
-Enter <i>?</i> followed by a date (yyyy-mm-dd) to get a list of all the rides on that day:
-<ul>
-    <li> Follow this with <i>&</i> and: </li>
-    <ul>
-        <li> <i>expanded=True</i> to see all the readings from each ride; </li>
-        <li> <i>summary=True</i> to see a summary of the readings from each ride; </li>
-        <li> <i>expanded=True&summary=True</i> to see all the readings, with a summary, from each ride. </li>
-    </ul>
-</ul>
-<br>
-Example:
-<pre><i>    /daily?date=01-01-2024&expanded=True&summary=True</i></pre>
-""", 200
 
 
 @app.route("/daily", methods=["GET"])

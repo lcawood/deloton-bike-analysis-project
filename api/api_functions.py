@@ -21,7 +21,7 @@ def get_ride(db_conn: connection, ride_id: int, expanded: str = 'False',
     """
     if (type(ride_id) != int) or (ride_id < 0):
         return {'error': 'Invalid url; ride_id must be a positive integer.'}, 400
-    
+
     if expanded not in ['True', 'False']:
         return {'error': 'Invalid url; expanded must be a boolean value (True/False).'}, 400
 
@@ -40,7 +40,7 @@ def get_ride(db_conn: connection, ride_id: int, expanded: str = 'False',
                 db_conn, ride['ride_id'])
             ride['reading_summary']['duration'] = format_seconds_as_readable_time(
                 ride['reading_summary']['duration'])
-                
+
     except Error as e:
         return {'error': str(e)}, 500
 
@@ -80,7 +80,7 @@ def get_rider_rides(db_conn: connection, rider_id: int, expanded: str = 'False',
     """
     if (type(rider_id) != int) or (rider_id < 0):
         return {'error': 'Invalid url; rider_id must be a positive integer.'}, 400
-    
+
     if expanded not in ['True', 'False']:
         return {'error': 'Invalid url; expanded must be a boolean value (True/False).'}, 400
 
@@ -125,7 +125,7 @@ def get_daily_rides(db_conn: connection, date: str = datetime.today().strftime("
         return {
             'error': 'Invalid url; date must be a datetime string matching the format dd-mm-yyyy.'
             }, 400
-    
+
     if expanded not in ['True', 'False']:
         return {'error': 'Invalid url; expanded must be a boolean value (True/False).'}, 400
 
@@ -146,7 +146,7 @@ def get_daily_rides(db_conn: connection, date: str = datetime.today().strftime("
                     db_conn, ride['ride_id'])
                 rides[i]['reading_summary']['duration'] = format_seconds_as_readable_time(
                     rides[i]['reading_summary']['duration'])
-                
+
     except Error as e:
         return {'error': str(e)}, 500
 
