@@ -79,7 +79,16 @@ def get_user_from_log_line(log_line: str) -> dict:
     user['height'] = int(log_line_data.get('height_cm', -1))
     user['weight'] = int(log_line_data.get('weight_kg', -1))
     user['email'] = get_email_from_log_line(log_line)
-    user['gender'] = log_line_data.get('gender', None)
+
+    if log_line_data.get('gender') and \
+            log_line_data.get('gender').lower() not in ['male', 'female']:
+        user['gender'] = 'other'
+    elif log_line_data.get('gender') and \
+            log_line_data.get('gender').lower() in ['male', 'female']:
+        user['gender'] = log_line_data.get('gender')
+    else:
+        user['gender'] = None
+
     user['account_created'] = timestamp_to_date(
         log_line_data.get('account_create_date', None))
 
