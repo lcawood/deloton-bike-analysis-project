@@ -38,8 +38,8 @@ resource "aws_db_instance" "c9_velo_deloton" {
   engine = "postgres"
   engine_version = "15.3"
   instance_class = "db.t3.micro"
-  username = var.database_username
-  password = var.database_password
+  username = var.DATABASE_USERNAME
+  password = var.DATABASE_PASSWORD
   skip_final_snapshot = true 
   availability_zone = "eu-west-2b"
   performance_insights_enabled = false
@@ -118,13 +118,13 @@ resource "aws_lambda_function" "c9-deloton-lambda-report-t" {
     timeout = 15
     environment {
       variables = {
-      DATABASE_IP = "${var.database_ip}",
-      DATABASE_NAME ="${var.database_name}",
-      DATABASE_PASSWORD = "${var.database_password}",
-      DATABASE_PORT ="${var.database_port}",
-      DATABASE_USERNAME = "${var.database_username}",
-      AWS_ACCESS = "${var.aws_access_key_id}",
-      AWS_SECRET_ACCESS = "${var.aws_secret_access_key}"
+      DATABASE_IP = "${var.DATABASE_IP}",
+      DATABASE_NAME ="${var.DATABASE_NAME}",
+      DATABASE_PASSWORD = "${var.DATABASE_PASSWORD}",
+      DATABASE_PORT ="${var.DATABASE_PORT}",
+      DATABASE_USERNAME = "${var.DATABASE_USERNAME}",
+      AWS_ACCESS = "${var.AWS_ACCESS_KEY_ID_}",
+      AWS_SECRET_ACCESS = "${var.AWS_SECRET_ACCESS_KEY_}"
     }
 }
 }
@@ -320,7 +320,7 @@ resource "aws_iam_policy" "step-function-policy" {
 })
 }
 
-#Report : EventBridge Schedule
+# Report : EventBridge Schedule
 
 # Attach the policy to the role
 resource "aws_iam_role_policy_attachment" "attach-execution-policy" {
@@ -347,3 +347,121 @@ resource "aws_scheduler_schedule" "c9_deloton_report_schedule_t" {
     })
   }
 }
+
+
+# ECR Repository for pipeline Docker image
+resource "aws_ecr_repository" "pipeline_ecr_repo" {
+  name = "c9-deloton-pipeline-repo"
+}
+
+# My account for reference
+data "aws_caller_identity" "current" {}
+
+# Existing cohort 9 cluster, here for reference
+data "aws_ecs_cluster" "existing_cluster" {
+  cluster_name = "c9-ecs-cluster"
+}
+
+# Logging messages
+resource "aws_cloudwatch_log_group" "ecs_log_group" {
+  name = "c9-deloton-log"
+}
+
+# Task definition for pipeline service
+resource "aws_ecs_task_definition" "pipeline_task_def" {
+  family = "c9-deloton-pipeline-task-def"
+  network_mode = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu = 1024
+  memory = 3072
+  execution_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/ecsTaskExecutionRole"
+  container_definitions = jsonencode([{
+    name = "c9-deloton-pipeline-container"
+    image = "${aws_ecr_repository.pipeline_ecr_repo.repository_url}"
+    essential = true
+    logConfiguration = {
+    logDriver = "awslogs"
+    options = {
+        awslogs-group = aws_cloudwatch_log_group.ecs_log_group.name
+        awslogs-region = "eu-west-2"
+        awslogs-stream-prefix = "ecs"
+      }
+      }
+    environment = [
+      {
+        name = "DATABASE_USERNAME"
+        value = var.DATABASE_USERNAME
+      },
+      {
+        name = "DATABASE_PASSWORD"
+        value = var.DATABASE_PASSWORD
+      },
+      {
+        name = "AWS_ACCESS_KEY_ID_"
+        value = var.AWS_ACCESS_KEY_ID_
+      },
+      {
+        name = "AWS_SECRET_ACCESS_KEY_"
+        value = var.AWS_SECRET_ACCESS_KEY_
+      },
+      {
+        name = "DATABASE_IP"
+        value = var.DATABASE_IP
+      },
+      {
+        name = "DATABASE_PORT"
+        value = var.DATABASE_PORT
+      },
+      {
+        name = "DATABASE_NAME"
+        value = var.DATABASE_NAME
+      },
+      {
+        name = "KAFKA_TOPIC"
+        value = var.KAFKA_TOPIC
+      },
+      {
+        name = "BOOTSTRAP_SERVERS"
+        value = var.BOOTSTRAP_SERVERS
+      },
+      {
+        name = "SECURITY_PROTOCOL"
+        value = var.SECURITY_PROTOCOL
+      },
+      {
+        name = "SASL_MECHANISM"
+        value = var.SASL_MECHANISM
+      },
+      {
+        name = "USERNAME"
+        value = var.USERNAME
+      },
+      {
+        name = "PASSWORD"
+        value = var.PASSWORD
+      },
+      {
+        name = "BUCKET_NAME"
+        value = var.BUCKET_NAME
+      }
+    ]
+  }])
+}
+
+# Pipeline service associated with the task definition
+resource "aws_ecs_service" "pipeline_service" {
+  name = "c9-deloton-pipeline-service"
+  cluster = data.aws_ecs_cluster.existing_cluster.id
+  task_definition = aws_ecs_task_definition.pipeline_task_def.arn
+  launch_type = "FARGATE"
+  network_configuration {
+    subnets = ["subnet-02a00c7be52b00368",
+              "subnet-0d0b16e76e68cf51b",
+              "subnet-081c7c419697dec52"]
+    security_groups = ["sg-020697b6514174b72"]
+    assign_public_ip = true
+  }
+  desired_count = 1  
+}
+
+
