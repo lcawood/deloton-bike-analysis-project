@@ -6,6 +6,8 @@ import re
 
 
 INVALID_DATE_THRESHOLD = datetime(1900, 1, 1, 0, 0, 0)
+PREFIXES = ['mr', 'mrs', 'miss', 'ms', 'dr',
+            'mr.', 'mrs.', 'miss.', 'ms.', 'dr.']
 
 
 def timestamp_to_date(timestamp_ms: int | None) -> str | None:
@@ -61,15 +63,19 @@ def get_rider_from_log_line(log_line: str) -> dict:
     """Takes in a kafka log line and returns a dictionary of rider data from it (excluding address).
     If any rider information is missing, this field is given as None in the returned dictionary."""
 
+
     rider = {}
+    
     log_line_data = literal_eval(log_line.split('=')[1])
 
     # Obtain rider data from the log line directly
     rider['rider_id'] = int(log_line_data.get('user_id', -1))
 
+    # If a full name is found in the log line, get the first and last name
     if log_line_data.get('name'):
         rider['first_name'] = log_line_data['name'].split()[0]
         rider['last_name'] = " ".join(log_line_data['name'].split()[1:])
+
     else:
         rider['first_name'] = None
         rider['last_name'] = None
