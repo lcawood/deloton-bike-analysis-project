@@ -76,6 +76,7 @@ def load_user_into_database(db_connection : extensions.connection, user : dict) 
                         user['weight'],user['email'],user['gender'],user['account_created'])
 
         db_cur.execute(query,parameters)
+        db_connection.commit()
 
         rider_id = db_cur.fetchone()
 
@@ -89,7 +90,7 @@ def load_ride_into_database(db_connection : extensions.connection, ride : dict) 
 
         query = """INSERT INTO Ride(rider_id,bike_id,start_time)
           VALUES (%s,%s,%s) RETURNING ride_id;"""
-
+        
         parameters = (ride["user_id"],ride["bike_id"],ride["start_time"])
 
         db_cur.execute(query,parameters)
@@ -171,9 +172,9 @@ def load_bike_into_database(db_connection : extensions.connection, bike_serial_n
     with db_connection.cursor() as db_cur:
 
         query = """INSERT INTO Bike(serial_number)
-          VALUES (%s) RETURNING reading_id;"""
+          VALUES (%s) RETURNING bike_id;"""
 
-        parameters = bike_serial_number
+        parameters = (bike_serial_number,)
 
         db_cur.execute(query,parameters)
 
@@ -195,7 +196,7 @@ def select_bike_from_database(db_connection : extensions.connection,
 
         query = """SELECT bike_id FROM Bike WHERE serial_number=%s"""
 
-        parameters = bike_serial_number
+        parameters = (bike_serial_number,)
 
         db_cur.execute(query,parameters)
 
