@@ -98,9 +98,9 @@ def process_dataframe_types(recent_rides: pd.DataFrame) -> pd.DataFrame:
 
 def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame) -> pd.DataFrame:
     """
-    Returns a DataFrame that calculates the reading_time from the
-    start_time and elapsed_time columns, and returns the resulting DataFrame,
-    containing only relevant columns to speed up aggregation of data.
+    Calculates the reading_time from the start_time and elapsed_time columns,
+    and returns the resulting DataFrame containing only relevant columns
+    to speed up aggregation of data.
     """
 
     df = recent_rides[['elapsed_time',
@@ -112,19 +112,41 @@ def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame) -> pd.Data
     return df
 
 
-def process_dataframe_power_output_avg_per_minute(ride_data: pd.DataFrame) -> pd.DataFrame:
+def process_dataframe_power_output_avg(ride_data: pd.DataFrame) -> pd.DataFrame:
     """Returns a DataFrame that average power output per minute."""
 
     grouped_df = ride_data.groupby(
         ['reading_time'])['power'].mean().astype(int)
 
+    grouped_df = grouped_df.reset_index()
+
+    grouped_df.columns = ['reading_time', 'power']
+
     return grouped_df
 
 
-def process_dataframe_resistance_output_avg_per_minute(ride_data: pd.DataFrame) -> pd.DataFrame:
+def process_dataframe_resistance_output_avg(ride_data: pd.DataFrame) -> pd.DataFrame:
     """Returns a DataFrame that average resistance per minute."""
 
     grouped_df = ride_data.groupby(
         ['reading_time'])['resistance'].mean().astype(int)
+
+    return grouped_df
+
+
+def process_dataframe_power_output_cumul(ride_data: pd.DataFrame) -> pd.DataFrame:
+    """Returns a DataFrame that cumulative power output per minute."""
+
+    grouped_df = ride_data.groupby(
+        ['reading_time'])['power'].cumsum().astype(int)
+
+    return grouped_df
+
+
+def process_dataframe_resistance_output_cumul(ride_data: pd.DataFrame) -> pd.DataFrame:
+    """Returns a DataFrame that cumulative resistance per minute."""
+
+    grouped_df = ride_data.groupby(
+        ['reading_time'])['resistance'].cumsum().astype(int)
 
     return grouped_df

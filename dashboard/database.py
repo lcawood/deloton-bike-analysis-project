@@ -9,8 +9,6 @@ import psycopg2
 from psycopg2 import extensions, OperationalError
 import streamlit as st
 
-TWELVE_HOURS_AGO = (datetime.now() - timedelta(hours=12))
-
 
 @st.cache_resource
 def get_database_connection() -> extensions.connection:
@@ -38,18 +36,18 @@ def get_current_ride_data(db_connection: extensions.connection) -> int:
     with db_connection.cursor() as db_cur:
 
         query = """
-        WITH current_rider_id AS (
-        SELECT Ride.rider_id
-        FROM Ride
-        ORDER BY start_time DESC
-        LIMIT 1
+        WITH current_ride AS (
+            SELECT Ride.rider_id, Ride.ride_id, Ride.start_time
+            FROM Ride
+            ORDER BY start_time DESC
+            LIMIT 1
         )
-        SELECT Ride.rider_id, first_name, last_name, height, weight, gender, birthdate,
-        heart_rate, power, resistance, elapsed_time
-        FROM Ride
-        JOIN Rider ON Ride.rider_id = Rider.rider_id
-        JOIN Reading ON Ride.ride_id = Reading.ride_id
-        WHERE Ride.rider_id = (select * FROM current_rider_id)
+        SELECT
+            current_ride.rider_id, first_name, last_name, height, weight, gender, birthdate,
+            heart_rate, power, resistance, elapsed_time
+        FROM current_ride
+        JOIN Rider ON current_ride.rider_id = Rider.rider_id
+        JOIN Reading ON current_ride.ride_id = Reading.ride_id
         ORDER BY start_time DESC, elapsed_time DESC
         LIMIT 1;
         """
@@ -180,7 +178,11 @@ def get_recent_12hr_data(db_connection: extensions.connection) -> pd.DataFrame:
     as a Pandas Dataframe.
     """
 
+    twelve_hours_ago = (datetime.now() - timedelta(hours=12))
+
+    print(twelve_hours_ago)
     with db_connection.cursor() as db_cur:
+
         query = """
         SELECT Ride.rider_id, first_name, last_name, height, weight, gender, birthdate,
         heart_rate, power, resistance, elapsed_time, start_time, Ride.ride_id
@@ -191,7 +193,7 @@ def get_recent_12hr_data(db_connection: extensions.connection) -> pd.DataFrame:
         ;
         """
 
-        parameters = (TWELVE_HOURS_AGO, )
+        parameters = (twelve_hours_ago, )
 
         db_cur.execute(query, parameters)
 
@@ -209,6 +211,8 @@ def get_ride_count_gender(db_connection: extensions.connection) -> pd.DataFrame:
     as a Pandas Dataframe.
     """
 
+    twelve_hours_ago = (datetime.now() - timedelta(hours=12))
+
     with db_connection.cursor() as db_cur:
         query = """
         SELECT gender, count(Ride.ride_id)
@@ -219,7 +223,7 @@ def get_ride_count_gender(db_connection: extensions.connection) -> pd.DataFrame:
         ;
         """
 
-        parameters = (TWELVE_HOURS_AGO, )
+        parameters = (twelve_hours_ago, )
 
         db_cur.execute(query, parameters)
 
@@ -235,6 +239,8 @@ def get_ride_count_age(db_connection: extensions.connection) -> pd.DataFrame:
     Retrieves data from the last 12 hours (by attribute 'start_time') from the database
     as a Pandas Dataframe.
     """
+
+    twelve_hours_ago = (datetime.now() - timedelta(hours=12))
 
     with db_connection.cursor() as db_cur:
         query = """
@@ -252,7 +258,7 @@ def get_ride_count_age(db_connection: extensions.connection) -> pd.DataFrame:
         ;
         """
 
-        parameters = (TWELVE_HOURS_AGO, )
+        parameters = (twelve_hours_ago, )
 
         db_cur.execute(query, parameters)
 
