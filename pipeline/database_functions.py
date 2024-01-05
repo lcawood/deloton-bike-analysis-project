@@ -62,8 +62,8 @@ def select_address_from_database(db_connection : extensions.connection, address 
 
 
 
-def load_user_into_database(db_connection : extensions.connection, user : dict) -> int:
-    """Loads a user from the user dict into the database using SQL."""
+def load_rider_into_database(db_connection : extensions.connection, rider : dict) -> int:
+    """Loads a rider from the rider dict into the database using SQL."""
 
     with db_connection.cursor() as db_cur:
 
@@ -71,9 +71,9 @@ def load_user_into_database(db_connection : extensions.connection, user : dict) 
         birthdate,height,weight,email,gender,account_created)
           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING rider_id;"""
 
-        parameters = (user['user_id'],user['address_id'],user['first_name'],
-                        user['last_name'],user['birthdate'],user['height'],
-                        user['weight'],user['email'],user['gender'],user['account_created'])
+        parameters = (rider['rider_id'],rider['address_id'],rider['first_name'],
+                        rider['last_name'],rider['birthdate'],rider['height'],
+                        rider['weight'],rider['email'],rider['gender'],rider['account_created'])
 
         db_cur.execute(query,parameters)
         db_connection.commit()
@@ -91,7 +91,7 @@ def load_ride_into_database(db_connection : extensions.connection, ride : dict) 
         query = """INSERT INTO Ride(rider_id,bike_id,start_time)
           VALUES (%s,%s,%s) RETURNING ride_id;"""
         
-        parameters = (ride["user_id"],ride["bike_id"],ride["start_time"])
+        parameters = (ride["rider_id"],ride["bike_id"],ride["start_time"])
 
         db_cur.execute(query,parameters)
 
@@ -110,10 +110,10 @@ def select_ride_from_database(db_connection : extensions.connection, ride : dict
 
     with db_connection.cursor() as db_cur:
 
-        query = """SELECT ride_id FROM Ride WHERE user_id=%s
+        query = """SELECT ride_id FROM Ride WHERE rider_id=%s
             AND bike_id=%s AND start_time =%s"""
 
-        parameters = (ride["user_id"],ride["bike_id"],ride["start_time"])
+        parameters = (ride["rider_id"],ride["bike_id"],ride["start_time"])
 
         db_cur.execute(query,parameters)
 

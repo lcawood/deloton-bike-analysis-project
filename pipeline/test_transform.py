@@ -4,7 +4,7 @@ attained data from the log lines, as well as missing/incomplete data."""
 from datetime import datetime, timedelta
 
 from transform import timestamp_to_date, check_datetime_is_valid, extract_datetime_from_string, \
-    get_bike_serial_number_from_log_line, get_email_from_log_line, get_user_from_log_line, \
+    get_bike_serial_number_from_log_line, get_email_from_log_line, get_rider_from_log_line, \
     get_ride_data_from_log_line, get_reading_data_from_log_line, get_address_from_log_line
 
 
@@ -130,17 +130,17 @@ def test_no_email_found_in_log_line():
     ) is None
 
 
-def test_get_valid_user_data_from_log_line():
-    """Test for the get_user_from_log_line function where all fields are present."""
+def test_get_valid_rider_data_from_log_line():
+    """Test for the get_rider_from_log_line function where all fields are present."""
 
-    assert get_user_from_log_line(
+    assert get_rider_from_log_line(
         "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = \
         {\"user_id\":815,\"name\":\"Wayne Fitzgerald\",\"gender\":\"male\",\
         \"address\":\"Studio 3,William alley,New Bethan,WR4V 7TA\",\
         \"date_of_birth\":-336700800000,\"email_address\":\"wayne_fitzgerald@hotmail.com\",\
         \"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\
         \"bike_serial\":\"SN0000\",\"original_source\":\"offline\"}\n"
-    ) == {'user_id': 815, 'first_name': 'Wayne', 'last_name': 'Fitzgerald',
+    ) == {'rider_id': 815, 'first_name': 'Wayne', 'last_name': 'Fitzgerald',
           'birthdate': datetime(year=1959, month=5, day=2).date(), 'height': 187, 'weight': 52,
           'email': 'wayne_fitzgerald@hotmail.com', 'gender': 'male',
           'account_created': datetime(year=2022, month=1, day=4).date()}
@@ -156,7 +156,7 @@ def test_valid_ride_data_from_log_line():
         \"date_of_birth\":-336700800000,\"email_address\":\"wayne_fitzgerald@hotmail.com\",\
         \"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\
         \"bike_serial\":\"SN0000\",\"original_source\":\"offline\"}\n"
-    ) == {'user_id': 815, 'start_time': datetime.strptime('25/07/2022 16:13:37.209120', "%d/%m/%Y %H:%M:%S.%f") - timedelta(seconds=0.5)}
+    ) == {'rider_id': 815, 'start_time': datetime.strptime('25/07/2022 16:13:37.209120', "%d/%m/%Y %H:%M:%S.%f") - timedelta(seconds=0.5)}
 
 
 def test_invalid_ride_data_from_log_line():
@@ -169,7 +169,7 @@ def test_invalid_ride_data_from_log_line():
         \"date_of_birth\":-336700800000,\"email_address\":\"wayne_fitzgerald@hotmail.com\",\
         \"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\
         \"bike_serial\":\"SN0000\",\"original_source\":\"offline\"}\n"
-    ) == {'user_id': None, 'start_time': None}
+    ) == {'rider_id': None, 'start_time': None}
 
 
 def test_valid_reading_data_from_log_line():

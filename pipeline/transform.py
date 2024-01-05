@@ -59,53 +59,51 @@ def get_email_from_log_line(log_line: str) -> str | None:
     return log_line_dict.get('email_address', None)
 
 
-def get_user_from_log_line(log_line: str) -> dict:
-    """Takes in a kafka log line and returns a dictionary of user data from it (excluding address).
-    If any user information is missing, this field is given as None in the returned dictionary."""
+def get_rider_from_log_line(log_line: str) -> dict:
+    """Takes in a kafka log line and returns a dictionary of rider data from it (excluding address).
+    If any rider information is missing, this field is given as None in the returned dictionary."""
 
-    user = {}
 
+    rider = {}
+    
     log_line_data = literal_eval(log_line.split('=')[1])
 
-    # Obtain user data from the log line directly
-    user['user_id'] = int(log_line_data.get('user_id', -1))
+    # Obtain rider data from the log line directly
+    rider['rider_id'] = int(log_line_data.get('user_id', -1))
 
     # If a full name is found in the log line, get the first and last name
     if log_line_data.get('name'):
-        name_parts = log_line_data['name'].split()
-        name_no_prefix = [
-            part for part in name_parts if part.lower() not in PREFIXES]
-        full_name = ' '. join(name_no_prefix)
-        user['first_name'] = full_name[:full_name.rfind(' ')]
-        user['last_name'] = full_name.split()[-1]
-    # If no name is found in the log line, set the first and last name to None
+        rider['first_name'] = log_line_data['name'].split()[0]
+        rider['last_name'] = " ".join(log_line_data['name'].split()[1:])
+ 
     else:
-        user['first_name'] = None
-        user['last_name'] = None
+        rider['first_name'] = None
+        rider['last_name'] = None
 
-    user['birthdate'] = timestamp_to_date(
+    rider['birthdate'] = timestamp_to_date(
         log_line_data.get('date_of_birth', None))
-    user['height'] = int(log_line_data.get('height_cm', -1))
-    user['weight'] = int(log_line_data.get('weight_kg', -1))
-    user['email'] = get_email_from_log_line(log_line)
+
+    rider['height'] = int(log_line_data.get('height_cm', -1))
+    rider['weight'] = int(log_line_data.get('weight_kg', -1))
+    rider['email'] = get_email_from_log_line(log_line)
 
     if log_line_data.get('gender') and \
             log_line_data.get('gender').lower() not in ['male', 'female']:
-        user['gender'] = 'other'
+        rider['gender'] = 'other'
     elif log_line_data.get('gender') and \
             log_line_data.get('gender').lower() in ['male', 'female']:
-        user['gender'] = log_line_data.get('gender')
+        rider['gender'] = log_line_data.get('gender')
     else:
-        user['gender'] = None
+        rider['gender'] = None
 
-    user['account_created'] = timestamp_to_date(
+    rider['account_created'] = timestamp_to_date(
         log_line_data.get('account_create_date', None))
 
-    for key, val in user.items():
+    for key, val in rider.items():
         if val == -1:
-            user[key] = None
+            rider[key] = None
 
-    return user
+    return rider
 
 
 def get_ride_data_from_log_line(log_line: str) -> dict:
@@ -120,9 +118,9 @@ def get_ride_data_from_log_line(log_line: str) -> dict:
     log_line_data = literal_eval(log_line.split('=')[1])
 
     try:
-        ride['user_id'] = int(log_line_data['user_id'])
+        ride['rider_id'] = int(log_line_data['user_id'])
     except KeyError:
-        ride['user_id'] = None
+        ride['rider_id'] = None
 
     if extract_datetime_from_string(log_line):
         ride['start_time'] = (extract_datetime_from_string(
