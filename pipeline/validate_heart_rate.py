@@ -51,12 +51,15 @@ def calculate_max_heart_rate(user_details: dict) -> int:
 
     'birthdate' and 'gender' are assumed to be cleaned and
     always as datetime and str types, respectively.
+
+    'other' and 'None' gender heart rates are treated conservatively using the formula
+    for females as a safety precaution.
     """
     birthdate = user_details.get('birthdate')
     age = calculate_age(birthdate)
     gender = user_details.get('gender')
 
-    if gender == "female":
+    if gender in ("female", "other", None):
         return round(206 - (0.88 * age))
     if gender == "male" and age < 40:
         return round(220 - age)
