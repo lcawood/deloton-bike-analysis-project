@@ -46,18 +46,21 @@ jobs:
         id: test-dashboard
         run: |
           cd dashboard
+          pip install -r requirements.txt
           pytest 
 
       - name: Run the unit tests with pytest
         id: test-api
         run: |
           cd api
+          pip install -r requirements.txt
           pytest 
 
       - name: Run the unit tests with pytest
         id: test-report
         run: |
           cd daily_report
+          pip install -r requirements.txt
           pytest 
   pylint:
     runs-on: ubuntu-latest

@@ -80,10 +80,20 @@ def get_rider_from_log_line(log_line: str) -> dict:
 
     rider['birthdate'] = timestamp_to_date(
         log_line_data.get('date_of_birth', None))
+
     rider['height'] = int(log_line_data.get('height_cm', -1))
     rider['weight'] = int(log_line_data.get('weight_kg', -1))
     rider['email'] = get_email_from_log_line(log_line)
-    rider['gender'] = log_line_data.get('gender', None)
+
+    if log_line_data.get('gender') and \
+            log_line_data.get('gender').lower() not in ['male', 'female']:
+        rider['gender'] = 'other'
+    elif log_line_data.get('gender') and \
+            log_line_data.get('gender').lower() in ['male', 'female']:
+        rider['gender'] = log_line_data.get('gender')
+    else:
+        rider['gender'] = None
+
     rider['account_created'] = timestamp_to_date(
         log_line_data.get('account_create_date', None))
 
