@@ -75,7 +75,7 @@ def get_rider_from_log_line(log_line: str) -> dict:
     if log_line_data.get('name'):
         rider['first_name'] = log_line_data['name'].split()[0]
         rider['last_name'] = " ".join(log_line_data['name'].split()[1:])
-
+ 
     else:
         rider['first_name'] = None
         rider['last_name'] = None
