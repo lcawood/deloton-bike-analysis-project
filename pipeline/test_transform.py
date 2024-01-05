@@ -78,7 +78,7 @@ def test_invalid_date_found_in_log_line():
 
 def test_get_serial_number_from_log_line():
     """Test for the get_bike_serial_number_from_log_line
-    function where a serial number is present."""
+    function where a serial number is present."""   
 
     assert get_bike_serial_number_from_log_line(
         "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = \
