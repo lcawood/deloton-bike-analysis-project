@@ -1,4 +1,4 @@
-"""Module to add the transformed data extracted from the kafka stream to the db."""
+"""Module to add the transformed data extracted from the kafka stream to the database."""
 
 # pylint: disable=C0301
 # pylint: disable=E1101
