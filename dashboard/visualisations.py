@@ -1,6 +1,6 @@
 """Functions for visualising Deloton Bike ride data on the Streamlit app."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import altair as alt
 import pandas as pd

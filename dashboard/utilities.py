@@ -107,9 +107,8 @@ def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame) -> pd.Data
                        'start_time', 'power', 'resistance']].copy()
 
     df["reading_time"] = df.apply(
-        lambda x: (x['start_time'] + timedelta(seconds=x['elapsed_time'])).round('min'), axis=1)
+        lambda x: (pd.to_datetime(x['start_time']) + pd.to_timedelta(x['elapsed_time'], unit='s')).round('min'), axis=1)
 
-    print(df.sort_values('reading_time', ascending=True))
     return df
 
 

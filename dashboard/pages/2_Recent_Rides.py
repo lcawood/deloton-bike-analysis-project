@@ -24,7 +24,7 @@ from visualisations import (get_dashboard_title, get_total_ride_count_age_bar_ch
                             get_power_output_avg_line_chart, get_resistance_output_avg_line_chart,)
 
 
-RECENT_RIDE_REFRESH_RATE = 3
+RECENT_RIDE_REFRESH_RATE = 5
 LAST_UPDATED_COUNT_INCREMENT = 1
 
 
@@ -60,7 +60,7 @@ def generate_line_charts(avg_power_over_time: pd.DataFrame,
                          avg_resistance_over_time: pd.DataFrame) -> None:
     """Generates the line charts for the dashboard."""
 
-    line_col_1, line_col_2 = st.columns(2, gap='small')
+    line_col_1, line_col_2 = st.columns(2, gap='large')
     with line_col_1:
         avg_power_chart = get_power_output_avg_line_chart(
             avg_power_over_time)

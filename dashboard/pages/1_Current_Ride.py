@@ -20,7 +20,7 @@ from visualisations import (get_current_ride_header, get_dashboard_title,
                             get_heart_rate_warning)
 
 
-CURRENT_RIDE_REFRESH_RATE = 5
+CURRENT_RIDE_REFRESH_RATE = 1
 LAST_UPDATED_COUNT_INCREMENT = 1
 
 
