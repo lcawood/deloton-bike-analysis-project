@@ -33,10 +33,10 @@ This dashboard allows us:
 
 
 ## 🗂️ Repository Contents
-- `api` - contains all the code and resources required to create a api using flask that allows access to the rider data in a secure way.
-- `daily_report` - contains all the code and resources required to extract key statistics from a RDS and create a html string to send in a daily report through email.
+- `api` - contains all the code and resources required to create an API using Flask that allows access to the rider data in a secure way.
+- `daily_report` - contains all the code and resources required to extract key statistics from an RDS and create an html string to send in a daily report through email.
 - `dashboard` - contains all the code and resources required to run the dashboard.
-- `database` - contains the code required to set up the database, as well as script to connect to and reset the database.
+- `database` - contains the code required to set up the database, as well as a script to connect to and reset the database.
 - `diagrams` - contains all the diagrams used in planning and designing our approach.
 - `pipeline` - contains all the code and resources required to run the pipeline.
 - `terraform` - contains all the terraform code required to build the necessary AWS services for running the pipeline on the cloud.
