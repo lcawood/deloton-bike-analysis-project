@@ -5,7 +5,7 @@ st.set_page_config(
     page_icon="🚲",
 )
 
-st.write("# Deloton Bike Analysis Dashboard 🚲")
+st.write("# Deloton Bike Analysis🚴")
 
 st.sidebar.success("Select a page above.")
 

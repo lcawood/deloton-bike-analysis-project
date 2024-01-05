@@ -44,6 +44,7 @@ if __name__ == "__main__":
     conn = get_database_connection()
 
     get_dashboard_title()
+
     while True:
         # Auto-refresh the page
         last_updated_placeholder_recent = main_recent_rides(conn)

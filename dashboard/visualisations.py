@@ -15,7 +15,7 @@ def get_dashboard_title() -> None:
 
 
 # CURRENT RIDE
-@st.cache_data(show_spinner="Retrieving current ride...")
+# @st.cache_data(show_spinner="Retrieving current ride...")
 def get_current_ride_header(rider_name: str) -> None:
     """Returns a header for the current ride and the rider's name."""
     st.header(f"CURRENT RIDE: {rider_name}", divider='blue')
@@ -32,7 +32,7 @@ def get_last_updated_current_ride(last_update_time: datetime,
         f"Last updated: {time_delta} seconds ago")
 
 
-@st.cache_data(show_spinner="Retrieving personal info...")
+# @st.cache_data(show_spinner="Retrieving personal info...")
 def get_current_ride_header_personal_info(user_details: list) -> None:
     """
     Gets the main header personal_info for the current ride and displays them.
@@ -70,7 +70,7 @@ def get_heart_rate_warning(heart_rate: int) -> None:
             PLEASE SLOW DOWN OR SEEK ASSISTANCE!""", icon="⚠️")
 
 
-@st.cache_data(show_spinner="Retrieving ride metrics...")
+# @st.cache_data(show_spinner="Retrieving ride metrics...")
 def get_current_ride_metrics(user_details: list) -> None:
     """
     Gets the header metrics for the current ride and displays them.
@@ -94,7 +94,7 @@ def get_current_ride_metrics(user_details: list) -> None:
         st.metric("Resistance", resistance)
 
 
-@st.cache_data(show_spinner="Retrieving personal bests...")
+# @st.cache_data(show_spinner="Retrieving personal bests...")
 def get_current_ride_personal_best_metrics(user_best_details: list) -> None:
     """
     Gets the main header metric personal bests for the current ride and displays them.
@@ -104,7 +104,7 @@ def get_current_ride_personal_best_metrics(user_best_details: list) -> None:
 
 
 # RECENT RIDES
-@st.cache_data(show_spinner="Retrieving recent rides...")
+# @st.cache_data(show_spinner="Retrieving recent rides...")
 def get_recent_rides_header() -> None:
     """Returns a header for the recent rides section."""
     st.header(f"RECENT RIDES", divider='blue')

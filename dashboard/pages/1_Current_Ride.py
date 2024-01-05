@@ -64,6 +64,7 @@ if __name__ == "__main__":
     conn = get_database_connection()
 
     get_dashboard_title()
+
     while True:
         # Auto-refresh the current ride section
         last_updated_placeholder_current = main_current_ride(conn)
