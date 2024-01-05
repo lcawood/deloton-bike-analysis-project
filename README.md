@@ -9,14 +9,14 @@ Deloton has a range of exercise bikes on the market that track metrics such as h
 Unfortunately, the data that Deloton are collecting from their bikes is unstructured and not clean. 
 
 Our team has been tasked to:
-- Create an ETL Pipeline to clean,structure adn upload the Deloton Bike data to a data warehouse.
+- Create an ETL Pipeline to clean, structure and upload the Deloton Bike data to a data warehouse.
 - Create 5 deliverables from this data;
   - Heart Rate Alerts
     - Sending a heart rate alert through email to users with spiking heart rates while they are using the bikes.
   - Live Dashboard
     - A live dashboard of the current ride coming into the database.
   - Daily Report
-    - A daily report that contains key statistics from the previous days data is sent in a email every day at 9.30.
+    - A daily report that contains key statistics from the previous days' data is sent in an email every day at 9.30.
   - RESTful API
     - A API live on the cloud that enables Deloton to perform some queries on the Data Warehouse and standardise this process all across the company.
   - Tableau Integration
