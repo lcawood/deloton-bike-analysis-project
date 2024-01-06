@@ -9,6 +9,7 @@ bucket for the regular pipeline to read from to continue.
 import argparse
 from datetime import datetime
 from functools import partial
+import logging
 from multiprocessing import Pool, Process
 
 from dotenv import load_dotenv
@@ -19,7 +20,8 @@ import transform
 import pipeline
 
 
-GROUP_ID = "pipeline_10"
+GROUP_ID = "pipeline_delta"
+LOG_FILE = "historical_pipeline_log.txt"
 
 
 def rider_pipeline(log_line: str) -> dict:
@@ -82,7 +84,7 @@ def historical_pipeline(str_stop_date: str):
                 system_log_line = log_line
                 pipeline.save_log_line_to_s3(system_log_line)
 
-                if str_stop_date in system_log_line:
+                if "2024-01-06 10:" in system_log_line:
                     return None
 
             if system_log_line:
@@ -109,6 +111,7 @@ def historical_pipeline(str_stop_date: str):
                     # Saves readings already received from kafka stream to db before program ends.
                     print("\n\nTwo secs....")
                     process_readings(reading_log_lines, ride['ride_id'], ride['start_time'])
+                    logging.error(str(e) + f"\n    for reading at time {ride['start_time']}")
                     print("Data saved; program end.\n")
                     raise e
 
@@ -131,8 +134,13 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
+    logging.basicConfig(filename=LOG_FILE, filemode='a', encoding='utf-8',
+                        level=logging.ERROR)
+
     try:
         datetime.strptime(args.stop_date, '%Y-%m-%d')
-        historical_pipeline(args.stop_date)
-    except ValueError:
+    except ValueError as e:
         print("Invalid stop date; must be date string of format yyyy-mm-dd.")
+        raise e
+    
+    historical_pipeline(args.stop_date)
