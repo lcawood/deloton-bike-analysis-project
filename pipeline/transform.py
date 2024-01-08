@@ -66,7 +66,7 @@ def get_rider_from_log_line(log_line: str) -> dict:
     # Obtain rider data from the log line directly
     rider['rider_id'] = int(log_line_data.get('user_id', -1))
 
-    name =log_line_data.get('name')
+    name = log_line_data.get('name')
     if name:
         name_parts = name.split()
         if name_parts[0].lower() in PREFIXES:
@@ -144,7 +144,8 @@ def get_reading_data_from_log_line(reading: dict, log_line: str, start_time: dat
 
         log_datetime = extract_datetime_from_string(log_line)
         if log_datetime and log_datetime > start_time:
-            reading['elapsed_time'] = int((log_datetime - start_time).total_seconds())
+            reading['elapsed_time'] = int(
+                (log_datetime - start_time).total_seconds())
         else:
             reading['elapsed_time'] = None
 
@@ -154,7 +155,7 @@ def get_reading_data_from_log_line(reading: dict, log_line: str, start_time: dat
             str_attributes[0].split('=')[1].strip())
         reading['power'] = float(log_line.split('=')[-1].strip())
         reading['rpm'] = int(str_attributes[1].split('=')[1].strip())
-        
+
     return reading
 
 

@@ -22,9 +22,10 @@ import load
 import transform
 import validate_heart_rate
 
-GROUP_ID = "testing24"
+GROUP_ID = "pipeline_10"
 EXTREME_HR_COUNT_THRESHOLD = 3
 S3_BACKUP_FILENAME = "pipeline_backup.txt"
+
 
 def get_kafka_consumer(group_id: str) -> Consumer:
     """Function to return a consumer for the kafka cluster specified in .env."""
@@ -65,8 +66,10 @@ def rider_pipeline(log_line: str) -> dict:
     address = transform.get_address_from_log_line(log_line)
     rider['address_id'] = load.add_address(address)
     load.add_rider(rider)
-    rider['min_heart_rate'] = validate_heart_rate.calculate_min_heart_rate(rider)
-    rider['max_heart_rate'] = validate_heart_rate.calculate_max_heart_rate(rider)
+    rider['min_heart_rate'] = validate_heart_rate.calculate_min_heart_rate(
+        rider)
+    rider['max_heart_rate'] = validate_heart_rate.calculate_max_heart_rate(
+        rider)
     return rider
 
 
@@ -88,13 +91,14 @@ def reading_pipeline(log_line: str, ride_id: int, start_time: datetime, reading:
     readings) upload to db and alert rider by email if their heart rate has had an extreme value
     for enough consecutive readings.
     """
-    reading = transform.get_reading_data_from_log_line(reading, log_line, start_time)
+    reading = transform.get_reading_data_from_log_line(
+        reading, log_line, start_time)
     if 'heart_rate' in reading:
         # Heart rate comes with the second of every pair of reading log lines.
         load.add_reading(reading)
 
         if (reading['heart_rate'] == 0) or \
-            (rider['min_heart_rate'] <= reading['heart_rate'] <= rider['max_heart_rate']):
+                (rider['min_heart_rate'] <= reading['heart_rate'] <= rider['max_heart_rate']):
             consecutive_extreme_hrs.clear()
         else:
             consecutive_extreme_hrs.append(reading['heart_rate'])
@@ -115,8 +119,8 @@ def get_s3_client():
     """Function to return boto3 s3 client; returns None if connection can't be made."""
     try:
         return client("s3",
-                        aws_access_key_id=environ['AWS_ACCESS_KEY_ID_'],
-                        aws_secret_access_key=environ['AWS_SECRET_ACCESS_KEY_'])
+                      aws_access_key_id=environ['AWS_ACCESS_KEY_ID_'],
+                      aws_secret_access_key=environ['AWS_SECRET_ACCESS_KEY_'])
     except ClientError:
         return None
 
@@ -129,10 +133,10 @@ def save_log_line_to_s3(log_line: str, filename: str = S3_BACKUP_FILENAME):
     s3_client = get_s3_client()
     if s3_client is None:
         return None
-    
+
     try:
-        s3_client.put_object(Body = log_line, Bucket = environ['BUCKET_NAME'],
-                             Key = filename)
+        s3_client.put_object(Body=log_line, Bucket=environ['BUCKET_NAME'],
+                             Key=filename)
     except ClientError:
         pass
 
@@ -142,7 +146,7 @@ def retrieve_text_from_s3_file(filename: str = S3_BACKUP_FILENAME):
     s3_client = get_s3_client()
     if s3_client is None:
         return None
-    
+
     try:
         return s3_client.get_object(
             Bucket=environ['BUCKET_NAME'], Key=filename)['Body'].read().decode("utf-8")
@@ -160,7 +164,6 @@ def pipeline():
     first_relevant_line = True
     while True:
         log_line = get_next_log_line(kafka_consumer)
-
         if ('[SYSTEM]' in log_line) or (('[INFO]: Ride' in log_line) and first_relevant_line):
             # SYSTEM log_line, or the pipeline is starting mid ride.
 

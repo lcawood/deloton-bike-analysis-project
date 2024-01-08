@@ -10,7 +10,7 @@ The html document is sent to a S3 Bucket.
 
 from os import environ, _Environ
 import json
-from datetime import datetime,timedelta,date
+from datetime import datetime, timedelta, date
 
 from boto3 import client
 from dotenv import load_dotenv
@@ -18,12 +18,14 @@ import psycopg2
 from psycopg2 import extensions
 import pandas as pd
 
+
 def get_s3_client(config: _Environ):
     """Get a connection to the relevant S3 bucket."""
     s3_client = client("s3",
-                       aws_access_key_id=config["AWS_ACCESS"],
-                       aws_secret_access_key=config["AWS_SECRET_ACCESS"])
+                       aws_access_key_id=config["AWS_ACCESS_KEY_ID_"],
+                       aws_secret_access_key=config["AWS_SECRET_ACCESS_KEY_"])
     return s3_client
+
 
 def get_database_connection() -> extensions.connection:
     """Return a connection our database."""
@@ -35,11 +37,13 @@ def get_database_connection() -> extensions.connection:
                             database=environ["DATABASE_NAME"]
                             )
 
-def create_gender_split_table(gender_dict : dict) -> str:
+
+def create_gender_split_table(gender_dict: dict) -> str:
     """Creates html string for multiple lines in a table based on the gender dict size"""
 
     if gender_dict == []:
-        gender_dict = [{'gender': 'female', 'count': 0}, {'gender': 'male', 'count': 0}]
+        gender_dict = [{'gender': 'female', 'count': 0},
+                       {'gender': 'male', 'count': 0}]
 
     html_string = ""
 
@@ -58,7 +62,8 @@ def create_gender_split_table(gender_dict : dict) -> str:
     html_string += "</table>"
     return html_string
 
-def create_user_stats_table(age_dict : dict,power_dict : dict, heart_dict : dict) -> str:
+
+def create_user_stats_table(age_dict: dict, power_dict: dict, heart_dict: dict) -> str:
     """Creates html string for multiple lines in a table based on the gender dict size"""
 
     html_string = ""
@@ -85,7 +90,7 @@ def create_user_stats_table(age_dict : dict,power_dict : dict, heart_dict : dict
     return html_string
 
 
-def create_html_string(ride_dict : dict,yesterday : datetime) -> str:
+def create_html_string(ride_dict: dict, yesterday: datetime) -> str:
     """Creates a html string to create tables of data for the email report"""
 
     html_style = """
@@ -143,18 +148,20 @@ background-color: #dddddd;
 </tr>
 """
 
-    user_stats = create_user_stats_table(ride_dict["ages"],ride_dict["power"],
+    user_stats = create_user_stats_table(ride_dict["ages"], ride_dict["power"],
                                          ride_dict["heart_rate"])
 
     final = "</body>"
 
-    updated_html = html_style + body_beginning + table_insert_one + gender_split + table_insert_two + user_stats + final
+    updated_html = html_style + body_beginning + table_insert_one + \
+        gender_split + table_insert_two + user_stats + final
 
     updated_html = updated_html.replace("\n", "")
 
     return updated_html
 
-def previous_day_from_database(db_connection : extensions.connection) -> str:
+
+def previous_day_from_database(db_connection: extensions.connection) -> str:
     """Gets the previous day based on the most recent entry to the database"""
 
     query = """SELECT start_time
@@ -174,11 +181,11 @@ def previous_day_from_database(db_connection : extensions.connection) -> str:
     date_time = last_date.strftime("%Y-%m-%d")
     return date_time
 
-def sql_select_all_useful_data(db_connection : extensions.connection) -> pd.DataFrame:
+
+def sql_select_all_useful_data(db_connection: extensions.connection) -> pd.DataFrame:
     """Uses SQL to select all the needed data to create the useful report for the ceo"""
 
     calculate_previous_day = previous_day_from_database(db_connection)
-
 
     query = f"""SELECT Ride.ride_id,Ride.rider_id,Ride.bike_id,Ride.start_time,
     Rider.gender,Rider.birthdate,AVG(Reading.heart_rate),AVG(Reading.power) as average_power FROM Ride INNER JOIN
@@ -187,9 +194,10 @@ def sql_select_all_useful_data(db_connection : extensions.connection) -> pd.Data
     WHERE DATE(start_time) = '{calculate_previous_day}'
     GROUP BY Ride.ride_id,Rider.gender,Rider.birthdate;"""
 
-    rides = pd.read_sql_query(query,db_connection)
+    rides = pd.read_sql_query(query, db_connection)
 
     return rides
+
 
 def convert_to_age(born):
     """Converts a date of birth to the age of the person"""
@@ -200,20 +208,25 @@ def convert_to_age(born):
                                       today.day) < (born.month,
                                                     born.day))
 
-def extract_report_data(rides : pd.DataFrame) -> dict:
+
+def extract_report_data(rides: pd.DataFrame) -> dict:
     """Extracts all the data needed to populate the report"""
 
-    rides['birthdate']=rides['birthdate'].astype(str)
+    rides['birthdate'] = rides['birthdate'].astype(str)
     rides['Age'] = rides['birthdate'].apply(convert_to_age)
 
     number_of_rides = rides.ride_id.count()
 
-    average_power_users = rides.groupby('rider_id', as_index=False)['average_power'].mean()
-    average_heart_rate_users = rides.groupby('rider_id', as_index=False)['avg'].mean()
+    average_power_users = rides.groupby('rider_id', as_index=False)[
+        'average_power'].mean()
+    average_heart_rate_users = rides.groupby(
+        'rider_id', as_index=False)['avg'].mean()
 
-    grouped_users = rides.groupby('rider_id').agg({'Age': 'mean', 'gender': lambda x: x.mode().iat[0]}).reset_index()
+    grouped_users = rides.groupby('rider_id').agg(
+        {'Age': 'mean', 'gender': lambda x: x.mode().iat[0]}).reset_index()
 
-    gender_split = grouped_users.groupby(['gender'], as_index=False)['rider_id'].count()
+    gender_split = grouped_users.groupby(['gender'], as_index=False)[
+        'rider_id'].count()
     gender_split = gender_split.rename(columns={"rider_id": "count"})
 
     riders_age_df = rides.groupby('rider_id')['Age'].mean().reset_index()
@@ -224,10 +237,11 @@ def extract_report_data(rides : pd.DataFrame) -> dict:
     gender = gender_split.to_dict('records')
     ages = riders_age_df.to_dict('records')
 
-    return {"power" : power,"heart_rate" : heart_rate,"amount_of_rides": number_of_rides,
-            "gender": gender, "ages" : ages}
+    return {"power": power, "heart_rate": heart_rate, "amount_of_rides": number_of_rides,
+            "gender": gender, "ages": ages}
 
-def create_report_data(yesterday :datetime, db_connection : extensions.connection) -> dict:
+
+def create_report_data(yesterday: datetime, db_connection: extensions.connection) -> dict:
     """Creates and calls all the data needed in the report"""
 
     rides_df = sql_select_all_useful_data(db_connection)
@@ -250,16 +264,16 @@ def handler(event=None, context=None) -> int:
 
         yesterday = previous_day_from_database(connection)
 
-        report_dict = create_report_data(yesterday,connection)
+        report_dict = create_report_data(yesterday, connection)
 
-        s3_client.put_object(Body = report_dict["html_body"],Bucket = "c9-deloton",
-            Key = f"c9-deloton-daily-reports/daily_report_{yesterday}.html")
+        s3_client.put_object(Body=report_dict["html_body"], Bucket="c9-deloton",
+                             Key=f"c9-deloton-daily-reports/daily_report_{yesterday}.html")
 
         connection.close()
 
         return {
-                'statusCode': 200,
-                'body': json.dumps(report_dict["html_body"])
+            'statusCode': 200,
+            'body': json.dumps(report_dict["html_body"])
         }
 
     except Exception as e:
@@ -267,6 +281,7 @@ def handler(event=None, context=None) -> int:
             'statusCode': 404,
             'body': json.dumps(str(e))
         }
+
 
 if __name__ == "__main__":
     print(handler())

@@ -1,38 +1,76 @@
-variable "database_username" {
-  description = "Value of the username for the Redshift instance"
+variable "DATABASE_USERNAME" {
+  description = "Value of the username for the RDS instance"
   type        = string
   default = "value"
 }
 
-variable "database_password" {
-  description = "Value of the password for the Redshift instance"
+variable "DATABASE_PASSWORD" {
+  description = "Value of the password for the RDS instance"
   type        = string
   default = "value"
 }
-variable "aws_access_key_id" {
+
+variable "AWS_ACCESS_KEY_ID_" {
   description = "Value of the aws access key id"
   type        = string
   default = "value"
 }
 
-variable "aws_secret_access_key" {
+variable "AWS_SECRET_ACCESS_KEY_" {
   description = "Value of the aws secret access key"
   type        = string
   default = "value"
 }
-variable "database_ip" {
-  description = "Value of the redshift ip"
+
+variable "DATABASE_IP" {
+  description = "Value of the RDS ip"
   type        = string
   default = "value"
 }
 
-variable "database_port" {
-  description = "Value of the redshift port"
+variable "DATABASE_PORT" {
+  description = "Value of the RDS port"
   type        = string
   default = "value"
 }
-variable "database_name" {
-  description = "Value of the database redshift name"
+
+variable "DATABASE_NAME" {
+  description = "Value of the database RDS name"
+  type        = string
+  default = "value"
+}
+
+variable "KAFKA_TOPIC" {
+  type        = string
+  default = "value"
+}
+
+variable "BOOTSTRAP_SERVERS" {
+  type        = string
+  default = "value"
+}
+
+variable "SECURITY_PROTOCOL" {
+  type        = string
+  default = "value"
+}
+
+variable "SASL_MECHANISM" {
+  type        = string
+  default = "value"
+}
+
+variable "USERNAME" {
+  type        = string
+  default = "value"
+}
+
+variable "PASSWORD" {
+  type        = string
+  default = "value"
+}
+
+variable "BUCKET_NAME" {
   type        = string
   default = "value"
 }

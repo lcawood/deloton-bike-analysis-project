@@ -25,7 +25,7 @@ These are:
 """
 
 from datetime import datetime
-
+from os import environ
 import boto3
 
 
@@ -103,7 +103,7 @@ def send_email(rider_details: dict, extreme_hr_counts: list[int]) -> None:
     Sends an email to the relevant email address using AWS SES,
     assuming the rider email address is already verified.
     """
-    ses_client = boto3.client("ses", region_name="us-west-2")
+    ses_client = boto3.client("ses", region_name="eu-west-2")
 
     rider_email = rider_details.get("email")
     first_name = rider_details.get("first_name")

@@ -83,7 +83,7 @@ def test_calculate_min_heart_rate_valid(user_details: dict, threshold: int):
     assert calculate_min_heart_rate(user_details) == threshold
 
 
-@patch('boto3.client')
+@patch('validate_heart_rate.boto3.client')
 def test_ses_send_email(mock_boto_client):
     """send_email() should call .send_email once to send an SES email."""
 
