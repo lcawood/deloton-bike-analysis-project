@@ -52,3 +52,11 @@ Remove the terraform with `terraform destroy`
       - Security Group setup for the API to allow access on port 5000.
      - `API ECS Service`
       - A ECS Service that runs the API Task Definition.
+     - `ECR Dashboard`
+      - An ECR to store the Dashboard container.
+     - `Dashboard Task Definition`
+      - A task definition that runs the Dashboard image.
+     - `Dashboard Security Group`
+      - Security Group setup for the Dashboard to allow access on port 4321.
+     - `Dashboard ECS Service`
+      - A ECS Service that runs the Dashboard Task Definition.
