@@ -9,7 +9,30 @@ from psycopg2.extensions import connection
 from psycopg2.errors import Error
 
 import database_functions
-from api_helper_functions import format_seconds_as_readable_time
+from api_helper_functions import format_seconds_as_readable_time, is_positive_integer, \
+    is_string_boolean
+
+
+STATUS_CODES = {
+    'success': 200,
+    'bad request': 400,
+    'not found': 404,
+    'server error': 500
+}
+
+ERROR_MESSAGES = {
+    'bad request': {
+        'id': 'Invalid url; {} must be a positive integer.',
+        'boolean': 'Invalid url; {} must be a boolean value (True/False).',
+        'datetime': 'Invalid url; {} must be a datetime string matching the format dd-mm-yyyy.'
+    },
+    'not found': {
+        'ride': 'Ride with id {} could not be found.',
+        'rider': 'Rider with id {} could not be found.',
+        'rider_rides': 'Unable to locate any rides belonging to a rider with id {}.',
+        'daily_rides': 'Unable to locate any rides starting on {}.'
+    }
+}
 
 
 def get_ride(db_conn: connection, ride_id: int, expanded: str = 'False',
@@ -19,14 +42,14 @@ def get_ride(db_conn: connection, ride_id: int, expanded: str = 'False',
     database_functions, returning a dictionary of said ride with status code 200 if successful,
     and an error dict with appropriate status code if not.
     """
-    if (type(ride_id) != int) or (ride_id < 0):
-        return {'error': 'Invalid url; ride_id must be a positive integer.'}, 400
+    if not is_positive_integer(ride_id):
+        return {'error': ERROR_MESSAGES['bad request']['id'].format('ride_id')}, \
+            STATUS_CODES['bad request']
 
-    if expanded not in ['True', 'False']:
-        return {'error': 'Invalid url; expanded must be a boolean value (True/False).'}, 400
-
-    if summary not in ['True', 'False']:
-        return {'error': 'Invalid url; summary must be a boolean value (True/False).'}, 400
+    for name, value in [('expanded', expanded), ('summary', summary)]:
+        if not is_string_boolean(value):
+            return {'error': ERROR_MESSAGES['bad request']['boolean'].format(name)}, \
+                STATUS_CODES['bad request']
 
     try:
         ride = database_functions.get_ride_by_id(db_conn, ride_id)
@@ -42,12 +65,13 @@ def get_ride(db_conn: connection, ride_id: int, expanded: str = 'False',
                 ride['reading_summary']['duration'])
 
     except Error as e:
-        return {'error': str(e)}, 500
+        return {'error': str(e)}, STATUS_CODES['server error']
 
     if ride:
-        return ride, 200
+        return ride, STATUS_CODES['success']
 
-    return {'error': f'Ride with id {ride_id} could not be found.'}, 404
+    return {'error': ERROR_MESSAGES['not found']['ride'].format(ride_id)}, \
+        STATUS_CODES['not found']
 
 
 def get_rider(db_conn: connection, rider_id: int) -> (dict, int):
@@ -56,18 +80,20 @@ def get_rider(db_conn: connection, rider_id: int) -> (dict, int):
     database_functions, returning a dictionary of said rider's information with status code 200 if
     successful, and an error dict with appropriate status code if not.
     """
-    if (type(rider_id) != int) or (rider_id < 0):
-        return {'error': 'Invalid url; rider_id must be a positive integer.'}, 400
+    if not is_positive_integer(rider_id):
+        return {'error': ERROR_MESSAGES['bad request']['id'].format('rider_id')}, \
+            STATUS_CODES['bad request']
 
     try:
         rider = database_functions.get_rider_by_id(db_conn, rider_id)
     except Error as e:
-        return {'error': str(e)}, 500
+        return {'error': str(e)}, STATUS_CODES['server error']
 
     if rider:
-        return rider, 200
+        return rider, STATUS_CODES['success']
 
-    return {'error': f'Rider with id {rider_id} could not be found.'}, 404
+    return {'error': ERROR_MESSAGES['not found']['rider'].format(rider_id)}, \
+        STATUS_CODES['not found']
 
 
 def get_rider_rides(db_conn: connection, rider_id: int, expanded: str = 'False',
@@ -78,14 +104,14 @@ def get_rider_rides(db_conn: connection, rider_id: int, expanded: str = 'False',
     rides with status code 200 if successful, and an error dict with appropriate status code if
     not.
     """
-    if (type(rider_id) != int) or (rider_id < 0):
-        return {'error': 'Invalid url; rider_id must be a positive integer.'}, 400
+    if not is_positive_integer(rider_id):
+        return {'error': ERROR_MESSAGES['bad request']['id'].format('rider_id')}, \
+            STATUS_CODES['bad request']
 
-    if expanded not in ['True', 'False']:
-        return {'error': 'Invalid url; expanded must be a boolean value (True/False).'}, 400
-
-    if summary not in ['True', 'False']:
-        return {'error': 'Invalid url; summary must be a boolean value (True/False).'}, 400
+    for name, value in [('expanded', expanded), ('summary', summary)]:
+        if not is_string_boolean(value):
+            return {'error': ERROR_MESSAGES['bad request']['boolean'].format(name)}, \
+                STATUS_CODES['bad request']
 
     try:
         rides = database_functions.get_rider_rides_by_id(db_conn, rider_id)
@@ -103,12 +129,13 @@ def get_rider_rides(db_conn: connection, rider_id: int, expanded: str = 'False',
                     rides[i]['reading_summary']['duration'])
 
     except Error as e:
-        return {'error': str(e)}, 500
+        return {'error': str(e)}, STATUS_CODES['server error']
 
     if rides:
-        return rides, 200
+        return rides, STATUS_CODES['success']
 
-    return {'error': f'Unable to locate any rides belonging to a rider with id {rider_id}.'}, 404
+    return {'error': ERROR_MESSAGES['not found']['rider_rides'].format(rider_id)}, \
+        STATUS_CODES['not found']
 
 
 def get_daily_rides(db_conn: connection, date: str = datetime.today().strftime("%d-%m-%Y"),
@@ -123,14 +150,13 @@ def get_daily_rides(db_conn: connection, date: str = datetime.today().strftime("
         date = datetime.strptime(date, "%d-%m-%Y").date()
     except (TypeError, ValueError):
         return {
-            'error': 'Invalid url; date must be a datetime string matching the format dd-mm-yyyy.'
-            }, 400
+            'error': ERROR_MESSAGES['bad request']['datetime'].format('date')
+            }, STATUS_CODES['bad request']
 
-    if expanded not in ['True', 'False']:
-        return {'error': 'Invalid url; expanded must be a boolean value (True/False).'}, 400
-
-    if summary not in ['True', 'False']:
-        return {'error': 'Invalid url; summary must be a boolean value (True/False).'}, 400
+    for name, value in [('expanded', expanded), ('summary', summary)]:
+        if not is_string_boolean(value):
+            return {'error': ERROR_MESSAGES['bad request']['boolean'].format(name)}, \
+                STATUS_CODES['bad request']
 
     try:
         rides = database_functions.get_daily_rides(db_conn, date)
@@ -148,12 +174,15 @@ def get_daily_rides(db_conn: connection, date: str = datetime.today().strftime("
                     rides[i]['reading_summary']['duration'])
 
     except Error as e:
-        return {'error': str(e)}, 500
+        return {'error': str(e)}, STATUS_CODES['server error']
 
     if rides:
-        return rides, 200
+        return rides, STATUS_CODES['success']
 
-    return {'error': f'Unable to locate any rides starting on {date.strftime("%d-%m-%Y")}.'}, 404
+    return {
+        'error': ERROR_MESSAGES['not found']['daily_rides'].format(date.strftime("%d-%m-%Y"))
+        }, \
+        STATUS_CODES['not found']
 
 
 def delete_ride(db_conn: connection, ride_id: int) -> (dict, int):
@@ -162,15 +191,17 @@ def delete_ride(db_conn: connection, ride_id: int) -> (dict, int):
     database_functions, returning a dictionary of said ride with status code 200 if successful,
     and an error dict with appropriate status code if not.
     """
-    if (type(ride_id) != int) or (ride_id < 0):
-        return {'error': 'Invalid url; ride_id must be a positive integer.'}, 400
+    if not is_positive_integer(ride_id):
+        return {'error': ERROR_MESSAGES['bad request']['id'].format('ride_id')}, \
+            STATUS_CODES['bad request']
 
     try:
         ride = database_functions.delete_ride_by_id(db_conn, ride_id)
     except Error as e:
-        return {'error': str(e)}, 500
+        return {'error': str(e)}, STATUS_CODES['server error']
 
     if ride:
-        return ride, 200
+        return ride, STATUS_CODES['success']
 
-    return {'error': f'Ride with id {ride_id} could not be found.'}, 404
+    return {'error': ERROR_MESSAGES['not found']['ride'].format(ride_id)}, \
+        STATUS_CODES['not found']

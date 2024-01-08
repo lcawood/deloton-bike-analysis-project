@@ -7,12 +7,43 @@ from flask_caching import Cache
 import api_functions
 from database_functions import get_database_connection
 
+DEFAULT_RIDE_HTML = """
+Enter a ride number to see its details:
+<ul>
+    <li> Follow this with <i>?</i> and: </li>
+    <ul>
+        <li> <i>expanded=True</i> to see all the readings for the ride; </li>
+        <li> <i>summary=True</i> to see a summary of the readings for the ride; </li>
+        <li> <i>expanded=True&summary=True</i> to see all the readings and a summary for the ride. </li>
+    </ul>
+</ul>
+<br>
+Example:
+<pre><i>    /ride/1?expanded=True&summary=True</i></pre>
+"""
+DEFAULT_RIDER_HTML = """
+Enter a rider number to see their details:
+<ul>
+    <li> Follow this with <i>/rides</i> to see all of their logged rides: </li>
+    <ul>
+        <li> Follow this with <i>?</i> and: </li>
+        <ul>
+            <li> <i>expanded=True</i> to see all the readings from each ride; </li>
+            <li> <i>summary=True</i> to see a summary of the readings from each ride; </li>
+            <li> <i>expanded=True&summary=True</i> to see all the readings, with a summary, from each ride. </li>
+        </ul>
+    </ul>
+</ul>
+<br>
+Example:
+<pre><i>    /rider/1/rides?expanded=True&summary=True</i></pre>
+"""
+
 
 app = Flask(__name__)
 app.json.sort_keys = False
 cache = Cache(config={'CACHE_TYPE': 'SimpleCache', 'CACHE_DEFAULT_TIMEOUT': 1})
 cache.init_app(app)
-db_conn = get_database_connection()
 
 
 def is_not_get_request(*args, **kwargs) -> bool:
@@ -28,20 +59,7 @@ def is_not_get_request(*args, **kwargs) -> bool:
 @cache.cached(query_string=True)
 def default_ride_endpoint():
     """Default ride endpoint"""
-    return """
-Enter a ride number to see its details:
-<ul>
-    <li> Follow this with <i>?</i> and: </li>
-    <ul>
-        <li> <i>expanded=True</i> to see all the readings for the ride; </li>
-        <li> <i>summary=True</i> to see a summary of the readings for the ride; </li>
-        <li> <i>expanded=True&summary=True</i> to see all the readings and a summary for the ride. </li>
-    </ul>
-</ul>
-<br>
-Example:
-<pre><i>    /ride/1?expanded=True&summary=True</i></pre>
-""", 200
+    return DEFAULT_RIDE_HTML, api_functions.STATUS_CODES['success']
         
 
 @app.route("/ride/<int:ride_id>", methods=["GET", "DELETE"])
@@ -61,23 +79,7 @@ def ride_endpoint(ride_id: int):
 @cache.cached(query_string=True)
 def default_rider_endpoint():
     """Default rider endpoint"""
-    return """
-Enter a rider number to see their details:
-<ul>
-    <li> Follow this with <i>/rides</i> to see all of their logged rides: </li>
-    <ul>
-        <li> Follow this with <i>?</i> and: </li>
-        <ul>
-            <li> <i>expanded=True</i> to see all the readings from each ride; </li>
-            <li> <i>summary=True</i> to see a summary of the readings from each ride; </li>
-            <li> <i>expanded=True&summary=True</i> to see all the readings, with a summary, from each ride. </li>
-        </ul>
-    </ul>
-</ul>
-<br>
-Example:
-<pre><i>    /rider/1/rides?expanded=True&summary=True</i></pre>
-""", 200
+    return DEFAULT_RIDER_HTML, api_functions.STATUS_CODES['success']
 
 
 @app.route("/rider/<int:rider_id>", methods=["GET"])
@@ -108,4 +110,5 @@ def daily_rides_endpoint():
 
 
 if __name__ == "__main__":
+    db_conn = get_database_connection()
     app.run(debug=True, host="0.0.0.0", port=5000)

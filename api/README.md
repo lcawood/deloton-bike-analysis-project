@@ -1,5 +1,11 @@
 # API
-Files in this folder are used in the production of a RESTful API implemented using the python library Flask; the api can be run using the command `python api.py` (after having installed the necessary requirements, listed below and in the file `requirements.txt`, and with the relevant environment variables).
+Files in this folder are used in the production of a RESTful API implemented using the python library Flask; the api can be run using the command `python api.py` (after having installed the necessary requirements, listed below and in the file `requirements.txt`, and with the relevant environment variables). 
+
+In summary, to run:
+```
+pip install -r requirements.txt
+python api
+```
 
 API endpoints (note query parameters are to be conjoined with `&` and appended to their root URL following a `?`, as required):
  - `GET /ride` - HTML text instructions on how to use below endpoint:
@@ -17,10 +23,10 @@ API endpoints (note query parameters are to be conjoined with `&` and appended t
     - `summary=true` - Summarise all readings associated with each ride.
  - `GET /daily?date=01-01-2020` - Get all rides for a specific date
 
-### Requirements
+### Requirements (as per `requirements.txt`)
 - python-dotenv
 - flask
-- flask-caching
+- flask-caching~
 - psycopg2-binary
 - pytest
 
