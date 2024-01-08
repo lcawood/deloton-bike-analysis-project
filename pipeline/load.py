@@ -100,7 +100,6 @@ def add_readings_from_csv(readings_file: str) -> bool:
     try:
         load_readings_into_database_from_csv(connection, readings_file)
         connection.close()
-        remove(readings_file)
         return True
 
     except errors.UniqueViolation:

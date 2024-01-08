@@ -11,6 +11,7 @@ from datetime import datetime
 from functools import partial
 import logging
 from multiprocessing import Pool, Process
+import os
 
 from dotenv import load_dotenv
 import pandas as pd
@@ -20,8 +21,8 @@ import transform
 import pipeline
 
 
-GROUP_ID = "pipeline_delta"
-LOG_FILE = "historical_pipeline_log.txt"
+GROUP_ID = "pipeline_zeta"
+FIRST_READING_TIME = datetime.strptime("2023-10-05 22:09:48", '%Y-%m-%d %H:%M:%S')
 
 
 def rider_pipeline(log_line: str) -> dict:
@@ -60,7 +61,27 @@ def process_readings(reading_log_lines: list[str], ride_id: int, start_time: dat
     readings.to_csv("readings.csv", index=False)
     load.add_readings_from_csv("readings.csv")
 
-    print("Start time of ride being processed: ", start_time)
+
+def format_seconds_as_readable_time(seconds: int) -> str:
+    """
+    Takes in an integer number of seconds, and returns a human readable string of the time in
+    hours, minutes and seconds.
+    """
+
+    hours = seconds // (60 ** 2)
+    seconds -= hours * (60 ** 2)
+    minutes = seconds // 60
+    seconds -= minutes * 60
+
+    time_string = f"{seconds}s"
+
+    if minutes:
+        time_string = f'{minutes}m ' + time_string
+
+    if hours:
+        time_string = f'{hours}h ' + time_string
+
+    return time_string
 
 
 def historical_pipeline(str_stop_date: str):
@@ -71,56 +92,70 @@ def historical_pipeline(str_stop_date: str):
     """
 
     kafka_consumer = pipeline.get_kafka_consumer(GROUP_ID)
-    first_relevant_line = True
-    log_line = pipeline.get_next_log_line(kafka_consumer)
-    while True:
-        reading_log_lines = []
-        if ('[SYSTEM]' in log_line) or (('[INFO]: Ride' in log_line) and first_relevant_line):
-            # SYSTEM log_line, or the pipeline is starting mid ride.
+    messages = []
+    log_line = ""
+    p = None
 
-            if '[INFO]' in log_line:
-                system_log_line = pipeline.retrieve_text_from_s3_file()
-            else:
-                system_log_line = log_line
-                pipeline.save_log_line_to_s3(system_log_line)
+    first_reading_time = None
 
-                if "2024-01-06 10:" in system_log_line:
+    try:
+        if os.path.exists('readings.csv'):
+            load.add_readings_from_csv('readings.csv')
+        
+        start = int(datetime.now().strftime('%s'))
+        while True:
+
+            reading_log_lines = []
+            if '[SYSTEM]' in log_line:
+
+                if "2024-01-06 22:" in log_line:
                     return None
 
-            if system_log_line:
-                rider_pipeline(system_log_line)
+                rider_pipeline(log_line)
                 bike_serial_number = transform.get_bike_serial_number_from_log_line(
-                    system_log_line)
+                    log_line)
                 bike_id = load.add_bike(bike_serial_number)
-                ride = pipeline.ride_pipeline(system_log_line, bike_id)
+                ride = pipeline.ride_pipeline(log_line, bike_id)
 
-                if '[SYSTEM]' in log_line:
-                    log_line = pipeline.get_next_log_line(kafka_consumer)
+                log_line = pipeline.get_next_log_line(kafka_consumer, messages)
 
-                try:
-                    while '[INFO]' in log_line:
-                        log_line += pipeline.get_next_log_line(kafka_consumer)
-                        reading_log_lines.append(log_line)
-                        log_line = pipeline.get_next_log_line(kafka_consumer)
+                while '[INFO]' in log_line:
+                    log_line += pipeline.get_next_log_line(kafka_consumer, messages)
+                    reading_log_lines.append(log_line)
+                    log_line = pipeline.get_next_log_line(kafka_consumer, messages)
 
-                    p = Process(target=process_readings,
-                                args=(reading_log_lines, ride['ride_id'], ride['start_time']))
-                    p.start()
+                if p:
+                    p.join()
+                    p.close()
 
-                except BaseException as e:
-                    # Saves readings already received from kafka stream to db before program ends.
-                    print("\n\nTwo secs....")
-                    process_readings(reading_log_lines, ride['ride_id'], ride['start_time'])
-                    logging.error(str(e) + f"\n    for reading at time {ride['start_time']}")
-                    print("Data saved; program end.\n")
-                    raise e
+                    ride_st_seconds = int(ride['start_time'].strftime('%s'))
+                    now = int(datetime.now().strftime('%s'))
+                    print()
+                    print("Start time of ride being processed: ", ride['start_time'])
+                    print("  Estimated time remaining: ",
+                          format_seconds_as_readable_time(int(
+                              (now - ride_st_seconds)*(
+                                  (now - start)/(
+                                      ride_st_seconds - first_reading_time)))))
+
+                if not first_reading_time:
+                    first_reading_time = int(ride['start_time'].strftime('%s'))
+
+                p = Process(target=process_readings,
+                            args=(reading_log_lines, ride['ride_id'], ride['start_time']))
+                p.start()
 
                 reading_log_lines.clear()
 
-            first_relevant_line = False
+            else:
+                log_line = pipeline.get_next_log_line(kafka_consumer, messages)
 
-        else:
-            log_line = pipeline.get_next_log_line(kafka_consumer)
+    except BaseException as e:
+        print('Two secs...')
+        with open('historical_pipeline_log.txt', 'a') as file:
+            error_log_string = f"\n\n\n *** Error on log line: {log_line}\n\n    " + repr(e) + "\n    " + str(e)
+            file.write(error_log_string)
+        raise e
 
 
 if __name__ == "__main__":

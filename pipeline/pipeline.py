@@ -13,7 +13,6 @@ import json
 import logging
 from os import environ
 
-from boto3 import client
 from botocore.exceptions import ClientError
 
 from confluent_kafka import Consumer, KafkaException, Message
@@ -22,9 +21,9 @@ import load
 import transform
 import validate_heart_rate
 
-GROUP_ID = "testing24"
+GROUP_ID = "pipeline_zeta"
 EXTREME_HR_COUNT_THRESHOLD = 3
-S3_BACKUP_FILENAME = "pipeline_backup.txt"
+
 
 def get_kafka_consumer(group_id: str) -> Consumer:
     """Function to return a consumer for the kafka cluster specified in .env."""
@@ -36,7 +35,8 @@ def get_kafka_consumer(group_id: str) -> Consumer:
             'sasl.username': environ['USERNAME'],
             'sasl.password': environ['PASSWORD'],
             'group.id': group_id,
-            'auto.offset.reset': 'earliest'
+            'auto.offset.reset': 'earliest',
+            'enable.auto.commit': 'false'
         }
         consumer = Consumer(kafka_config)
         consumer.subscribe([environ['KAFKA_TOPIC']])
@@ -46,14 +46,28 @@ def get_kafka_consumer(group_id: str) -> Consumer:
         raise error
 
 
-def get_next_log_line(consumer: Consumer) -> str:
+def get_next_log_line(consumer: Consumer, messages: list[Message]) -> str:
     """Function to retrieve and return next log line from kafka stream."""
-    message = None
-    while (not message) or ('log' not in message):
-        message = consumer.poll(1)
-        if isinstance(message, Message):
-            message = json.loads(message.value().decode())
-    return message.get('log')
+    messages.append(None)
+
+    log_line = None
+    while not log_line:
+        messages[-1] = consumer.poll(1)
+        log_line = get_log_line_from_message(messages[-1])
+            
+    if (len(messages) == 3):
+        messages.pop(0)
+        if ('[SYSTEM]' in log_line):
+            consumer.commit(messages[0], asynchronous=False)
+
+    return log_line
+
+
+def get_log_line_from_message(message: Message | None) -> str:
+    """Returns log line from kafka stream message; returns None if no 'log' key in message."""
+    if isinstance(message, Message):
+        return json.loads(message.value().decode()).get('log')
+    return None
 
 
 def rider_pipeline(log_line: str) -> dict:
@@ -111,45 +125,6 @@ def reading_pipeline(log_line: str, ride_id: int, start_time: datetime, reading:
     return reading
 
 
-def get_s3_client():
-    """Function to return boto3 s3 client; returns None if connection can't be made."""
-    try:
-        return client("s3",
-                        aws_access_key_id=environ['AWS_ACCESS_KEY_ID_'],
-                        aws_secret_access_key=environ['AWS_SECRET_ACCESS_KEY_'])
-    except ClientError:
-        return None
-
-
-def save_log_line_to_s3(log_line: str, filename: str = S3_BACKUP_FILENAME):
-    """
-    Saves a log line to a text file in s3 bucket; allows the state of the pipeline to persist after
-    a crash.
-    """
-    s3_client = get_s3_client()
-    if s3_client is None:
-        return None
-    
-    try:
-        s3_client.put_object(Body = log_line, Bucket = environ['BUCKET_NAME'],
-                             Key = filename)
-    except ClientError:
-        pass
-
-
-def retrieve_text_from_s3_file(filename: str = S3_BACKUP_FILENAME):
-    """Retrieves body of text file stores in s3_bucket."""
-    s3_client = get_s3_client()
-    if s3_client is None:
-        return None
-    
-    try:
-        return s3_client.get_object(
-            Bucket=environ['BUCKET_NAME'], Key=filename)['Body'].read().decode("utf-8")
-    except ClientError:
-        return None
-
-
 def pipeline():
     """
     Function to run the main pipeline; establishes connection to Kafka stream, retrieves messages,
@@ -157,34 +132,25 @@ def pipeline():
     """
     kafka_consumer = get_kafka_consumer(GROUP_ID)
     rider = None
-    first_relevant_line = True
+    messages = []
+
     while True:
-        log_line = get_next_log_line(kafka_consumer)
-
-        if ('[SYSTEM]' in log_line) or (('[INFO]: Ride' in log_line) and first_relevant_line):
-            # SYSTEM log_line, or the pipeline is starting mid ride.
-
-            if '[INFO]' in log_line:
-                system_log_line = retrieve_text_from_s3_file()
-            else:
-                system_log_line = log_line
-                save_log_line_to_s3(system_log_line)
-
-            if system_log_line:
-                rider = rider_pipeline(system_log_line)
-                consecutive_extreme_hrs = []
-                bike_serial_number = transform.get_bike_serial_number_from_log_line(
-                    system_log_line)
-                bike_id = load.add_bike(bike_serial_number)
-                ride = ride_pipeline(system_log_line, bike_id)
-                reading = {'ride_id': ride['ride_id']}
-
-            first_relevant_line = False
+        log_line = get_next_log_line(kafka_consumer, messages)
+        if '[SYSTEM]' in log_line:
+            rider = rider_pipeline(log_line)
+            consecutive_extreme_hrs = []
+            bike_serial_number = transform.get_bike_serial_number_from_log_line(
+                log_line)
+            bike_id = load.add_bike(bike_serial_number)
+            ride = ride_pipeline(log_line, bike_id)
+            reading = {'ride_id': ride['ride_id']}
 
         if ('[INFO]' in log_line) and rider:
             reading = reading_pipeline(
                 log_line, ride['ride_id'], ride['start_time'], reading, rider,
                 consecutive_extreme_hrs)
+
+        print(log_line)
 
 
 if __name__ == "__main__":
