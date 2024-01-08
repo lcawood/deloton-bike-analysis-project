@@ -13,6 +13,11 @@ provider "aws" {
   region  = "eu-west-2"
 }
 
+data "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecsTaskExecutionRole"
+}
+
+
 resource "aws_security_group" "c9_velo_securitygroup" {
   name        = "c9_velo_securitygroup"
   description = "Allow TLS inbound traffic"
