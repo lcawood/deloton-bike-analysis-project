@@ -490,9 +490,15 @@ resource "aws_ecs_task_definition" "c9_deloton_api_task_def_t"{
       {"name": "DATABASE_PORT", "value": "${var.DATABASE_PORT}"},
       {"name": "DATABASE_USERNAME", "value": "${var.DATABASE_USERNAME}"}
     ],
-    "name": "c9-ladybirds-load-old-data",
-    "image": "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-ladybirds-load-old-data:latest",
-    "essential": true
+    "name": "c9-deloton-api-task-def-t",
+    "image": "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-deloton-api-t:latest",
+    "essential": true,
+    "portMappings" : [
+        {
+          "containerPort" : 5000,
+          "hostPort"      : 5000
+        }
+      ]
   }
 ]
 TASK_DEFINITION
@@ -500,5 +506,32 @@ TASK_DEFINITION
   runtime_platform {
     operating_system_family = "LINUX"
     cpu_architecture        = "X86_64"
+  }
+}
+
+#Security group for api
+
+resource "aws_security_group" "c9_velo_securitygroup_api" {
+  name        = "c9_velo_securitygroup_api"
+  description = "Allow TLS inbound traffic"
+  vpc_id      = "vpc-04423dbb18410aece"
+
+  ingress {
+    description      = "TLS from VPC"
+    from_port        = 5000
+    to_port          = 5000
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"] 
+  }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    Name = "c9_velo_securitygroup_api"
   }
 }
