@@ -58,7 +58,7 @@ def is_not_get_request(*args, **kwargs) -> bool:
 @app.route("/", methods=["GET"])
 def index():
     """ Creates an index route with an index page for the API """
-    return current_app.send_static_file('./web_pages/index.html')
+    return current_app.send_static_file('./pages/index.html')
 
 @app.route("/ride", methods=["GET"])
 @cache.cached(query_string=True)
