@@ -170,8 +170,7 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame, selector) -> a
 
     chart = alt.Chart(ride_counts, title='Total Number of rides (by age)').mark_bar().encode(
         x=alt.X('age_bracket:N', title='Ages'),
-        y=alt.Y('count():Q', title='Number of Rides'),
-        opacity=alt.condition(selector, alt.value(1), alt.value(0.25))
+        y=alt.Y('count():Q', title='Number of Rides')
     ).add_selection(selector).transform_filter(selector).properties(width=1000)
 
     return chart
