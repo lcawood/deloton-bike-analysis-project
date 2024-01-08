@@ -3,8 +3,6 @@
 # pylint: disable=C0301
 # pylint: disable=E1101
 
-from os import remove 
-
 from psycopg2 import errors
 
 from database_functions import get_database_connection,load_rider_into_database,load_address_into_database,select_address_from_database,load_ride_into_database,select_ride_from_database,load_reading_into_database,select_reading_from_database,load_bike_into_database,select_bike_from_database, load_readings_into_database_from_csv

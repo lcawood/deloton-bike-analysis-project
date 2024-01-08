@@ -64,7 +64,7 @@ def process_readings(reading_log_lines: list[str], ride_id: int, start_time: dat
     load.add_readings_from_csv("readings.csv")
 
 
-def backfill_pipeline(custom_stop_date: datetime = None):
+def backfill_pipeline(stop_date: datetime = None):
     """
     Function to run the main pipeline; establishes connection to Kafka stream, retrieves messages,
     utilises transform module to get data, and uses load module to upload to the db (in batches
@@ -90,7 +90,7 @@ def backfill_pipeline(custom_stop_date: datetime = None):
 
             # Stops historical_pipeline automatically if caught up to specified datetime.
             if stop_date:
-                if (stop_date < ride['start_time']):
+                if stop_date < ride['start_time']:
                     return None
             elif datetime.now().strftime('%Y-%m-%d %H') in log_line:
                 return None
@@ -135,15 +135,15 @@ if __name__ == "__main__":
                         "the hour (increasing as the program runs).")
 
     args = parser.parse_args()
-    
+
     stop_date = args.stop_date
 
     if stop_date:
         try:
             stop_date = datetime.strptime(stop_date, '%Y-%m-%d %H'[:len(stop_date) - 2])
         except ValueError as e:
-            print("Invalid stop date; must be a datetime substring (starting at the same index) of " +
-                  "the format 'yyyy-mm-dd hh'; for example '2024', '2024-01-05', and " +
+            print("Invalid stop date; must be a datetime substring (starting at the same index) " +
+                  "of the format 'yyyy-mm-dd hh'; for example '2024', '2024-01-05', and " +
                   "'2024-01-05 12' are all valid options.")
             raise e
 

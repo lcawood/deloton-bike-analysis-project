@@ -64,8 +64,9 @@ def get_next_log_line(consumer: Consumer, messages: list[Message]) -> str:
 
     if len(messages) == 3:
         messages.pop(0)
-        if '[SYSTEM]' in log_line:
-            consumer.commit(messages[0], asynchronous=False)
+
+    if (len(messages) == 2) and ('[SYSTEM]' in log_line):
+        consumer.commit(messages[0], asynchronous=False)
 
     return log_line
 
@@ -74,7 +75,7 @@ def get_log_line_from_message(message: Message | None) -> str:
     """Returns log line from kafka stream message; returns None if no 'log' key in message."""
     if isinstance(message, Message):
         return json.loads(message.value().decode()).get('log')
-    return None
+    return message
 
 
 def rider_pipeline(log_line: str) -> dict:
@@ -134,9 +135,9 @@ def reading_pipeline(log_line: str, ride_id: int, start_time: datetime, rider: d
             try:
                 validate_heart_rate.send_email(rider, consecutive_extreme_hrs)
             except ClientError:
-                print('Unable to send email.')
+                logging.error('Unable to send email.')
             consecutive_extreme_hrs.clear()
-        
+
     return reading
 
 
@@ -167,10 +168,10 @@ def pipeline():
     Runs first the backfill_pipeline, and then the live_pipeline, until fatal error or user
     interrupt.
     """
-    logging.INFO("Running backfill_pipeline...")
+    logging.info("Running backfill_pipeline...")
     backfill_pipeline.backfill_pipeline()
-    logging.INFO("backfill_pipeline finished.")
-    logging.INFO("Running live_pipeline...")
+    logging.info("backfill_pipeline finished.")
+    logging.info("Running live_pipeline...")
     live_pipeline()
 
 
