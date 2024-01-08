@@ -1,7 +1,7 @@
 """Module to contain and run the endpoints for the Deloton staff API"""
 
 from datetime import datetime
-from flask import Flask, request
+from flask import Flask, request,current_app
 from flask_caching import Cache
 
 import api_functions
@@ -54,6 +54,11 @@ def is_not_get_request(*args, **kwargs) -> bool:
     if request.method == "GET":
         return False
     return True
+
+@app.route("/", methods=["GET"])
+def index():
+    """ Creates an index route with an index page for the API """
+    return current_app.send_static_file('./web_pages/index.html')
 
 @app.route("/ride", methods=["GET"])
 @cache.cached(query_string=True)
