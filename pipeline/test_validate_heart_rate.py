@@ -98,6 +98,6 @@ def test_ses_send_email(mock_boto_client):
 
     fake_hr_counts = [200, 200, 200]
 
-    send_email(fake_user_details, fake_hr_counts, 1, 1)
+    send_email(fake_user_details, fake_hr_counts)
 
     mock_boto_client.send_email.assert_called_once()
