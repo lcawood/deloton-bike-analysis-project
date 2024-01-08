@@ -1,3 +1,16 @@
+## Pipeline
+The modules in this folder are used to connect to the Kafka stream, fetch and process messages, extract and transform ride, rider and reading information into logically structure atomic parts, and upload to an AWS hosted 3NF database, all the while monitoring live heart-rate readings for riders and alerting them by email about dangerous numbers.
+
+To run the pipeline:
+```
+# Install requirements for all modules used.
+pip install -r requirements.txt
+# Start main pipeline script.
+python pipeline.py
+```
+
+When run, the `pipeline.py` script will run until failure.
+
 ## pipeline.py
 Pipeline script to establish connection to Kafka stream, retrieve log lines, and then transform and upload the relevant data to the database (using functions from the `transform.py` and `load.py` files as necessary).
 

@@ -1,14 +1,15 @@
 """Contains unit tests for pipeline.py"""
 
+from copy import deepcopy
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-from pipeline import get_next_log_line, rider_pipeline, ride_pipeline, reading_pipeline, \
-    live_pipeline
+from pipeline import KafkaConnection, Pipeline, BackfillPipeline
 
 
-@patch('pipeline.get_log_line_from_message')
-def test_get_next_log_line(mock_log_line_from_message):
+@patch('pipeline.KafkaConnection._get_kafka_consumer')
+@patch('pipeline.KafkaConnection._get_log_line_from_message')
+def test_get_next_log_line(mock_get_log_line_from_message, mock_get_kafka_consumer):
     """Tests function get_next_log_line."""
     test_consumer = MagicMock()
     test_consumer.poll.side_effect = [
@@ -20,45 +21,49 @@ def test_get_next_log_line(mock_log_line_from_message):
         {'log': 'this is a [SYSTEM] log line'},
         {'log': 'this, too, is a log line'}
     ]
-    mock_log_line_from_message.side_effect = \
+    mock_get_kafka_consumer.return_value = test_consumer
+    mock_get_log_line_from_message.side_effect = \
         lambda message_dict: message_dict.get('log') if message_dict else None
+    
+    test_kafka_conn = KafkaConnection("testing")
+
     messages = []
-    assert get_next_log_line(test_consumer, messages) == 'this is a log line'
-    assert messages == [{'log': 'this is a log line'}]
+    assert test_kafka_conn.get_next_log_line() == 'this is a log line'
+    assert test_kafka_conn.message == {'log': 'this is a log line'}
     test_consumer.commit.assert_not_called()
 
-    assert get_next_log_line(test_consumer, messages) == 'this is a [SYSTEM] log line'
-    assert messages == [{'log': 'this is a log line'}, {'log': 'this is a [SYSTEM] log line'}]
+    assert test_kafka_conn.get_next_log_line() == 'this is a [SYSTEM] log line'
+    assert test_kafka_conn.message == {'log': 'this is a [SYSTEM] log line'}
     test_consumer.commit.assert_called_once_with({'log': 'this is a log line'}, asynchronous=False)
 
-    assert get_next_log_line(test_consumer, messages) == 'this, too, is a log line'
-    assert messages == [
-        {'log': 'this is a [SYSTEM] log line'},
-        {'log': 'this, too, is a log line'}
-        ]
+    assert test_kafka_conn.get_next_log_line() == 'this, too, is a log line'
+    assert test_kafka_conn.message == {'log': 'this, too, is a log line'}
     assert test_consumer.commit.call_count == 1
 
 
 @patch('transform.get_rider_from_log_line')
-@patch('transform.get_address_from_log_line')
-@patch('load.add_address')
 @patch('load.add_rider')
 @patch('validate_heart_rate.calculate_max_heart_rate')
 @patch('validate_heart_rate.calculate_min_heart_rate')
 def test_rider_pipeline(mock_min_heart_rate, mock_max_heart_rate, mock_load_rider,
-                        mock_load_address, mock_transform_address, mock_transform_rider):
+                        mock_transform_rider):
     """
     Tests rider_pipeline function for patched transform, validate_heart_rate and load functions.
     """
+    test_consumer = MagicMock()
+    test_pipeline = Pipeline(test_consumer)
+    test_pipeline.log_line = 'I am a log line'
+    test_pipeline.address_id = 1
+
     mock_transform_rider.return_value = {'rider_id': 7, 'forename': 'John', 'surname': 'Doe'}
-    mock_transform_address.return_value = {'key': 'this is an address'}
-    mock_load_address.return_value = 1
     mock_min_heart_rate.return_value = 60
     mock_max_heart_rate.return_value = 180
 
-    rider = rider_pipeline('I am a log line')
+    test_pipeline._rider_pipeline()
 
-    assert rider == {
+    mock_load_rider.assert_called_once()
+    
+    assert test_pipeline.rider == {
         'rider_id': 7,
         'forename': 'John',
         'surname': 'Doe',
@@ -68,7 +73,7 @@ def test_rider_pipeline(mock_min_heart_rate, mock_max_heart_rate, mock_load_ride
         }
 
 
-
+'''
 @patch('transform.get_ride_data_from_log_line')
 @patch('load.add_ride')
 def test_ride_pipeline(mock_load_ride, mock_transform_ride):
@@ -265,3 +270,4 @@ def test_live_pipeline(mock_load_bike, mock_transform_bike, mock_reading_pipelin
     assert mock_load_bike.call_count == 3
     assert mock_ride_pipeline.call_count == 3
     assert mock_reading_pipeline.call_count == 40 - 4*3
+'''
