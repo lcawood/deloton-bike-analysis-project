@@ -173,7 +173,7 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame, selector_gende
         y=alt.Y('count():Q', title='Number of Rides'),
         tooltip=[alt.Tooltip('age_bracket:N', title='Age Bracket'), alt.Tooltip(
             'count():Q', title='Total Number of Rides')]
-    ).add_selection(selector_gender).transform_filter(selector_gender).properties(width=1000)
+    ).add_selection(selector_gender).transform_filter(selector_gender).properties(width=800)
 
     return chart
 
