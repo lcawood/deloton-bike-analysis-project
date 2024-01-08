@@ -1,0 +1,5 @@
+python-dotenv
+flask
+flask-caching
+psycopg2-binary
+pytest
