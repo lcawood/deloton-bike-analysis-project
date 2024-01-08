@@ -44,29 +44,29 @@ def generate_bar_charts(recent_rides: pd.DataFrame, selector) -> None:
 
     row = total_duration_gender_chart | ride_count_by_gender_chart | ride_count_by_age_chart
 
-    st.altair_chart(row)
+    return row
 
 
-def generate_line_charts(recent_rides: pd.DataFrame) -> None:
+def generate_line_charts(recent_rides: pd.DataFrame, selector) -> None:
     """Generates the line charts for the dashboard."""
 
     avg_power_chart = get_power_output_avg_line_chart(
-        recent_rides)
+        recent_rides, selector)
 
     avg_resistance_chart = get_resistance_output_avg_line_chart(
-        recent_rides)
+        recent_rides, selector)
 
     cumul_power_chart = get_power_output_cumul_line_chart(
-        recent_rides)
+        recent_rides, selector)
 
     cumul_resistance_chart = get_resistance_output_cumul_line_chart(
-        recent_rides)
+        recent_rides, selector)
 
     row1 = avg_power_chart | avg_resistance_chart
     row2 = cumul_power_chart | cumul_resistance_chart
     line_graphs = row1 & row2
 
-    st.altair_chart(line_graphs)
+    return line_graphs
 
 
 def timestamp(t):
@@ -103,10 +103,14 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
         selector_age = alt.selection_single(
             fields=['age'], empty='all', name='AgeSelector')
 
-        generate_bar_charts(
+        bar_charts = generate_bar_charts(
             recent_rides, selector_gender)
 
-        generate_line_charts(recent_rides)
+        line_charts = generate_line_charts(recent_rides, selector_gender)
+
+        widget = bar_charts & line_charts
+
+        st.altair_chart(widget)
 
         return empty_last_updated_placeholder
 

@@ -178,7 +178,7 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame, selector) -> a
     return chart
 
 
-def get_power_output_avg_line_chart(recent_data: pd.DataFrame) -> alt.Chart:
+def get_power_output_avg_line_chart(recent_data: pd.DataFrame, selector) -> alt.Chart:
     """Generates a line chart for the average power output over the past 12 hours."""
 
     chart = alt.Chart(recent_data, title='Average Power Output').mark_line(interpolate='linear').encode(
@@ -186,23 +186,23 @@ def get_power_output_avg_line_chart(recent_data: pd.DataFrame) -> alt.Chart:
         y=alt.Y('mean(power):Q', title='Average Power (W)'),
         tooltip=[alt.Tooltip('reading_time:N', title='Reading Time'), alt.Tooltip(
             'mean(power):Q', title='Average Power')]
-    ).properties(width=850)
+    ).transform_filter(selector).properties(width=850)
 
     return chart
 
 
-def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame) -> alt.Chart:
+def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame, selector) -> alt.Chart:
     """Generates a line chart for the average resistance output over the past 12 hours."""
 
     chart = alt.Chart(recent_data, title='Average Resistance output').mark_line(interpolate='linear').encode(
         x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
         y=alt.Y('mean(resistance):Q', title='Average Resistance'),
-    ).properties(width=850)
+    ).transform_filter(selector).properties(width=850)
 
     return chart
 
 
-def get_power_output_cumul_line_chart(recent_data: pd.DataFrame) -> alt.Chart:
+def get_power_output_cumul_line_chart(recent_data: pd.DataFrame, selector) -> alt.Chart:
     """Generates a line chart for the cumulative power output over the past 12 hours."""
 
     recent_data['kilowatt_power'] = recent_data['power']/1000
@@ -213,12 +213,12 @@ def get_power_output_cumul_line_chart(recent_data: pd.DataFrame) -> alt.Chart:
     ).transform_window(
         cumulative_power='sum(kilowatt_power)',
         sort=[{"field": 'reading_time'}]
-    ).properties(width=850)
+    ).transform_filter(selector).properties(width=850)
 
     return chart
 
 
-def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame) -> alt.Chart:
+def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame, selector) -> alt.Chart:
     """Generates a line chart for the cumulative resistance output over the past 12 hours."""
 
     chart = alt.Chart(recent_data, title='Cumulative Resistance output').mark_line().encode(
@@ -227,6 +227,6 @@ def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame) -> alt.Cha
     ).transform_window(
         cumulative_resistance='sum(resistance)',
         sort=[{"field": 'reading_time'}]
-    ).properties(width=850)
+    ).transform_filter(selector).properties(width=850)
 
     return chart
