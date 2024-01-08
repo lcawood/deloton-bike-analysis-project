@@ -44,9 +44,9 @@ def generate_bar_charts(recent_rides: pd.DataFrame, selector_gender) -> None:
     ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
         recent_rides, selector_gender)
 
-    row = total_duration_gender_chart | ride_count_by_gender_chart | ride_count_by_age_chart
+    widget_top_row = total_duration_gender_chart | ride_count_by_gender_chart | ride_count_by_age_chart
 
-    return row
+    return widget_top_row
 
 
 def generate_line_charts(recent_rides: pd.DataFrame, selector_gender) -> None:
@@ -66,11 +66,11 @@ def generate_line_charts(recent_rides: pd.DataFrame, selector_gender) -> None:
 
     # try to add empty bar joining to space horizontally
 
-    row1 = avg_power_chart | avg_resistance_chart
-    row2 = cumul_power_chart | cumul_resistance_chart
-    line_graphs = row1 & row2
+    widget_mid_row = avg_power_chart | avg_resistance_chart
+    widget_bot_row = cumul_power_chart | cumul_resistance_chart
+    widget_line_graphs = widget_mid_row & widget_bot_row
 
-    return line_graphs
+    return widget_line_graphs
 
 
 def main_recent_rides(db_connection: extensions.connection) -> None:
