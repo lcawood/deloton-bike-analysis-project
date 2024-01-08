@@ -1,12 +1,20 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="Deloton Dashboard",
+    page_title="DELOTON Dashboard",
     page_icon="🚲",
     layout="wide"
 )
 
-st.write("# Deloton Bike Analysis🚴")
+st.write("# DELOTON Bike Analysis🚴")
+
+st.markdown('''
+<style>
+.st-b7 {
+    color: #90d1a2;
+}
+</style>
+''', unsafe_allow_html=True)
 
 st.sidebar.success("Select a page above.")
 

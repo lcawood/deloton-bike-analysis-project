@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from psycopg2 import extensions
 import streamlit as st
 
-from database import (get_database_connection, get_recent_12hr_data,
+from database import (get_database_connection,
                       get_current_ride_data, get_current_ride_data_highest)
 from utilities import get_current_rider_name, is_heart_rate_abnormal
 from visualisations import (get_current_ride_header, get_dashboard_title,

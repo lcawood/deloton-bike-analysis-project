@@ -30,37 +30,39 @@ RECENT_RIDE_REFRESH_RATE = 20
 LAST_UPDATED_COUNT_INCREMENT = 1
 
 
-def generate_bar_charts(recent_rides: pd.DataFrame, selector) -> None:
+def generate_bar_charts(recent_rides: pd.DataFrame, selector_gender) -> None:
     """Generates the bar charts for the dashboard."""
 
     total_duration_gender_chart = get_total_duration_gender_bar_chart(
-        recent_rides, selector)
+        recent_rides, selector_gender)
 
     ride_count_by_gender_chart = get_total_ride_count_gender_bar_chart(
-        recent_rides, selector)
+        recent_rides, selector_gender)
 
     ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
-        recent_rides, selector)
+        recent_rides, selector_gender)
 
     row = total_duration_gender_chart | ride_count_by_gender_chart | ride_count_by_age_chart
 
     return row
 
 
-def generate_line_charts(recent_rides: pd.DataFrame, selector) -> None:
+def generate_line_charts(recent_rides: pd.DataFrame, selector_gender) -> None:
     """Generates the line charts for the dashboard."""
 
     avg_power_chart = get_power_output_avg_line_chart(
-        recent_rides, selector)
+        recent_rides, selector_gender)
 
     avg_resistance_chart = get_resistance_output_avg_line_chart(
-        recent_rides, selector)
+        recent_rides, selector_gender)
 
     cumul_power_chart = get_power_output_cumul_line_chart(
-        recent_rides, selector)
+        recent_rides, selector_gender)
 
     cumul_resistance_chart = get_resistance_output_cumul_line_chart(
-        recent_rides, selector)
+        recent_rides, selector_gender)
+
+    # try to add empty bar joining to space horizontally
 
     row1 = avg_power_chart | avg_resistance_chart
     row2 = cumul_power_chart | cumul_resistance_chart
