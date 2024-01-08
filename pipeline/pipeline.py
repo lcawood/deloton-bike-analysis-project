@@ -1,11 +1,16 @@
 """
-Pipeline script to establish connection to Kafka stream, retrieve log lines, and then transform and
-upload the relevant data to the database (using functions from the `transform.py` and `load.py`
-files as necessary).
-User's max and min heart rates are calculated using functions from validate_heart_rate, and their
-heart rate given in the readings compared against them; if it above or below the healthy range too
-many times in a row (EXTREME_HR_COUNT_THRESHOLD), the validate_heart_rate function send_email is
-used to alert the rider.
+Pipeline script to run first backfill_pipeline() from backfill_pipeline.py (to catch up on historic
+data from the kafka stream; described in docstring for said file), and then live_pipeline()
+(described below, and defined further below).
+
+live_pipeline():
+ - Pipeline script to establish connection to Kafka stream, retrieve log lines, and then transform
+ and upload the relevant data to the database (using functions from the `transform.py` and
+ `load.py` files as necessary).
+ - User's max and min heart rates are calculated using functions from validate_heart_rate, and
+ their heart rate given in the readings compared against them; if it above or below the healthy
+ range too many times in a row (EXTREME_HR_COUNT_THRESHOLD), the validate_heart_rate function
+ send_email is used to alert the rider.
 """
 
 from datetime import datetime
@@ -20,6 +25,8 @@ from dotenv import load_dotenv
 import load
 import transform
 import validate_heart_rate
+
+import backfill_pipeline
 
 GROUP_ID = "pipeline_zeta"
 EXTREME_HR_COUNT_THRESHOLD = 3
@@ -54,10 +61,10 @@ def get_next_log_line(consumer: Consumer, messages: list[Message]) -> str:
     while not log_line:
         messages[-1] = consumer.poll(1)
         log_line = get_log_line_from_message(messages[-1])
-            
-    if (len(messages) == 3):
+
+    if len(messages) == 3:
         messages.pop(0)
-        if ('[SYSTEM]' in log_line):
+        if '[SYSTEM]' in log_line:
             consumer.commit(messages[0], asynchronous=False)
 
     return log_line
@@ -84,6 +91,15 @@ def rider_pipeline(log_line: str) -> dict:
     return rider
 
 
+def bike_pipeline(log_line: str):
+    """
+    Function to extract bike serial number from log line, upload it to the db (or locate it if it
+    already exists), and return the bike_id number.
+    """
+    bike_serial_number = transform.get_bike_serial_number_from_log_line(log_line)
+    return load.add_bike(bike_serial_number)
+
+
 def ride_pipeline(log_line: str, bike_id: int) -> dict:
     """
     Function to extract ride info from the given log line, upload it to the db, and return the id
@@ -95,13 +111,14 @@ def ride_pipeline(log_line: str, bike_id: int) -> dict:
     return ride_info
 
 
-def reading_pipeline(log_line: str, ride_id: int, start_time: datetime, reading: dict, rider: dict,
+def reading_pipeline(log_line: str, ride_id: int, start_time: datetime, rider: dict,
                      consecutive_extreme_hrs: list) -> dict:
     """
     Function to extract reading data from log_line, add it to reading dict, and (for every pair of
     readings) upload to db and alert rider by email if their heart rate has had an extreme value
     for enough consecutive readings.
     """
+    reading = {'ride_id': ride_id}
     reading = transform.get_reading_data_from_log_line(reading, log_line, start_time)
     if 'heart_rate' in reading:
         # Heart rate comes with the second of every pair of reading log lines.
@@ -119,13 +136,11 @@ def reading_pipeline(log_line: str, ride_id: int, start_time: datetime, reading:
             except ClientError:
                 print('Unable to send email.')
             consecutive_extreme_hrs.clear()
-
-        reading.clear()
-        reading['ride_id'] = ride_id
+        
     return reading
 
 
-def pipeline():
+def live_pipeline():
     """
     Function to run the main pipeline; establishes connection to Kafka stream, retrieves messages,
     utilises transform module to get data, and uses load module to upload to the db.
@@ -137,20 +152,26 @@ def pipeline():
     while True:
         log_line = get_next_log_line(kafka_consumer, messages)
         if '[SYSTEM]' in log_line:
-            rider = rider_pipeline(log_line)
             consecutive_extreme_hrs = []
-            bike_serial_number = transform.get_bike_serial_number_from_log_line(
-                log_line)
-            bike_id = load.add_bike(bike_serial_number)
+            rider = rider_pipeline(log_line)
+            bike_id = bike_pipeline(log_line)
             ride = ride_pipeline(log_line, bike_id)
-            reading = {'ride_id': ride['ride_id']}
 
         if ('[INFO]' in log_line) and rider:
-            reading = reading_pipeline(
-                log_line, ride['ride_id'], ride['start_time'], reading, rider,
-                consecutive_extreme_hrs)
+            reading_pipeline(
+                log_line, ride['ride_id'], ride['start_time'], rider, consecutive_extreme_hrs)
 
-        print(log_line)
+
+def pipeline():
+    """
+    Runs first the backfill_pipeline, and then the live_pipeline, until fatal error or user
+    interrupt.
+    """
+    logging.INFO("Running backfill_pipeline...")
+    backfill_pipeline.backfill_pipeline()
+    logging.INFO("backfill_pipeline finished.")
+    logging.INFO("Running live_pipeline...")
+    live_pipeline()
 
 
 if __name__ == "__main__":
