@@ -117,8 +117,6 @@ def get_last_updated_recent_rides(last_update_time: datetime,
                                   _last_updated_placeholder: st.empty) -> None:
     """Generates a caption under the header with the time since the last data update."""
 
-    # time_delta = (current_time-last_update_time).total_seconds()
-
     current_time = datetime.utcnow()
     time_delta = int((current_time - last_update_time).total_seconds())
 
