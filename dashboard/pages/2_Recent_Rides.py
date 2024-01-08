@@ -30,12 +30,11 @@ RECENT_RIDE_REFRESH_RATE = 20
 LAST_UPDATED_COUNT_INCREMENT = 1
 
 
-def generate_bar_charts(recent_rides: pd.DataFrame, ride_count_by_gender: pd.DataFrame,
-                        ride_count_by_age: pd.DataFrame, selector) -> None:
+def generate_bar_charts(recent_rides: pd.DataFrame, selector) -> None:
     """Generates the bar charts for the dashboard."""
 
     # Generate bar charts
-    bar_col_1,  = st.columns([1, 1, 2], gap='large')
+    bar_col_1, bar_col_2, bar_col_3 = st.columns([1, 1, 2], gap='large')
     with bar_col_1:
 
         total_duration_gender_chart = get_total_duration_gender_bar_chart(
@@ -134,17 +133,17 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
         recent_rides = get_recent_12hr_data(db_connection)
         recent_rides = process_dataframe(recent_rides, date_resolution)
 
-        print(recent_rides)
+        print(recent_rides['gender'])
         # ride_count_by_gender = get_ride_count_gender(db_connection)
         # ride_count_by_age = get_ride_count_age(db_connection)
         # line_chart_data = get_dataframe_columns_for_line_charts(
         #     recent_rides, date_resolution)
 
-        # # average charts
-        avg_power_over_time = process_dataframe_power_output_avg(
-            recent_rides)
-        avg_resistance_over_time = process_dataframe_resistance_output_avg(
-            line_chart_data)
+        # # # average charts
+        # avg_power_over_time = process_dataframe_power_output_avg(
+        #     recent_rides)
+        # avg_resistance_over_time = process_dataframe_resistance_output_avg(
+        #     line_chart_data)
 
         # # cumulative charts
         # cumul_power_over_time = process_dataframe_power_output_cumul(

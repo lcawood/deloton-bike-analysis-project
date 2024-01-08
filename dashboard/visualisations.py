@@ -130,16 +130,17 @@ def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame, selector) -> 
     over the past 12 hours.
     """
 
-    grouped_data = recent_data.groupby(
-        'gender')['elapsed_time'].sum().reset_index()
-    grouped_data['elapsed_time'] = (
-        grouped_data['elapsed_time'] / (60 * 60)).round()
-
-    chart = alt.Chart(grouped_data, title='Total Duration (by gender)').mark_bar().encode(
+    chart = alt.Chart(recent_data, title='Total Duration (by gender)').transform_aggregate(
+        total_elapsed_time='sum(elapsed_time)',
+        groupby=['gender']
+    ).transform_calculate(
+        total_elapsed_time_hours='datum.total_elapsed_time / 3600'
+    ).mark_bar().encode(
         x=alt.X('gender:N', title='Gender'),
-        y=alt.Y('elapsed_time:Q', title='Total Elapsed Time (hours)'),
+        y=alt.Y('total_elapsed_time_hours:Q',
+                title='Total Elapsed Time (hours)'),
         tooltip=[alt.Tooltip('gender:N', title='Gender'), alt.Tooltip(
-            'elapsed_time:Q', title='Total Elapsed Time')],
+            'total_elapsed_time_hours:Q', title='Total Elapsed Time')],
         opacity=alt.condition(selector, alt.value(1), alt.value(0.25))
     ).add_selection(selector).transform_filter(selector).properties(width=300)
 
