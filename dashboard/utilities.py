@@ -104,7 +104,7 @@ def add_age_bracket_column(df: pd.DataFrame) -> None:
 
     bins = [0, 18, 25, 35, 45, 55, 65, 75, float('inf')]
     labels = ['Under 18', '18-24', '25-34',
-              '35-44', '45-54', '55-64', '65-74', '65-74', '75+']
+              '35-44', '45-54', '55-64', '65-74', '75+']
 
     df['age_bracket'] = pd.cut(
         df['age'], bins=bins, labels=labels, right=False, include_lowest=True)
