@@ -130,7 +130,7 @@ def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame, selector_gend
     over the past 12 hours.
     """
 
-    chart = alt.Chart(recent_data, title='Total Duration (by gender)').transform_aggregate(
+    chart = alt.Chart(recent_data, title='Total Duration').transform_aggregate(
         total_elapsed_time='sum(elapsed_time)',
         groupby=['gender']
     ).transform_calculate(
@@ -153,7 +153,7 @@ def get_total_ride_count_gender_bar_chart(recent_rides: pd.DataFrame, selector_g
     over the past 12 hours.
     """
 
-    chart = alt.Chart(recent_rides, title='Total Number of rides (by gender)').mark_bar().encode(
+    chart = alt.Chart(recent_rides, title='Total Number of Rides (by gender)').mark_bar().encode(
         x=alt.X('gender:N', title='Gender'),
         y=alt.Y('count():Q', title='Number of Rides'),
         opacity=alt.condition(selector_gender, alt.value(1), alt.value(0.25))
@@ -168,7 +168,7 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame, selector_gende
     over the past 12 hours.
     """
 
-    chart = alt.Chart(ride_counts, title='Total Number of rides (by age)').mark_bar().encode(
+    chart = alt.Chart(ride_counts, title='Total Number of Rides (by age)').mark_bar().encode(
         x=alt.X('age_bracket:N', title='Ages'),
         y=alt.Y('count():Q', title='Number of Rides'),
         tooltip=[alt.Tooltip('age_bracket:N', title='Age Bracket'), alt.Tooltip(
@@ -197,7 +197,7 @@ def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame, selector_gen
     """Generates a line chart for the average resistance output over the past 12 hours."""
 
     chart = alt.Chart(
-        recent_data, title='Average Resistance output'
+        recent_data, title='Average Resistance Output'
     ).mark_line(interpolate='linear').encode(
         x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
         y=alt.Y('mean(resistance):Q', title='Average Resistance'),
@@ -225,7 +225,7 @@ def get_power_output_cumul_line_chart(recent_data: pd.DataFrame, selector_gender
 def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame, selector_gender) -> alt.Chart:
     """Generates a line chart for the cumulative resistance output over the past 12 hours."""
 
-    chart = alt.Chart(recent_data, title='Cumulative Resistance output').mark_line().encode(
+    chart = alt.Chart(recent_data, title='Cumulative Resistance Output').mark_line().encode(
         x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
         y=alt.Y('cumulative_resistance:Q', title='Cumulative Resistance'),
     ).transform_window(
