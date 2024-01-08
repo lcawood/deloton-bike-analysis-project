@@ -13,6 +13,11 @@ provider "aws" {
   region  = "eu-west-2"
 }
 
+data "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecsTaskExecutionRole"
+}
+
+
 resource "aws_security_group" "c9_velo_securitygroup" {
   name        = "c9_velo_securitygroup"
   description = "Allow TLS inbound traffic"
@@ -464,4 +469,90 @@ resource "aws_ecs_service" "pipeline_service" {
   desired_count = 1  
 }
 
+# ECR for API
 
+resource "aws_ecr_repository" "c9_deloton_api_t" {
+  name                 = "c9-deloton-api-t"
+  image_tag_mutability = "MUTABLE"
+}
+
+#Task definition for API
+
+resource "aws_ecs_task_definition" "c9_deloton_api_task_def_t"{
+  family                   = "c9-deloton-api-task-def-t"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 1024
+  memory                   = 2048
+  execution_role_arn       = "${data.aws_iam_role.ecs_task_execution_role.arn}"
+  container_definitions    = <<TASK_DEFINITION
+[
+  {
+    "environment": [
+      {"name": "DATABASE_IP", "value": "${var.DATABASE_IP}"},
+      {"name": "DATABASE_NAME", "value": "${var.DATABASE_NAME}"},
+      {"name": "DATABASE_PASSWORD", "value": "${var.DATABASE_PASSWORD}"},
+      {"name": "DATABASE_PORT", "value": "${var.DATABASE_PORT}"},
+      {"name": "DATABASE_USERNAME", "value": "${var.DATABASE_USERNAME}"}
+    ],
+    "name": "c9-deloton-api-task-def-t",
+    "image": "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-deloton-api-t:latest",
+    "essential": true,
+    "portMappings" : [
+        {
+          "containerPort" : 5000,
+          "hostPort"      : 5000
+        }
+      ]
+  }
+]
+TASK_DEFINITION
+
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = "X86_64"
+  }
+}
+
+#Security group for api
+
+resource "aws_security_group" "c9_velo_securitygroup_api" {
+  name        = "c9_velo_securitygroup_api"
+  description = "Allow TLS inbound traffic"
+  vpc_id      = "vpc-04423dbb18410aece"
+
+  ingress {
+    description      = "TLS from VPC"
+    from_port        = 5000
+    to_port          = 5000
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"] 
+  }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    Name = "c9_velo_securitygroup_api"
+  }
+}
+
+resource "aws_ecs_service" "c9-deloton-api-service" {
+  name            = "c9-deloton-api-service"
+  cluster         = "c9-ecs-cluster"
+  task_definition = aws_ecs_task_definition.c9_deloton_api_task_def_t.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+  force_new_deployment = true 
+  depends_on = [aws_ecs_task_definition.c9_deloton_api_task_def_t]
+
+network_configuration {
+    security_groups = [aws_security_group.c9_velo_securitygroup_api.id]
+    subnets         = ["subnet-0d0b16e76e68cf51b","subnet-081c7c419697dec52","subnet-02a00c7be52b00368"]
+    assign_public_ip = true
+  }
+}

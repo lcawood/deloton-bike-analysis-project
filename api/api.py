@@ -44,6 +44,7 @@ app = Flask(__name__)
 app.json.sort_keys = False
 cache = Cache(config={'CACHE_TYPE': 'SimpleCache', 'CACHE_DEFAULT_TIMEOUT': 1})
 cache.init_app(app)
+db_conn = get_database_connection()
 
 
 def is_not_get_request(*args, **kwargs) -> bool:
@@ -115,5 +116,4 @@ def daily_rides_endpoint():
 
 
 if __name__ == "__main__":
-    db_conn = get_database_connection()
     app.run(debug=True, host="0.0.0.0", port=5000)
