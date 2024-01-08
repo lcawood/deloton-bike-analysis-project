@@ -89,11 +89,44 @@ def is_heart_rate_abnormal(user_details: list) -> bool:
     return (heart_rate == 0) or not (min_heart_rate <= heart_rate <= max_heart_rate)
 
 
-def process_dataframe_types(recent_rides: pd.DataFrame) -> pd.DataFrame:
-    """Modifies by reference the given DataFrame column types"""
-    recent_rides['elapsed_time'] = pd.to_numeric(recent_rides['elapsed_time'])
+def ceil_dt(dt, delta):
+    """Round datetime up to the nearest delta minutes"""
+    return dt + (datetime.min - dt) % delta
 
-    return recent_rides
+
+def add_age_bracket_column(df: pd.DataFrame) -> None:
+    """Adds a column containing the age brackets to the given DataFrame based on the birthdate."""
+
+    df['age'] = df['birthdate'].apply(calculate_age)
+
+    bins = [0, 18, 25, 35, 45, 55, 65, float('inf')]
+    labels = ['Under 18', '18-24', '25-34', '35-44', '45-54', '55-64', '65+']
+
+    df['age_bracket'] = pd.cut(
+        df['age'], bins=bins, labels=labels, right=False, include_lowest=True)
+
+    df.drop('age', axis=1, inplace=True)
+
+
+def process_dataframe(df: pd.DataFrame, date_resolution) -> pd.DataFrame:
+    """Modifies by reference the given DataFrame."""
+
+    # Ensure elapsed time is numeric to calculate reading_time
+    df['elapsed_time'] = pd.to_numeric(df['elapsed_time'])
+
+    # Calculate reading_time
+    df["reading_time"] = df.apply(
+        lambda x: (pd.to_datetime(x['start_time']) + pd.to_timedelta(x['elapsed_time'], unit='s')).round('min'), axis=1)
+
+    # Round reading time to date_resolution
+    delta = timedelta(minutes=date_resolution)
+    df["reading_time"] = df['reading_time'].apply(
+        lambda dt: ceil_dt(dt, delta))
+
+    # Add age_bracket column
+    add_age_bracket_column(df)
+
+    return df
 
 
 def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame, date_resolution: int) -> pd.DataFrame:
@@ -110,10 +143,6 @@ def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame, date_resol
 
     df["reading_time"] = df.apply(
         lambda x: (pd.to_datetime(x['start_time']) + pd.to_timedelta(x['elapsed_time'], unit='s')).round('min'), axis=1)
-
-    def ceil_dt(dt, delta):
-        """Round datetime up to the nearest delta minutes"""
-        return dt + (datetime.min - dt) % delta
 
     df["reading_time"] = df['reading_time'].apply(
         lambda dt: ceil_dt(dt, delta))

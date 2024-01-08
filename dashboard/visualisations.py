@@ -141,7 +141,7 @@ def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame, selector) -> 
         tooltip=[alt.Tooltip('gender:N', title='Gender'), alt.Tooltip(
             'elapsed_time:Q', title='Total Elapsed Time')],
         opacity=alt.condition(selector, alt.value(1), alt.value(0.25))
-    ).add_selection(selector).transform_filter(selector).properties(width=200)
+    ).add_selection(selector).transform_filter(selector).properties(width=300)
 
     return chart
 
@@ -156,7 +156,7 @@ def get_total_ride_count_gender_bar_chart(ride_counts: pd.DataFrame, selector) -
         x=alt.X('gender:N', title='Gender'),
         y=alt.Y('count:Q', title='Number of Rides'),
         opacity=alt.condition(selector, alt.value(1), alt.value(0.25))
-    ).add_selection(selector).transform_filter(selector).properties(width=200)
+    ).add_selection(selector).transform_filter(selector).properties(width=300)
     return chart
 
 
@@ -170,7 +170,7 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame, selector) -> a
         x=alt.X('age_bracket:N', title='Ages'),
         y=alt.Y('count:Q', title='Number of Rides'),
         opacity=alt.condition(selector, alt.value(1), alt.value(0.25))
-    ).add_selection(selector).transform_filter(selector).properties(width=500)
+    ).add_selection(selector).transform_filter(selector).properties(width=1000)
 
     return chart
 

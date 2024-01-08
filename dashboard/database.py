@@ -44,7 +44,7 @@ def get_current_ride_data(db_connection: extensions.connection) -> int:
         )
         SELECT
             current_ride.rider_id, first_name, last_name, height, weight, gender, birthdate,
-            heart_rate, power, resistance, elapsed_time
+            heart_rate, power, resistance, elapsed_time, start_time
         FROM current_ride
         JOIN Rider ON current_ride.rider_id = Rider.rider_id
         JOIN Reading ON current_ride.ride_id = Reading.ride_id
