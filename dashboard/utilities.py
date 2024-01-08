@@ -1,6 +1,11 @@
 """Utility functions to transform data fetched from SQL for use in visualisations."""
 
-from datetime import datetime
+# 'Unable to import' errors
+# pylint: disable = E0401
+
+from datetime import datetime, timedelta
+
+import pandas as pd
 
 
 def get_current_rider_name(current_ride: list) -> str:
@@ -30,12 +35,15 @@ def calculate_max_heart_rate(user_details: list) -> int:
 
     'birthdate' and 'gender' are assumed to be cleaned and
     always as datetime and str types, respectively.
+
+    'other' and 'None' gender heart rates are treated conservatively using the formula
+    for females as a safety precaution.
     """
     birthdate = user_details[6]
     age = calculate_age(birthdate)
     gender = user_details[5]
 
-    if gender == "female":
+    if gender in ("female", "other", None):
         return round(206 - (0.88 * age))
     if gender == "male" and age < 40:
         return round(220 - age)
@@ -49,12 +57,15 @@ def calculate_min_heart_rate(user_details: list) -> int:
 
     'birthdate' and 'gender' are assumed to be cleaned and
     always as datetime and str types, respectively.
+
+    'other' and 'None' gender heart rates are treated conservatively using the formula
+    for females as a safety precaution.
     """
     birthdate = user_details[6]
     age = calculate_age(birthdate)
     gender = user_details[5]
 
-    if gender == "female":
+    if gender in ("female", "other", None):
 
         if 18 <= age <= 39:
             return 45
@@ -79,3 +90,124 @@ def is_heart_rate_abnormal(user_details: list) -> bool:
     heart_rate = user_details[7]
 
     return (heart_rate == 0) or not (min_heart_rate <= heart_rate <= max_heart_rate)
+
+
+def ceil_dt(dt, delta):
+    """Round datetime up to the nearest delta minutes"""
+    return dt + (datetime.min - dt) % delta
+
+
+def add_age_bracket_column(df: pd.DataFrame) -> None:
+    """Adds a column containing the age brackets to the given DataFrame based on the birthdate."""
+
+    df['age'] = df['birthdate'].apply(calculate_age)
+
+    bins = [0, 18, 25, 35, 45, 55, 65, 75, float('inf')]
+    labels = ['Under 18', '18-24', '25-34',
+              '35-44', '45-54', '55-64', '65-74', '65-74', '75+']
+
+    df['age_bracket'] = pd.cut(
+        df['age'], bins=bins, labels=labels, right=False, include_lowest=True)
+
+    df.drop('age', axis=1, inplace=True)
+
+
+def process_dataframe(df: pd.DataFrame, date_resolution) -> pd.DataFrame:
+    """Modifies by reference the given DataFrame."""
+
+    # Ensure elapsed time is numeric to calculate reading_time
+    df['elapsed_time'] = pd.to_numeric(df['elapsed_time'])
+
+    # Calculate reading_time
+    df["reading_time"] = df.apply(
+        lambda x: (
+            pd.to_datetime(x['start_time']) +
+            pd.to_timedelta(x['elapsed_time'], unit='s')
+        ).round('min'), axis=1)
+
+    # Round reading time to date_resolution
+    delta = timedelta(minutes=date_resolution)
+    df["reading_time"] = df['reading_time'].apply(
+        lambda dt: ceil_dt(dt, delta))
+
+    # Add age_bracket column
+    add_age_bracket_column(df)
+
+    return df
+
+
+def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame,
+                                          date_resolution: int) -> pd.DataFrame:
+    """
+    Calculates the reading_time from the start_time and elapsed_time columns,
+    and returns the resulting DataFrame containing only relevant columns
+    to speed up aggregation of data.
+    """
+
+    df = recent_rides[['elapsed_time',
+                       'start_time', 'power', 'resistance']].copy()
+
+    delta = timedelta(minutes=date_resolution)
+
+    df["reading_time"] = df.apply(
+        lambda x: (
+            pd.to_datetime(x['start_time']) +
+            pd.to_timedelta(x['elapsed_time'], unit='s')
+        ).round('min'), axis=1)
+
+    df["reading_time"] = df['reading_time'].apply(
+        lambda dt: ceil_dt(dt, delta))
+
+    return df
+
+
+def process_dataframe_power_output_avg(ride_data: pd.DataFrame) -> pd.DataFrame:
+    """Returns a DataFrame that average power output per minute."""
+
+    grouped_df = ride_data.groupby(
+        ['reading_time'])['power'].mean().astype(int)
+
+    grouped_df = grouped_df.reset_index()
+
+    grouped_df.columns = ['reading_time', 'power']
+
+    return grouped_df
+
+
+def process_dataframe_resistance_output_avg(ride_data: pd.DataFrame) -> pd.DataFrame:
+    """Returns a DataFrame that average resistance per minute."""
+
+    grouped_df = ride_data.groupby(
+        ['reading_time'])['resistance'].mean().astype(int)
+
+    grouped_df = grouped_df.reset_index()
+
+    grouped_df.columns = ['reading_time', 'resistance']
+
+    return grouped_df
+
+
+def process_dataframe_power_output_cumul(ride_data: pd.DataFrame) -> pd.DataFrame:
+    """Returns a DataFrame that cumulative power output per minute."""
+
+    grouped_df = ride_data.groupby(
+        ['reading_time'])['power'].cumsum().astype(int)
+
+    grouped_df = grouped_df.reset_index()
+
+    grouped_df.columns = ['reading_time', 'power']
+
+    return grouped_df
+
+
+def process_dataframe_resistance_output_cumul(ride_data: pd.DataFrame) -> pd.DataFrame:
+    """Returns a DataFrame that cumulative resistance per minute."""
+
+    grouped_df = ride_data.groupby(
+        ['reading_time'])['resistance'].cumsum().astype(int)
+
+    grouped_df = grouped_df.reset_index()
+
+    grouped_df.columns = ['reading_time', 'resistance']
+
+    return grouped_df

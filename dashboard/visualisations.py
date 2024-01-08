@@ -1,35 +1,41 @@
 """Functions for visualising Deloton Bike ride data on the Streamlit app."""
 
+# 'Unable to import' errors
+# pylint: disable = E0401
+
 from datetime import datetime
 
+import altair as alt
 import pandas as pd
 import streamlit as st
-import altair as alt
 
-from utilities import calculate_age, is_heart_rate_abnormal
+from utilities import calculate_age
 
 
 def get_dashboard_title() -> None:
-    """Returns a title for the dashboard."""
-    st.title("Deloton Bike Analysis")
+    """Generates a title for the dashboard."""
+    st.title("DELOTON Bike Analysis")
 
 
+# CURRENT RIDE
+# @st.cache_data(show_spinner="Retrieving current ride...")
 def get_current_ride_header(rider_name: str) -> None:
-    """Returns a header for the current ride and the rider's name."""
-    st.header(f"CURRENT RIDE: {rider_name}", divider='blue')
+    """Generates a header for the current ride and the rider's name."""
+    st.header(f"CURRENT RIDE: {rider_name}", divider='green')
 
 
 def get_last_updated_current_ride(last_update_time: datetime,
-                                  last_updated_placeholder: st.empty) -> None:
-    """Returns a caption under the header with the time since the last data update."""
+                                  _last_updated_placeholder: st.empty) -> None:
+    """Generates a caption under the header with the time since the last data update."""
 
     current_time = datetime.utcnow()
     time_delta = int((current_time - last_update_time).total_seconds())
 
-    last_updated_placeholder.caption(
+    _last_updated_placeholder.caption(
         f"Last updated: {time_delta} seconds ago")
 
 
+# @st.cache_data(show_spinner="Retrieving personal info...")
 def get_current_ride_header_personal_info(user_details: list) -> None:
     """
     Gets the main header personal_info for the current ride and displays them.
@@ -67,9 +73,10 @@ def get_heart_rate_warning(heart_rate: int) -> None:
             PLEASE SLOW DOWN OR SEEK ASSISTANCE!""", icon="⚠️")
 
 
+# @st.cache_data(show_spinner="Retrieving ride metrics...")
 def get_current_ride_metrics(user_details: list) -> None:
     """
-    Gets the header metrics for the current ride and displays them.
+    Generates the header metrics for the current ride and displays them.
     """
 
     # get metrics
@@ -90,9 +97,140 @@ def get_current_ride_metrics(user_details: list) -> None:
         st.metric("Resistance", resistance)
 
 
+# @st.cache_data(show_spinner="Retrieving personal bests...")
 def get_current_ride_personal_best_metrics(user_best_details: list) -> None:
     """
-    Gets the main header metric personal bests for the current ride and displays them.
+    Generates the main header metric personal bests for the current ride and displays them.
     """
     with st.expander('Personal Best ⛛'):
         get_current_ride_metrics(user_best_details)
+
+
+# RECENT RIDES
+# @st.cache_data(show_spinner="Retrieving recent rides...")
+def get_recent_rides_header() -> None:
+    """Generates a header for the recent rides section."""
+    st.header("RECENT RIDES", divider='green')
+
+
+def get_last_updated_recent_rides(last_update_time: datetime,
+                                  _last_updated_placeholder: st.empty) -> None:
+    """Generates a caption under the header with the time since the last data update."""
+
+    current_time = datetime.utcnow()
+    time_delta = int((current_time - last_update_time).total_seconds())
+
+    _last_updated_placeholder.caption(
+        f"Last updated: {time_delta} seconds ago")
+
+
+def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame, selector_gender) -> alt.Chart:
+    """
+    Generates a bar chart for the total elapsed_time grouped by gender
+    over the past 12 hours.
+    """
+
+    chart = alt.Chart(recent_data, title='Total Duration (by gender)').transform_aggregate(
+        total_elapsed_time='sum(elapsed_time)',
+        groupby=['gender']
+    ).transform_calculate(
+        total_elapsed_time_hours='datum.total_elapsed_time / 3600'
+    ).mark_bar().encode(
+        x=alt.X('gender:N', title='Gender'),
+        y=alt.Y('total_elapsed_time_hours:Q',
+                title='Total Elapsed Time (hours)'),
+        tooltip=[alt.Tooltip('gender:N', title='Gender'), alt.Tooltip(
+            'total_elapsed_time_hours:Q', title='Total Elapsed Time')],
+        opacity=alt.condition(selector_gender, alt.value(1), alt.value(0.25))
+    ).add_selection(selector_gender).transform_filter(selector_gender).properties(width=300)
+
+    return chart
+
+
+def get_total_ride_count_gender_bar_chart(recent_rides: pd.DataFrame, selector_gender) -> alt.Chart:
+    """
+    Generates a bar chart for the total number of rides grouped by gender
+    over the past 12 hours.
+    """
+
+    chart = alt.Chart(recent_rides, title='Total Number of rides (by gender)').mark_bar().encode(
+        x=alt.X('gender:N', title='Gender'),
+        y=alt.Y('count():Q', title='Number of Rides'),
+        opacity=alt.condition(selector_gender, alt.value(1), alt.value(0.25))
+    ).add_selection(selector_gender).transform_filter(selector_gender).properties(width=300)
+
+    return chart
+
+
+def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame, selector_gender) -> alt.Chart:
+    """
+    Generates a bar chart for the total number of rides grouped by age brackets
+    over the past 12 hours.
+    """
+
+    chart = alt.Chart(ride_counts, title='Total Number of rides (by age)').mark_bar().encode(
+        x=alt.X('age_bracket:N', title='Ages'),
+        y=alt.Y('count():Q', title='Number of Rides'),
+        tooltip=[alt.Tooltip('age_bracket:N', title='Age Bracket'), alt.Tooltip(
+            'count():Q', title='Total Number of Rides')]
+    ).add_selection(selector_gender).transform_filter(selector_gender).properties(width=1000)
+
+    return chart
+
+
+def get_power_output_avg_line_chart(recent_data: pd.DataFrame, selector_gender) -> alt.Chart:
+    """Generates a line chart for the average power output over the past 12 hours."""
+
+    chart = alt.Chart(
+        recent_data, title='Average Power Output'
+    ).mark_line(interpolate='linear').encode(
+        x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
+        y=alt.Y('mean(power):Q', title='Average Power (W)'),
+        tooltip=[alt.Tooltip('reading_time:N', title='Reading Time'), alt.Tooltip(
+            'mean(power):Q', title='Average Power')]
+    ).transform_filter(selector_gender).properties(width=850)
+
+    return chart
+
+
+def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame, selector_gender) -> alt.Chart:
+    """Generates a line chart for the average resistance output over the past 12 hours."""
+
+    chart = alt.Chart(
+        recent_data, title='Average Resistance output'
+    ).mark_line(interpolate='linear').encode(
+        x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
+        y=alt.Y('mean(resistance):Q', title='Average Resistance'),
+    ).transform_filter(selector_gender).properties(width=850)
+
+    return chart
+
+
+def get_power_output_cumul_line_chart(recent_data: pd.DataFrame, selector_gender) -> alt.Chart:
+    """Generates a line chart for the cumulative power output over the past 12 hours."""
+
+    recent_data['kilowatt_power'] = recent_data['power']/1000
+
+    chart = alt.Chart(recent_data, title='Cumulative Power Output').mark_line().encode(
+        x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
+        y=alt.Y('cumulative_power:Q', title='Cumulative Power (kW)'),
+    ).transform_window(
+        cumulative_power='sum(kilowatt_power)',
+        sort=[{"field": 'reading_time'}]
+    ).transform_filter(selector_gender).properties(width=850)
+
+    return chart
+
+
+def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame, selector_gender) -> alt.Chart:
+    """Generates a line chart for the cumulative resistance output over the past 12 hours."""
+
+    chart = alt.Chart(recent_data, title='Cumulative Resistance output').mark_line().encode(
+        x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
+        y=alt.Y('cumulative_resistance:Q', title='Cumulative Resistance'),
+    ).transform_window(
+        cumulative_resistance='sum(resistance)',
+        sort=[{"field": 'reading_time'}]
+    ).transform_filter(selector_gender).properties(width=850)
+
+    return chart

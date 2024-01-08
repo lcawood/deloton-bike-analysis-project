@@ -1,6 +1,6 @@
 """Unit tests for the dashboard.py file"""
 
-from dashboard import main_current_ride
+from dashboard import main_homepage
 
 
 def test_dashboard():
