@@ -50,36 +50,6 @@ def generate_bar_charts(recent_rides: pd.DataFrame, selector) -> None:
 def generate_line_charts(recent_rides: pd.DataFrame) -> None:
     """Generates the line charts for the dashboard."""
 
-    # line_col_11, line_col_12 = st.columns(2, gap='large')
-    # with line_col_11:
-    #     avg_power_chart = get_power_output_avg_line_chart(
-    #         recent_rides)
-
-    #     st.altair_chart(avg_power_chart,
-    #                     use_container_width=True)
-
-    # with line_col_12:
-    #     avg_resistance_chart = get_resistance_output_avg_line_chart(
-    #         recent_rides)
-
-    #     st.altair_chart(avg_resistance_chart,
-    #                     use_container_width=True)
-
-    # line_col_21, line_col_22 = st.columns(2, gap='large')
-    # with line_col_21:
-    #     cumul_power_chart = get_power_output_cumul_line_chart(
-    #         recent_rides)
-
-    #     st.altair_chart(cumul_power_chart,
-    #                     use_container_width=True)
-
-    # with line_col_22:
-    #     cumul_resistance_chart = get_resistance_output_cumul_line_chart(
-    #         recent_rides)
-
-    #     st.altair_chart(cumul_resistance_chart,
-    #                     use_container_width=True)
-
     avg_power_chart = get_power_output_avg_line_chart(
         recent_rides)
 
@@ -123,24 +93,6 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
 
         recent_rides = get_recent_12hr_data(db_connection)
         recent_rides = process_dataframe(recent_rides, date_resolution)
-
-        print(recent_rides['resistance'])
-        # ride_count_by_gender = get_ride_count_gender(db_connection)
-        # ride_count_by_age = get_ride_count_age(db_connection)
-        # line_chart_data = get_dataframe_columns_for_line_charts(
-        #     recent_rides, date_resolution)
-
-        # # # average charts
-        # avg_power_over_time = process_dataframe_power_output_avg(
-        #     recent_rides)
-        # avg_resistance_over_time = process_dataframe_resistance_output_avg(
-        #     recent_rides)
-
-        # # # cumulative charts
-        # cumul_power_over_time = process_dataframe_power_output_cumul(
-        #     recent_rides)
-        # cumul_resistance_over_time = process_dataframe_resistance_output_cumul(
-        #     recent_rides)
 
         # placeholder for last updated time caption
         empty_last_updated_placeholder = st.empty()
