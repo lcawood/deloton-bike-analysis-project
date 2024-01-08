@@ -1,3 +1,10 @@
+"""
+Entry point home page for the dashboard.
+"""
+
+# 'Unable to import' errors
+# pylint: disable = E0401
+
 import streamlit as st
 
 st.set_page_config(

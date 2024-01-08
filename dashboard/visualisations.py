@@ -1,13 +1,15 @@
 """Functions for visualising Deloton Bike ride data on the Streamlit app."""
 
-from datetime import datetime, timedelta
+# 'Unable to import' errors
+# pylint: disable = E0401
+
+from datetime import datetime
 
 import altair as alt
 import pandas as pd
 import streamlit as st
 
 from utilities import calculate_age
-from database import (get_recent_12hr_data)
 
 
 def get_dashboard_title() -> None:
@@ -108,7 +110,7 @@ def get_current_ride_personal_best_metrics(user_best_details: list) -> None:
 # @st.cache_data(show_spinner="Retrieving recent rides...")
 def get_recent_rides_header() -> None:
     """Generates a header for the recent rides section."""
-    st.header(f"RECENT RIDES", divider='green')
+    st.header("RECENT RIDES", divider='green')
 
 
 def get_last_updated_recent_rides(last_update_time: datetime,
@@ -181,7 +183,9 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame, selector_gende
 def get_power_output_avg_line_chart(recent_data: pd.DataFrame, selector_gender) -> alt.Chart:
     """Generates a line chart for the average power output over the past 12 hours."""
 
-    chart = alt.Chart(recent_data, title='Average Power Output').mark_line(interpolate='linear').encode(
+    chart = alt.Chart(
+        recent_data, title='Average Power Output'
+    ).mark_line(interpolate='linear').encode(
         x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
         y=alt.Y('mean(power):Q', title='Average Power (W)'),
         tooltip=[alt.Tooltip('reading_time:N', title='Reading Time'), alt.Tooltip(
@@ -194,7 +198,9 @@ def get_power_output_avg_line_chart(recent_data: pd.DataFrame, selector_gender) 
 def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame, selector_gender) -> alt.Chart:
     """Generates a line chart for the average resistance output over the past 12 hours."""
 
-    chart = alt.Chart(recent_data, title='Average Resistance output').mark_line(interpolate='linear').encode(
+    chart = alt.Chart(
+        recent_data, title='Average Resistance output'
+    ).mark_line(interpolate='linear').encode(
         x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
         y=alt.Y('mean(resistance):Q', title='Average Resistance'),
     ).transform_filter(selector_gender).properties(width=850)

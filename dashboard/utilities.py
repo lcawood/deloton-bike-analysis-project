@@ -1,5 +1,8 @@
 """Utility functions to transform data fetched from SQL for use in visualisations."""
 
+# 'Unable to import' errors
+# pylint: disable = E0401
+
 from datetime import datetime, timedelta
 
 import pandas as pd
@@ -116,7 +119,10 @@ def process_dataframe(df: pd.DataFrame, date_resolution) -> pd.DataFrame:
 
     # Calculate reading_time
     df["reading_time"] = df.apply(
-        lambda x: (pd.to_datetime(x['start_time']) + pd.to_timedelta(x['elapsed_time'], unit='s')).round('min'), axis=1)
+        lambda x: (
+            pd.to_datetime(x['start_time']) +
+            pd.to_timedelta(x['elapsed_time'], unit='s')
+        ).round('min'), axis=1)
 
     # Round reading time to date_resolution
     delta = timedelta(minutes=date_resolution)
@@ -129,7 +135,8 @@ def process_dataframe(df: pd.DataFrame, date_resolution) -> pd.DataFrame:
     return df
 
 
-def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame, date_resolution: int) -> pd.DataFrame:
+def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame,
+                                          date_resolution: int) -> pd.DataFrame:
     """
     Calculates the reading_time from the start_time and elapsed_time columns,
     and returns the resulting DataFrame containing only relevant columns
@@ -142,7 +149,10 @@ def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame, date_resol
     delta = timedelta(minutes=date_resolution)
 
     df["reading_time"] = df.apply(
-        lambda x: (pd.to_datetime(x['start_time']) + pd.to_timedelta(x['elapsed_time'], unit='s')).round('min'), axis=1)
+        lambda x: (
+            pd.to_datetime(x['start_time']) +
+            pd.to_timedelta(x['elapsed_time'], unit='s')
+        ).round('min'), axis=1)
 
     df["reading_time"] = df['reading_time'].apply(
         lambda dt: ceil_dt(dt, delta))
@@ -200,8 +210,3 @@ def process_dataframe_resistance_output_cumul(ride_data: pd.DataFrame) -> pd.Dat
     grouped_df.columns = ['reading_time', 'resistance']
 
     return grouped_df
-
-# TODO
-# function that adds column age bracket to recent_data dataframe instead of separate query.
-# instead of sql query to find count aggregate of gender, apply transform_aggregate altair method -
-    # this is to allow filtering of the same dataset.

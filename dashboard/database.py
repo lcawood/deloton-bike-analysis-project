@@ -1,5 +1,7 @@
 """Utility functions to interact with the RDS database."""
 
+# 'Unable to import' errors
+# pylint: disable = E0401
 
 from datetime import timedelta, datetime
 from os import environ
@@ -198,8 +200,11 @@ def get_recent_12hr_data(db_connection: extensions.connection) -> pd.DataFrame:
 
         recent_rides = db_cur.fetchall()
 
-        columns = ["rider_id", "first_name", "last_name", "height", "weight", "gender",
-                   "birthdate", "heart_rate", "power", "resistance", "elapsed_time", "start_time", "ride_id"]
+        columns = [
+            "rider_id", "first_name", "last_name", "height", "weight",
+            "gender", "birthdate", "heart_rate", "power",
+            "resistance", "elapsed_time", "start_time", "ride_id"
+        ]
 
         return pd.DataFrame(recent_rides, columns=columns)
 
