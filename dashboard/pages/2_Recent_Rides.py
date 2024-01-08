@@ -33,42 +33,18 @@ LAST_UPDATED_COUNT_INCREMENT = 1
 def generate_bar_charts(recent_rides: pd.DataFrame, selector) -> None:
     """Generates the bar charts for the dashboard."""
 
-    # Generate bar charts
-    bar_col_1, bar_col_2, bar_col_3 = st.columns([1, 1, 2], gap='large')
-    with bar_col_1:
+    total_duration_gender_chart = get_total_duration_gender_bar_chart(
+        recent_rides, selector)
 
-        total_duration_gender_chart = get_total_duration_gender_bar_chart(
-            recent_rides, selector)
-        st.altair_chart(total_duration_gender_chart,
-                        use_container_width=True)
+    ride_count_by_gender_chart = get_total_ride_count_gender_bar_chart(
+        recent_rides, selector)
 
-    # with bar_col_2:
+    ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
+        recent_rides, selector)
 
-    #     ride_count_by_gender_chart = get_total_ride_count_gender_bar_chart(
-    #         ride_count_by_gender, selector)
-    #     st.altair_chart(ride_count_by_gender_chart,
-    #                     use_container_width=True)
+    row = total_duration_gender_chart | ride_count_by_gender_chart | ride_count_by_age_chart
 
-    # with bar_col_3:
-
-    #     ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
-    #         ride_count_by_age, selector)
-
-    #     st.altair_chart(ride_count_by_age_chart,
-    #                     use_container_width=True)
-
-    # total_duration_gender_chart = get_total_duration_gender_bar_chart(
-    #     recent_rides, selector)
-
-    # ride_count_by_gender_chart = get_total_ride_count_gender_bar_chart(
-    #     ride_count_by_gender, selector)
-
-    # ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
-    #     ride_count_by_age, selector)
-
-    # row = total_duration_gender_chart | ride_count_by_gender_chart | ride_count_by_age_chart
-
-    # st.altair_chart(row)
+    st.altair_chart(row)
 
 
 def generate_line_charts(avg_power_over_time: pd.DataFrame,
