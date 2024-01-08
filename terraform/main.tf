@@ -556,3 +556,10 @@ network_configuration {
     assign_public_ip = true
   }
 }
+
+# ECR for Dashboard
+
+resource "aws_ecr_repository" "c9_deloton_dashboard_t" {
+  name                 = "c9-deloton-dashboard-t"
+  image_tag_mutability = "MUTABLE"
+}
