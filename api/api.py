@@ -1,7 +1,7 @@
 """Module to contain and run the endpoints for the Deloton staff API"""
 
 from datetime import datetime
-from flask import Flask, request
+from flask import Flask, request,current_app
 from flask_caching import Cache
 
 import api_functions
@@ -44,6 +44,7 @@ app = Flask(__name__)
 app.json.sort_keys = False
 cache = Cache(config={'CACHE_TYPE': 'SimpleCache', 'CACHE_DEFAULT_TIMEOUT': 1})
 cache.init_app(app)
+db_conn = get_database_connection()
 
 
 def is_not_get_request(*args, **kwargs) -> bool:
@@ -54,6 +55,11 @@ def is_not_get_request(*args, **kwargs) -> bool:
     if request.method == "GET":
         return False
     return True
+
+@app.route("/", methods=["GET"])
+def index():
+    """ Creates an index route with an index page for the API """
+    return current_app.send_static_file('./pages/index.html')
 
 @app.route("/ride", methods=["GET"])
 @cache.cached(query_string=True)
@@ -110,5 +116,4 @@ def daily_rides_endpoint():
 
 
 if __name__ == "__main__":
-    db_conn = get_database_connection()
     app.run(debug=True, host="0.0.0.0", port=5000)
