@@ -535,3 +535,19 @@ resource "aws_security_group" "c9_velo_securitygroup_api" {
     Name = "c9_velo_securitygroup_api"
   }
 }
+
+resource "aws_ecs_service" "c9-deloton-api-service" {
+  name            = "c9-deloton-api-service"
+  cluster         = "c9-ecs-cluster"
+  task_definition = aws_ecs_task_definition.c9_deloton_api_task_def_t.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+  force_new_deployment = true 
+  depends_on = [aws_ecs_task_definition.c9_deloton_api_task_def_t]
+
+network_configuration {
+    security_groups = [aws_security_group.c9_velo_securitygroup_api.id]
+    subnets         = ["subnet-0d0b16e76e68cf51b","subnet-081c7c419697dec52","subnet-02a00c7be52b00368"]
+    assign_public_ip = true
+  }
+}
