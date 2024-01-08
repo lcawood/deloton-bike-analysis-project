@@ -7,6 +7,7 @@ create visualisations in a Streamlit app (using functions from the `database.py`
 from datetime import datetime
 import time
 
+import altair as alt
 from dotenv import load_dotenv
 import pandas as pd
 from psycopg2 import extensions
@@ -21,7 +22,8 @@ from utilities import (process_dataframe_types,
 from visualisations import (get_dashboard_title, get_total_ride_count_age_bar_chart,
                             get_recent_rides_header, get_last_updated_recent_rides,
                             get_total_duration_gender_bar_chart, get_total_ride_count_gender_bar_chart,
-                            get_power_output_avg_line_chart, get_resistance_output_avg_line_chart,)
+                            get_power_output_avg_line_chart, get_resistance_output_avg_line_chart,
+                            get_power_output_cumul_line_chart, get_resistance_output_cumul_line_chart)
 
 
 RECENT_RIDE_REFRESH_RATE = 5
@@ -57,23 +59,44 @@ def generate_bar_charts(recent_rides: pd.DataFrame, ride_count_by_gender: pd.Dat
 
 
 def generate_line_charts(avg_power_over_time: pd.DataFrame,
-                         avg_resistance_over_time: pd.DataFrame) -> None:
+                         avg_resistance_over_time: pd.DataFrame,
+                         cumul_power_over_time: pd.DataFrame,
+                         cumul_resistance_over_time: pd.DataFrame) -> None:
     """Generates the line charts for the dashboard."""
 
-    line_col_1, line_col_2 = st.columns(2, gap='large')
-    with line_col_1:
+    line_col_11, line_col_12 = st.columns(2, gap='large')
+    with line_col_11:
         avg_power_chart = get_power_output_avg_line_chart(
             avg_power_over_time)
 
         st.altair_chart(avg_power_chart,
                         use_container_width=True)
 
-    with line_col_2:
+    with line_col_12:
         avg_resistance_chart = get_resistance_output_avg_line_chart(
             avg_resistance_over_time)
 
         st.altair_chart(avg_resistance_chart,
                         use_container_width=True)
+
+    line_col_21, line_col_22 = st.columns(2, gap='large')
+    with line_col_21:
+        cumul_power_chart = get_power_output_cumul_line_chart(
+            cumul_power_over_time)
+
+        st.altair_chart(cumul_power_chart,
+                        use_container_width=True)
+
+    with line_col_22:
+        cumul_resistance_chart = get_resistance_output_cumul_line_chart(
+            cumul_resistance_over_time)
+
+        st.altair_chart(cumul_resistance_chart,
+                        use_container_width=True)
+
+
+def timestamp(t):
+    return pd.to_datetime(t).timestamp() * 1000
 
 
 def main_recent_rides(db_connection: extensions.connection) -> None:
@@ -81,6 +104,15 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
     Main function that calls all the functions related to
     displaying the recent rides visualisations.
     """
+
+    gender_select = alt.selection_single(fields=["gender"], empty=False)
+    age_select = alt.selection_single(fields=["age_bracket"], empty=False)
+
+    with st.sidebar:
+        st.subheader("Date resolution")
+        date_resolution = st.slider('Select a resolution (minutes):',
+                                    1, 60, 10)
+
     with st.container():
 
         get_recent_rides_header()
@@ -89,7 +121,13 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
         recent_rides = process_dataframe_types(recent_rides)
         ride_count_by_gender = get_ride_count_gender(db_connection)
         ride_count_by_age = get_ride_count_age(db_connection)
-        line_chart_data = get_dataframe_columns_for_line_charts(recent_rides)
+        line_chart_data = get_dataframe_columns_for_line_charts(
+            recent_rides, date_resolution)
+
+        # line_chart_data["reading_time_timestamp"] = line_chart_data["reading_time"].astype(
+        #     int) // 10**9
+
+        print('\n\n', timestamp(max(line_chart_data["reading_time"])), '\n\n')
 
         avg_power_over_time = process_dataframe_power_output_avg(
             line_chart_data)
@@ -108,7 +146,8 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
         generate_bar_charts(
             recent_rides, ride_count_by_gender, ride_count_by_age)
 
-        generate_line_charts(avg_power_over_time, avg_resistance_over_time)
+        generate_line_charts(avg_power_over_time,
+                             avg_resistance_over_time, cumul_power_over_time, cumul_resistance_over_time)
 
         return empty_last_updated_placeholder
 

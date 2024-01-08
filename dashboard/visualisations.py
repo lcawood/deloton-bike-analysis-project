@@ -185,11 +185,33 @@ def get_power_output_avg_line_chart(recent_data: pd.DataFrame) -> alt.Chart:
 
 
 def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame) -> alt.Chart:
-    """Generates a line chart for the average power output over the past 12 hours."""
+    """Generates a line chart for the average resistance output over the past 12 hours."""
 
     chart = alt.Chart(recent_data, title='Average Resistance output').mark_line().encode(
         x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
         y=alt.Y('resistance:Q', title='Average Resistance'),
+    )
+
+    return chart
+
+
+def get_power_output_cumul_line_chart(recent_data: pd.DataFrame) -> alt.Chart:
+    """Generates a line chart for the cumulative power output over the past 12 hours."""
+
+    chart = alt.Chart(recent_data, title='Cumulative Power Output').mark_line().encode(
+        x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
+        y=alt.Y('power:Q', title='Cumulative Power (W)'),
+    )
+
+    return chart
+
+
+def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame) -> alt.Chart:
+    """Generates a line chart for the cumulative resistance output over the past 12 hours."""
+
+    chart = alt.Chart(recent_data, title='Cumulative Resistance output').mark_line().encode(
+        x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
+        y=alt.Y('resistance:Q', title='Cumulative Resistance'),
     )
 
     return chart

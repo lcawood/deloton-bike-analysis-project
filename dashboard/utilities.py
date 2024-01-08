@@ -96,7 +96,7 @@ def process_dataframe_types(recent_rides: pd.DataFrame) -> pd.DataFrame:
     return recent_rides
 
 
-def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame) -> pd.DataFrame:
+def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame, date_resolution: int) -> pd.DataFrame:
     """
     Calculates the reading_time from the start_time and elapsed_time columns,
     and returns the resulting DataFrame containing only relevant columns
@@ -106,8 +106,17 @@ def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame) -> pd.Data
     df = recent_rides[['elapsed_time',
                        'start_time', 'power', 'resistance']].copy()
 
+    delta = timedelta(minutes=date_resolution)
+
     df["reading_time"] = df.apply(
         lambda x: (pd.to_datetime(x['start_time']) + pd.to_timedelta(x['elapsed_time'], unit='s')).round('min'), axis=1)
+
+    def ceil_dt(dt, delta):
+        """Round datetime up to the nearest delta minutes"""
+        return dt + (datetime.min - dt) % delta
+
+    df["reading_time"] = df['reading_time'].apply(
+        lambda dt: ceil_dt(dt, delta))
 
     return df
 
