@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 
+# --------------   CURRENT RIDES   -------------------
 def get_current_rider_name(current_ride: list) -> str:
     """Returns a string containing the rider first and last name."""
     first_name = current_ride[1]
@@ -90,6 +91,24 @@ def is_heart_rate_abnormal(user_details: list) -> bool:
     heart_rate = user_details[7]
 
     return (heart_rate == 0) or not (min_heart_rate <= heart_rate <= max_heart_rate)
+
+
+def get_reading_time(user_details: list) -> datetime:
+    """Returns the reading time from the given user_details."""
+
+    elapsed_time = user_details[10]
+    start_time = user_details[11]
+
+    return start_time + timedelta(seconds=elapsed_time)
+
+
+def verify_reading_time(reading_time: datetime, delay: int, time_now: datetime = datetime.now()) -> bool:
+    """Returns True if reading time is within the allowed delay from the current time."""
+
+    return reading_time < time_now - timedelta(seconds=delay)
+
+
+# --------------   RECENT RIDES   -------------------
 
 
 def ceil_dt(dt, delta):
