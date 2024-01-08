@@ -171,3 +171,8 @@ def process_dataframe_resistance_output_cumul(ride_data: pd.DataFrame) -> pd.Dat
     grouped_df.columns = ['reading_time', 'resistance']
 
     return grouped_df
+
+# TODO
+# function that adds column age bracket to recent_data dataframe instead of separate query.
+# instead of sql query to find count aggregate of gender, apply transform_aggregate altair method -
+    # this is to allow filtering of the same dataset.
