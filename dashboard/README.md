@@ -13,7 +13,9 @@ This folder contains all code and resources required to create a Streamlit dashb
 - Create a `.env` file by running `touch .env`
 
 - You need a database called `postgres`.
+## 🏃 Running the dashboard locally
 
+To run locally use the command `streamlit run dashboard.py`
 Required env variables (NEED TO VERIFY):
 
 - `DATABASE_IP` -> ARN to your AWS RDS.

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deloton Ride Data API</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1, h2, p, ul, li {
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        h2 {
+            margin-top: 20px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div>
+        <h1>Deloton Ride Data API</h1>
+
+        <h2>/ride</h2>
+        <p>Retrieve information about rides.</p>
+
+        <h2>/ride/:id</h2>
+        <p>Get a ride with a specific ID.</p>
+        <p>Query Parameters:</p>
+        <ul>
+            <li><code>expanded=true</code> - Fetch all readings associated with ride.</li>
+            <li><code>summary=true</code> - Summarise all readings associated with ride.</li>
+        </ul>
+
+        <h2>/rider</h2>
+        <p>Retrieve information about riders.</p>
+
+        <h2>/rider/:user_id</h2>
+        <p>Get rider information (e.g., name, gender, age, avg. heart rate, number of rides).</p>
+
+        <h2>/rider/:user_id/rides</h2>
+        <p>Get all rides for a rider with a specific ID.</p>
+        <p>Query Parameters:</p>
+        <ul>
+            <li><code>expanded=true</code> - Fetch all readings associated with each ride.</li>
+            <li><code>summary=true</code> - Summarise all readings associated with each ride.</li>
+        </ul>
+
+        <h2>/daily</h2>
+        <p>Get all rides in the current day.</p>
+        <p>Query Parameters:</p>
+        <ul>
+            <li><code>expanded=true</code> - Fetch all readings associated with each ride.</li>
+            <li><code>summary=true</code> - Summarise all readings associated with each ride.</li>
+            <li><code>date=01-01-2020</code> - Get all rides for a specific date.</li>
+        </ul>
+    </div>
+
+</body>
+</html>
