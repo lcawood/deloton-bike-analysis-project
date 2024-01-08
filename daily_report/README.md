@@ -11,8 +11,8 @@ This folder contains all the code and resources used for creating the daily repo
 ## 🛠️ Getting Setup
 - Install requirements using `pip3 install -r requirements.txt`
 - Create a `.env` file with the following information:
-    - `AWS_ACCESS_KEY_ID `= xxxxxxxxxx
-    - `AWS_SECRET_ACCESS_KEY` = xxxxxxxx
+    - `AWS_ACCESS_KEY_ID_ `= xxxxxxxxxx
+    - `AWS_SECRET_ACCESS_KEY_` = xxxxxxxx
     - `DATABASE_USERNAME` = xxxxxxxx
     - `DATABASE_PASSWORD` = xxxxxxxx
     - `DATABASE_IP` = xxxxxxxxx

@@ -123,8 +123,8 @@ resource "aws_lambda_function" "c9-deloton-lambda-report-t" {
       DATABASE_PASSWORD = "${var.DATABASE_PASSWORD}",
       DATABASE_PORT ="${var.DATABASE_PORT}",
       DATABASE_USERNAME = "${var.DATABASE_USERNAME}",
-      AWS_ACCESS = "${var.AWS_ACCESS_KEY_ID_}",
-      AWS_SECRET_ACCESS = "${var.AWS_SECRET_ACCESS_KEY_}"
+      AWS_ACCESS_KEY_ID_ = "${var.AWS_ACCESS_KEY_ID_}",
+      AWS_SECRET_ACCESS_KEY_ = "${var.AWS_SECRET_ACCESS_KEY_}"
     }
 }
 }
