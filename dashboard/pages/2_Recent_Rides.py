@@ -26,36 +26,50 @@ from visualisations import (get_dashboard_title, get_total_ride_count_age_bar_ch
                             get_power_output_cumul_line_chart, get_resistance_output_cumul_line_chart)
 
 
-RECENT_RIDE_REFRESH_RATE = 5
+RECENT_RIDE_REFRESH_RATE = 20
 LAST_UPDATED_COUNT_INCREMENT = 1
 
 
-def generate_bar_charts(recent_rides: pd.DataFrame, ride_count_by_gender: pd.DataFrame, ride_count_by_age: pd.DataFrame) -> None:
+def generate_bar_charts(recent_rides: pd.DataFrame, ride_count_by_gender: pd.DataFrame,
+                        ride_count_by_age: pd.DataFrame, selector) -> None:
     """Generates the bar charts for the dashboard."""
 
     # Generate bar charts
-    bar_col_1, bar_col_2, bar_col_3 = st.columns([1, 1, 2], gap='large')
-    with bar_col_1:
+    # bar_col_1, bar_col_2, bar_col_3 = st.columns([1, 1, 2], gap='large')
+    # with bar_col_1:
 
-        total_duration_gender_chart = get_total_duration_gender_bar_chart(
-            recent_rides)
-        st.altair_chart(total_duration_gender_chart,
-                        use_container_width=True)
+    #     total_duration_gender_chart = get_total_duration_gender_bar_chart(
+    #         recent_rides, selector)
+    #     st.altair_chart(total_duration_gender_chart,
+    #                     use_container_width=True)
 
-    with bar_col_2:
+    # with bar_col_2:
 
-        ride_count_by_gender_chart = get_total_ride_count_gender_bar_chart(
-            ride_count_by_gender)
-        st.altair_chart(ride_count_by_gender_chart,
-                        use_container_width=True)
+    #     ride_count_by_gender_chart = get_total_ride_count_gender_bar_chart(
+    #         ride_count_by_gender, selector)
+    #     st.altair_chart(ride_count_by_gender_chart,
+    #                     use_container_width=True)
 
-    with bar_col_3:
+    # with bar_col_3:
 
-        ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
-            ride_count_by_age)
+    #     ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
+    #         ride_count_by_age, selector)
 
-        st.altair_chart(ride_count_by_age_chart,
-                        use_container_width=True)
+    #     st.altair_chart(ride_count_by_age_chart,
+    #                     use_container_width=True)
+
+    total_duration_gender_chart = get_total_duration_gender_bar_chart(
+        recent_rides, selector)
+
+    ride_count_by_gender_chart = get_total_ride_count_gender_bar_chart(
+        ride_count_by_gender, selector)
+
+    ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
+        ride_count_by_age, selector)
+
+    row = total_duration_gender_chart | ride_count_by_gender_chart | ride_count_by_age_chart
+
+    st.altair_chart(row)
 
 
 def generate_line_charts(avg_power_over_time: pd.DataFrame,
@@ -124,27 +138,29 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
         line_chart_data = get_dataframe_columns_for_line_charts(
             recent_rides, date_resolution)
 
-        # line_chart_data["reading_time_timestamp"] = line_chart_data["reading_time"].astype(
-        #     int) // 10**9
-
-        print('\n\n', timestamp(max(line_chart_data["reading_time"])), '\n\n')
-
+        # average charts
         avg_power_over_time = process_dataframe_power_output_avg(
             line_chart_data)
         avg_resistance_over_time = process_dataframe_resistance_output_avg(
             line_chart_data)
 
-        # print(avg_power_over_time.sort_values('reading_time', ascending=True))
+        # cumulative charts
         cumul_power_over_time = process_dataframe_power_output_cumul(
             line_chart_data)
         cumul_resistance_over_time = process_dataframe_resistance_output_cumul(
             line_chart_data)
 
-        # Placeholder for last updated time caption
+        # placeholder for last updated time caption
         empty_last_updated_placeholder = st.empty()
 
+        # create selectors
+        selector_gender = alt.selection_single(
+            fields=['gender'], empty='all', name='GenderSelector')
+        selector_age = alt.selection_single(
+            fields=['age'], empty='all', name='AgeSelector')
+
         generate_bar_charts(
-            recent_rides, ride_count_by_gender, ride_count_by_age)
+            recent_rides, ride_count_by_gender, ride_count_by_age, selector_gender)
 
         generate_line_charts(avg_power_over_time,
                              avg_resistance_over_time, cumul_power_over_time, cumul_resistance_over_time)

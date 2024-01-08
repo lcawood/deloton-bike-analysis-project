@@ -124,7 +124,7 @@ def get_last_updated_recent_rides(last_update_time: datetime,
         f"Last updated: {time_delta} seconds ago")
 
 
-def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame) -> alt.Chart:
+def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame, selector) -> alt.Chart:
     """
     Generates a bar chart for the total elapsed_time grouped by gender
     over the past 12 hours.
@@ -139,13 +139,14 @@ def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame) -> alt.Chart:
         x=alt.X('gender:N', title='Gender'),
         y=alt.Y('elapsed_time:Q', title='Total Elapsed Time (hours)'),
         tooltip=[alt.Tooltip('gender:N', title='Gender'), alt.Tooltip(
-            'elapsed_time:Q', title='Total Elapsed Time')]
-    ).interactive()
+            'elapsed_time:Q', title='Total Elapsed Time')],
+        opacity=alt.condition(selector, alt.value(1), alt.value(0.25))
+    ).add_selection(selector).transform_filter(selector).properties(width=200)
 
     return chart
 
 
-def get_total_ride_count_gender_bar_chart(ride_counts: pd.DataFrame) -> alt.Chart:
+def get_total_ride_count_gender_bar_chart(ride_counts: pd.DataFrame, selector) -> alt.Chart:
     """
     Generates a bar chart for the total number of rides grouped by gender
     over the past 12 hours.
@@ -154,12 +155,12 @@ def get_total_ride_count_gender_bar_chart(ride_counts: pd.DataFrame) -> alt.Char
     chart = alt.Chart(ride_counts, title='Total Number of rides (by gender)').mark_bar().encode(
         x=alt.X('gender:N', title='Gender'),
         y=alt.Y('count:Q', title='Number of Rides'),
-    ).interactive()
-
+        opacity=alt.condition(selector, alt.value(1), alt.value(0.25))
+    ).add_selection(selector).transform_filter(selector).properties(width=200)
     return chart
 
 
-def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame) -> alt.Chart:
+def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame, selector) -> alt.Chart:
     """
     Generates a bar chart for the total number of rides grouped by age brackets
     over the past 12 hours.
@@ -168,7 +169,8 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame) -> alt.Chart:
     chart = alt.Chart(ride_counts, title='Total Number of rides (by age)').mark_bar().encode(
         x=alt.X('age_bracket:N', title='Ages'),
         y=alt.Y('count:Q', title='Number of Rides'),
-    ).interactive()
+        opacity=alt.condition(selector, alt.value(1), alt.value(0.25))
+    ).add_selection(selector).transform_filter(selector).properties(width=500)
 
     return chart
 
