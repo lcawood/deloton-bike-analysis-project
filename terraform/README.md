@@ -8,15 +8,15 @@ This folder should contain all code and resources required to handle the infrast
 
 `.tfvars` keys used:
 
-- `database_username`
-- `database_password`
-- `aws_access_key_id`
-- `aws_secret_access_key`
-- `database_username`
-- `database_password`
-- `database_ip`
-- `database_port`
-- `database_name`
+- `DATABASE_USERNAME`
+- `DATABASE_PASSWORD`
+- `AWS_ACCESS_KEY_ID_`
+- `AWS_SECRET_ACCESS_KEY_`
+- `DATABASE_USERNAME`
+- `DATABASE_PASSWORD`
+- `DATABASE_IP`
+- `DATABASE_PORT`
+- `DATABASE_NAME`
 
 ## 🏃 Running the script
 
