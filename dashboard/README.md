@@ -2,7 +2,7 @@
 
 This folder contains all code and resources required to create a Streamlit dashboard from the data generated in the pipeline file. The files in this folder are used to connect to the database, make visualisations and deploy them to a Streamlit app.
 
-## Installation
+## 🛠️ Installation
 
 - It is recommended before stating any installations that you make a new virtual environment (`venv`).
 
@@ -24,7 +24,10 @@ Required env variables (NEED TO VERIFY):
 - `DATABASE_PASSWORD` -> Password to access your database.
 - `DATABASE_PORT` -> Port used to access the database.
 
-## Wireframe
+## 🏃 Running the dashboard locally
+To run locally use the command `streamlit run dashboard.py`
+
+## 📊 Wireframe
 
 Collapsed:
 ![Dashboard wireframe design (collapsed)](./../diagrams/Dashboard_Wireframe_Collapsed.png)

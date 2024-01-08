@@ -563,3 +563,28 @@ resource "aws_ecr_repository" "c9_deloton_dashboard_t" {
   name                 = "c9-deloton-dashboard-t"
   image_tag_mutability = "MUTABLE"
 }
+
+resource "aws_security_group" "c9_deloton_dashboard_sg" {
+  name        = "c9_deloton_dashboard_sg"
+  description = "Allow TLS inbound traffic"
+  vpc_id      = "vpc-04423dbb18410aece"
+
+  ingress {
+    description      = "TLS from VPC"
+    from_port        = 4321
+    to_port          = 4321
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"] 
+  }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    Name = "c9_deloton_dashboard_sg"
+  }
+}
