@@ -1,8 +1,11 @@
 """
-Dashboard script for the current ride to establish connection to the RDS database, fetch data using SQL queries and
-create visualisations in a Streamlit app (using functions from the `database.py`,
-`visualisations.py` and `utilities.pyz files as necessary).
+Dashboard script for the current ride to establish connection to the RDS database,
+fetch data using SQL queries and create visualisations in a Streamlit app
+using functions from the `database.py`, `visualisations.py` and `utilities.pyz files as necessary.
 """
+
+# 'Unable to import' errors
+# pylint: disable = E0401
 
 from datetime import datetime
 import time

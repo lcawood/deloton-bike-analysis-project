@@ -1,8 +1,11 @@
 """
-Dashboard script for recent rides to establish connection to the RDS database, fetch data using SQL queries and
-create visualisations in a Streamlit app (using functions from the `database.py`,
-`visualisations.py` and `utilities.pyz files as necessary).
+Dashboard script for recent rides to establish connection to the RDS database,
+fetch data using SQL queries and create visualisations in a Streamlit app
+using functions from the `database.py`, `visualisations.py` and `utilities.pyz files as necessary.
 """
+
+# 'Unable to import' errors
+# pylint: disable = E0401
 
 from datetime import datetime
 import time
@@ -13,17 +16,16 @@ import pandas as pd
 from psycopg2 import extensions
 import streamlit as st
 
-from database import (get_database_connection, get_recent_12hr_data,
-                      get_ride_count_gender, get_ride_count_age)
-from utilities import (process_dataframe,
-                       get_dataframe_columns_for_line_charts, process_dataframe_power_output_avg,
-                       process_dataframe_resistance_output_avg, process_dataframe_power_output_cumul,
-                       process_dataframe_resistance_output_cumul)
+from database import (get_database_connection, get_recent_12hr_data)
+from utilities import (process_dataframe)
 from visualisations import (get_dashboard_title, get_total_ride_count_age_bar_chart,
                             get_recent_rides_header, get_last_updated_recent_rides,
-                            get_total_duration_gender_bar_chart, get_total_ride_count_gender_bar_chart,
-                            get_power_output_avg_line_chart, get_resistance_output_avg_line_chart,
-                            get_power_output_cumul_line_chart, get_resistance_output_cumul_line_chart)
+                            get_total_duration_gender_bar_chart,
+                            get_total_ride_count_gender_bar_chart,
+                            get_power_output_avg_line_chart,
+                            get_resistance_output_avg_line_chart,
+                            get_power_output_cumul_line_chart,
+                            get_resistance_output_cumul_line_chart)
 
 
 RECENT_RIDE_REFRESH_RATE = 20
@@ -71,18 +73,11 @@ def generate_line_charts(recent_rides: pd.DataFrame, selector_gender) -> None:
     return line_graphs
 
 
-def timestamp(t):
-    return pd.to_datetime(t).timestamp() * 1000
-
-
 def main_recent_rides(db_connection: extensions.connection) -> None:
     """
     Main function that calls all the functions related to
     displaying the recent rides visualisations.
     """
-
-    gender_select = alt.selection_single(fields=["gender"], empty=False)
-    age_select = alt.selection_single(fields=["age_bracket"], empty=False)
 
     with st.sidebar:
         st.subheader("Date resolution")
