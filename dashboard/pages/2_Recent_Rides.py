@@ -32,40 +32,40 @@ RECENT_RIDE_REFRESH_RATE = 20
 LAST_UPDATED_COUNT_INCREMENT = 1
 
 
-def generate_bar_charts(recent_rides: pd.DataFrame, selector_gender) -> None:
+def generate_bar_charts(recent_rides: pd.DataFrame, selector_gender, selector_age) -> None:
     """Generates the bar charts for the dashboard."""
 
     total_duration_gender_chart = get_total_duration_gender_bar_chart(
-        recent_rides, selector_gender)
+        recent_rides, selector_gender, selector_age)
 
     ride_count_by_gender_chart = get_total_ride_count_gender_bar_chart(
-        recent_rides, selector_gender)
+        recent_rides, selector_gender, selector_age)
 
     ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
-        recent_rides, selector_gender)
+        recent_rides, selector_gender, selector_age)
 
     # widget_top_row = total_duration_gender_chart | ride_count_by_gender_chart | ride_count_by_age_chart
 
     widget_top_row = alt.hconcat(
-        total_duration_gender_chart, ride_count_by_gender_chart, ride_count_by_age_chart, spacing=150)
+        total_duration_gender_chart, ride_count_by_gender_chart, ride_count_by_age_chart, spacing=100)
 
     return widget_top_row
 
 
-def generate_line_charts(recent_rides: pd.DataFrame, selector_gender) -> None:
+def generate_line_charts(recent_rides: pd.DataFrame, selector_gender, selector_age) -> None:
     """Generates the line charts for the dashboard."""
 
     avg_power_chart = get_power_output_avg_line_chart(
-        recent_rides, selector_gender)
+        recent_rides, selector_gender, selector_age)
 
     avg_resistance_chart = get_resistance_output_avg_line_chart(
-        recent_rides, selector_gender)
+        recent_rides, selector_gender, selector_age)
 
     cumul_power_chart = get_power_output_cumul_line_chart(
-        recent_rides, selector_gender)
+        recent_rides, selector_gender, selector_age)
 
     cumul_resistance_chart = get_resistance_output_cumul_line_chart(
-        recent_rides, selector_gender)
+        recent_rides, selector_gender, selector_age)
 
     # try to add empty bar joining to space horizontally
 
@@ -104,13 +104,14 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
         selector_gender = alt.selection_single(
             fields=['gender'], empty='all', name='GenderSelector')
         selector_age = alt.selection_single(
-            fields=['age'], empty='all', name='AgeSelector')
+            fields=['age_bracket'], empty='all', name='AgeSelector')
 
         # generates charts
         bar_charts = generate_bar_charts(
-            recent_rides, selector_gender)
+            recent_rides, selector_gender, selector_age)
 
-        line_charts = generate_line_charts(recent_rides, selector_gender)
+        line_charts = generate_line_charts(
+            recent_rides, selector_gender, selector_age)
 
         # concatenate charts in widget to allow interactive filtering
         widget = alt.vconcat(bar_charts, line_charts, spacing=75)
