@@ -588,3 +588,55 @@ resource "aws_security_group" "c9_deloton_dashboard_sg" {
     Name = "c9_deloton_dashboard_sg"
   }
 }
+
+resource "aws_ecs_task_definition" "c9-deloton-dashboard-task" {
+  family                   = "c9-deloton-dashboard-task"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 1024
+  memory                   = 2048
+  execution_role_arn       = "${data.aws_iam_role.ecs_task_execution_role.arn}"
+  container_definitions    = <<TASK_DEFINITION
+[
+  {
+    "environment": [
+      {"name": "DATABASE_IP", "value": "${var.DATABASE_IP}"},
+      {"name": "DATABASE_NAME", "value": "${var.DATABASE_NAME}"},
+      {"name": "DATABASE_PASSWORD", "value": "${var.DATABASE_PASSWORD}"},
+      {"name": "DATABASE_PORT", "value": "${var.DATABASE_PORT}"},
+      {"name": "DATABASE_USERNAME", "value": "${var.DATABASE_USERNAME}"}
+    ],
+    "name": "c9-deloton-dashboard",
+    "image": "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-deloton-dashboard-t:latest",
+    "essential": true,
+    "portMappings" : [
+        {
+          "containerPort" : 4321,
+          "hostPort"      : 4321
+        }
+      ]
+  }
+]
+TASK_DEFINITION
+
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = "X86_64"
+  }
+}
+
+resource "aws_ecs_service" "c9-deloton-dashboard" {
+  name            = "c9-deloton-dashboard"
+  cluster         = "c9-ecs-cluster"
+  task_definition = aws_ecs_task_definition.c9-deloton-dashboard-task.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+  force_new_deployment = true 
+  depends_on = [aws_ecs_task_definition.c9-deloton-dashboard-task]
+
+network_configuration {
+    security_groups = [aws_security_group.c9_deloton_dashboard_sg.id]
+    subnets         = ["subnet-0d0b16e76e68cf51b","subnet-081c7c419697dec52","subnet-02a00c7be52b00368"]
+    assign_public_ip = true
+  }
+}
