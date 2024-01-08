@@ -55,11 +55,6 @@ def is_not_get_request(*args, **kwargs) -> bool:
         return False
     return True
 
-@app.route("/", methods=["GET"])
-def index():
-    """ Creates an index route with an index page for the API """
-    return "Welcome to the Rides API"
-
 @app.route("/ride", methods=["GET"])
 @cache.cached(query_string=True)
 def default_ride_endpoint():
