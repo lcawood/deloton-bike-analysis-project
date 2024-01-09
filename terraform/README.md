@@ -4,19 +4,15 @@ This folder should contain all code and resources required to handle the infrast
 # 📝 Project Description
 - This folder contains all the terraform code and details that are needed to setup the cloud services required in our project.
 
-## :hammer_and_wrench: Getting Setup
-
+## 🔐 Terraform Variables
 `.tfvars` keys used:
-
-- `DATABASE_USERNAME`
-- `DATABASE_PASSWORD`
-- `AWS_ACCESS_KEY_ID_`
-- `AWS_SECRET_ACCESS_KEY_`
-- `DATABASE_USERNAME`
-- `DATABASE_PASSWORD`
-- `DATABASE_IP`
-- `DATABASE_PORT`
-- `DATABASE_NAME`
+- `DATABASE_IP` -> ARN to your AWS RDS.
+- `DATABASE_NAME` -> Name of your database.
+- `DATABASE_USERNAME` -> Your database username.
+- `DATABASE_PASSWORD` -> Password to access your database.
+- `DATABASE_PORT` -> Port used to access the database.
+- `AWS_ACCESS_KEY_ID_ `  -> Personal AWS ACCESS KEY available on AWS.
+- `AWS_SECRET_ACCESS_KEY_` -> Personal AWS SECRET ACCESS KEY available on AWS.
 
 ## 🏃 Running the script
 
@@ -52,3 +48,11 @@ Remove the terraform with `terraform destroy`
       - Security Group setup for the API to allow access on port 5000.
      - `API ECS Service`
       - A ECS Service that runs the API Task Definition.
+     - `ECR Dashboard`
+      - An ECR to store the Dashboard container.
+     - `Dashboard Task Definition`
+      - A task definition that runs the Dashboard image.
+     - `Dashboard Security Group`
+      - Security Group setup for the Dashboard to allow access on port 4321.
+     - `Dashboard ECS Service`
+      - A ECS Service that runs the Dashboard Task Definition.

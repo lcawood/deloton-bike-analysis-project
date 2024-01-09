@@ -3,23 +3,29 @@ Pipeline script to establish connection to Kafka stream, retrieve log lines, and
 
 User's max and min heart rates are calculated using functions from `validate_heart_rate.py`, and their heart rate given in the readings compared against them; if it above or below the healthy range too many times in a row (`EXTREME_HR_COUNT_THRESHOLD`), the `validate_heart_rate` function send_email is used to alert the user.
 
-### To Run:
-`python pipeline.py`
+## 🛠️ Getting Setup
+- Install requirements using `pip3 install -r requirements.txt`
 
-### Requirements:
- - Python modules (as listed in `requirements.txt`):
-    - confluent-kafka
-    - python-dotenv
- - Environment variables (in `.env` file or otherwise):
-    - KAFKA_TOPIC
-    - BOOTSTRAP_SERVERS
-    - SECURITY_PROTOCOL
-    - SASL_MECHANISM
-    - USERNAME
-    - PASSWORD
-    - AWS_ACCESS_KEY_ID_
-    - AWS_SECRET_ACCESS_KEY_
-    - BUCKET_NAME
+## 🔐 Environment Variables
+- Create a `.env` file with the following information:
+- `DATABASE_IP` -> ARN to your AWS RDS.
+- `DATABASE_NAME` -> Name of your database.
+- `DATABASE_USERNAME` -> Your database username.
+- `DATABASE_PASSWORD` -> Password to access your database.
+- `DATABASE_PORT` -> Port used to access the database.
+- `AWS_ACCESS_KEY_ID_ `  -> Personal AWS ACCESS KEY available on AWS.
+- `AWS_SECRET_ACCESS_KEY_` -> Personal AWS SECRET ACCESS KEY available on AWS.
+- `KAFKA_TOPIC` -> The current kafka topic to subscribe to.
+- `BOOTSTRAP_SERVERS` -> Name of the kafka server.
+- `SECURITY_PROTOCOL` -> Name of the security protocol for the kafka stream.
+- `SASL_MECHANISM` -> Name of the simple username/password authentication mechanism for the kafka stream.
+- `USERNAME` -> Username for kafka account to access the input stream.
+- `PASSWORD` -> Password for kafka account to access the input stream.
+- `BUCKET_NAME` -> Name of the S3 Bucket all data gets sent to.
+
+## 🏃 Running the pipeline locally
+
+Run the command `python3 pipeline.py`
 
 ### Dependencies:
  - `transform.py`
@@ -34,14 +40,3 @@ User's max and min heart rates are calculated using functions from `validate_hea
  - `validate_heart_rate`
     - `calculate_max_heart_rate`
     - `calculate_min_heart_rate`
-
-
-## load.py
-
-### Requirements:
- - Environment variables (in `.env` file or otherwise):
-   - DATABASE_IP
-   - DATABASE_USERNAME
-   - DATABASE_NAME
-   - DATABASE_PASSWORD
-   - DATABASE_PORT
