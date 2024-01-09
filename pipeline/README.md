@@ -13,7 +13,13 @@ User's max and min heart rates are calculated using functions from `validate_hea
     - `DATABASE_IP` = xxxxxxxxx
     - `DATABASE_PORT` = xxxxxxxx
     - `DATABASE_NAME` = xxxxxxxx
-
+    - `KAFKA_TOPIC` = xxxxxxxx
+    - `BOOTSTRAP_SERVERS` = xxxxxxxx
+    - `SECURITY_PROTOCOL` = xxxxxxxx
+    - `SASL_MECHANISM` = xxxxxxxx
+    - `USERNAME` = xxxxxxxx
+    - `PASSWORD` = xxxxxxxx
+    - `BUCKET_NAME` = xxxxxxxx
 
 ## 🏃 Running the pipeline locally
 
