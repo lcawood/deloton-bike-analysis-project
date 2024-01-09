@@ -19,6 +19,11 @@ This folder contains all the code and resources used for creating the daily repo
     - `DATABASE_PORT` = xxxxxxxx
     - `DATABASE_NAME` = xxxxxxxx
 
+
+## 🏃 Running the daily report locally
+
+Run the command `python3 report.py`
+
 ## 🗂️ Files Explained
 - `report.py`
     - A script to extract the previous days data from the Deloton data warehouse then using this create useful data deliverables to present to the ceo in a report. The report is made in a html string then uploaded to a S3 Bucket as a html file. The html string is also the return from the lambda handler function as this can be used in a email to the CEO.
