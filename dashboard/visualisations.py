@@ -11,6 +11,23 @@ import streamlit as st
 
 from utilities import calculate_age
 
+# ------------------ HOME ----------------------
+
+
+def get_summary_statistics(total_ride_count: int, max_elapsed_time: int,
+                           max_power: float, max_resistance: int) -> None:
+    """Generates a header with historical summary statistics."""
+
+    head_cols = st.columns(4)
+    with head_cols[0]:
+        st.metric("Total Rides", total_ride_count)
+    with head_cols[1]:
+        st.metric("Max Elapsed Time", f"{max_elapsed_time} secs")
+    with head_cols[2]:
+        st.metric("Power", f"{round(max_power, 1)} W")
+    with head_cols[3]:
+        st.metric("Resistance", max_resistance)
+
 
 # -------------- CURRENT RIDE -----------------
 def get_current_ride_header(rider_name: str) -> None:
@@ -123,7 +140,7 @@ def get_current_ride_personal_best_metrics(user_best_details: list) -> None:
 # -------------- RECENT RIDES -----------------
 def get_recent_rides_header() -> None:
     """Generates a header for the recent rides section."""
-    st.title(f"RECENT RIDES")
+    st.title("RECENT RIDES")
     st.markdown('<hr style="border: 1px solid green; margin-top: 0em; margin-bottom: 0.5em;">',
                 unsafe_allow_html=True)
 
@@ -139,7 +156,8 @@ def get_last_updated_recent_rides(last_update_time: datetime,
         f"Last updated: {time_delta} seconds ago")
 
 
-def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame, selector_gender, selector_age) -> alt.Chart:
+def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame,
+                                        selector_gender, selector_age) -> alt.Chart:
     """
     Generates a bar chart for the total elapsed_time grouped by gender
     over the past 12 hours.

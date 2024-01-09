@@ -11,6 +11,7 @@ import streamlit as st
 
 from database import (get_database_connection,
                       get_total_ride_count, get_max_readings)
+from visualisations import get_summary_statistics
 
 
 def main_homepage():
@@ -47,12 +48,6 @@ if __name__ == "__main__":
 
     st.markdown(" ")
     st.subheader("Summary Statistics:", divider='green')
-    head_cols = st.columns(4)
-    with head_cols[0]:
-        st.metric("Total Rides", total_ride_count)
-    with head_cols[1]:
-        st.metric("Max Elapsed Time", f"{max_elapsed_time} secs")
-    with head_cols[2]:
-        st.metric("Power", f"{round(max_power, 1)} W")
-    with head_cols[3]:
-        st.metric("Resistance", max_resistance)
+
+    get_summary_statistics(
+        total_ride_count, max_elapsed_time, max_power, max_resistance)
