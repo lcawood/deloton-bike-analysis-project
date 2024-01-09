@@ -169,6 +169,9 @@ def process_dataframe(df: pd.DataFrame, date_resolution) -> pd.DataFrame:
     # Ensure elapsed time is numeric to calculate reading_time
     df['elapsed_time'] = pd.to_numeric(df['elapsed_time'])
 
+    # Add age_bracket column
+    add_age_bracket_column(df)
+
     # Calculate reading_time
     df["reading_time"] = df.apply(
         lambda x: (
@@ -180,8 +183,5 @@ def process_dataframe(df: pd.DataFrame, date_resolution) -> pd.DataFrame:
     delta = timedelta(minutes=date_resolution)
     df["reading_time"] = df['reading_time'].apply(
         lambda dt: ceil_dt(dt, delta))
-
-    # Add age_bracket column
-    add_age_bracket_column(df)
 
     return df
