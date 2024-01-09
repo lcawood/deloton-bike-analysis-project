@@ -18,14 +18,6 @@ def main_homepage():
 
     st.write("# DELOTON Bike Analysis🚴")
 
-    st.markdown('''
-    <style>
-    .st-b7 {
-        color: #90d1a2;
-    }
-    </style>
-    ''', unsafe_allow_html=True)
-
     st.sidebar.success("Select a page above.")
 
     st.markdown(

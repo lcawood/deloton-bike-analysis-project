@@ -58,7 +58,7 @@ def get_current_ride_data(db_connection: extensions.connection) -> list:
 
         user_details = db_cur.fetchone()
 
-        return list(user_details)
+        return list(user_details) if user_details else []
 
 
 def get_current_rider_highest_duration(db_cur: extensions.connection.cursor, rider_id: int):

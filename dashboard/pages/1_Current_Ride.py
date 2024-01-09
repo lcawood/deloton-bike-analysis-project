@@ -26,7 +26,7 @@ from visualisations import (get_current_ride_header,
 
 CURRENT_RIDE_REFRESH_RATE = 1
 LAST_UPDATED_COUNT_INCREMENT = 1
-READING_TIME_LAG_DELAY = 20
+READING_TIME_LAG_DELAY = 30
 
 
 def main_current_ride(db_connection: extensions.connection) -> None:
@@ -34,10 +34,16 @@ def main_current_ride(db_connection: extensions.connection) -> None:
     Main function that calls all the functions related to
     displaying the current ride visualisations.
     """
+
+    current_ride = get_current_ride_data(db_connection)
+
+    if not current_ride:
+        st.header("⚠️ Bike not in use.")
+
+    current_ride_personal_best = get_current_ride_data_highest(
+        db_connection, current_ride)
+
     with st.container():
-        current_ride = get_current_ride_data(db_connection)
-        current_ride_personal_best = get_current_ride_data_highest(
-            db_connection, current_ride)
 
         reading_time = get_reading_time(current_ride)
 
