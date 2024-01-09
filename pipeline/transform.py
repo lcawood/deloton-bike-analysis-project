@@ -2,7 +2,6 @@
 
 from ast import literal_eval
 from datetime import datetime, timedelta
-import re
 
 
 INVALID_DATE_THRESHOLD = datetime(1900, 1, 1, 0, 0, 0)
@@ -136,7 +135,8 @@ def get_data_from_reading_line_pair(reading_line_pair: str, start_time: datetime
     """
 
     reading_lines = reading_line_pair.split('\n')
-    reading = {}
+    reading = {'resistance': None, 'elapsed_time': None, 'heart_rate': None,
+               'power': None, 'rpm': None}
 
     # '[INFO]: Ride' line
     try:
@@ -144,13 +144,16 @@ def get_data_from_reading_line_pair(reading_line_pair: str, start_time: datetime
             reading_lines[0].split(';')[-1].split('=')[1].strip())
     except IndexError:
         reading['resistance'] = None
-
+    
     log_datetime = extract_datetime_from_string(reading_lines[0])
     if log_datetime and log_datetime > start_time:
         reading['elapsed_time'] = int((log_datetime - start_time).total_seconds())
     else:
         reading['elapsed_time'] = None
 
+    if len(reading_lines) == 1:
+        return reading
+    
     # '[INFO]: Telemetry' line
     str_attributes = reading_lines[1].split(';')
     reading['heart_rate'] = int(
