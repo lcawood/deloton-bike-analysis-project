@@ -1,11 +1,22 @@
 # API
-Files in this folder are used in the production of a RESTful API implemented using the python library Flask; the api can be run using the command `python api.py` (after having installed the necessary requirements, listed below and in the file `requirements.txt`, and with the relevant environment variables). 
+Files in this folder are used in the production of a RESTful API implemented using the python library Flask.
 
-In summary, to run:
-```
-pip install -r requirements.txt
-python api
-```
+## :hammer_and_wrench: Getting Setup
+
+1. `pip install -r requirements.txt` - command to install all necessary requirements to working directory
+
+## 🏃 Running the api locally
+
+Run the command `python3 api.py`
+
+# Environment Variables
+- `DATABASE_IP` -> ARN to your AWS RDS.
+- `DATABASE_NAME` -> Name of your database.
+- `DATABASE_USERNAME` -> Your database username.
+- `DATABASE_PASSWORD` -> Password to access your database.
+- `DATABASE_PORT` -> Port used to access the database.
+
+# API endpoints
 
 API endpoints (note query parameters are to be conjoined with `&` and appended to their root URL following a `?`, as required):
  - `GET /ride` - HTML text instructions on how to use below endpoint:
@@ -30,13 +41,7 @@ API endpoints (note query parameters are to be conjoined with `&` and appended t
 - psycopg2-binary
 - pytest
 
-### Environment Variables
-- DATABASE_IP
-- DATABASE_USERNAME
-- DATABASE_NAME
-- DATABASE_PASSWORD
-- DATABASE_PORT
-
+## :card_index_dividers: Files Explained
 <br>
 
  ## `api.py`
