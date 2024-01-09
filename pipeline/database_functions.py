@@ -1,6 +1,6 @@
 """Module containing functions used to interact with the RDS database."""
 
-from os import environ, remove
+from os import environ
 
 from dotenv import load_dotenv
 import psycopg2
