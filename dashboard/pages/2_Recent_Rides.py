@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 import pandas as pd
 from psycopg2 import extensions
 import streamlit as st
+from streamlit_dynamic_filters import DynamicFilters
 
 from database import (get_database_connection, get_recent_12hr_data)
 from utilities import (process_dataframe)
@@ -25,7 +26,8 @@ from visualisations import (get_dashboard_title, get_total_ride_count_age_bar_ch
                             get_power_output_avg_line_chart,
                             get_resistance_output_avg_line_chart,
                             get_power_output_cumul_line_chart,
-                            get_resistance_output_cumul_line_chart)
+                            get_resistance_output_cumul_line_chart,
+                            get_sidebar_age_filter)
 
 
 RECENT_RIDE_REFRESH_RATE = 20
@@ -94,8 +96,20 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
 
         get_recent_rides_header()
 
+        # get recent rides data
         recent_rides = get_recent_12hr_data(db_connection)
         recent_rides = process_dataframe(recent_rides, date_resolution)
+
+        # generate sidebar filters
+        dynamic_filters = DynamicFilters(
+            recent_rides, filters=['age_bracket', 'gender'])
+
+        with st.sidebar:
+            st.write("Apply filters in any order:")
+
+        dynamic_filters.display_filters(location='sidebar')
+
+        filtered_data = dynamic_filters.filter_df()
 
         # placeholder for last updated time caption
         empty_last_updated_placeholder = st.empty()
@@ -106,12 +120,12 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
         selector_age = alt.selection_single(
             fields=['age_bracket'], empty='all', name='AgeSelector')
 
-        # generates charts
+        # generate charts
         bar_charts = generate_bar_charts(
-            recent_rides, selector_gender, selector_age)
+            filtered_data, selector_gender, selector_age)
 
         line_charts = generate_line_charts(
-            recent_rides, selector_gender, selector_age)
+            filtered_data, selector_gender, selector_age)
 
         # concatenate charts in widget to allow interactive filtering
         widget = alt.vconcat(bar_charts, line_charts,

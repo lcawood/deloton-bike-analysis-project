@@ -6,3 +6,4 @@ altair
 altair_viewer
 python-dotenv
 psycopg2
+streamlit-dynamic-filters

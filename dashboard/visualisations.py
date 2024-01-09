@@ -284,3 +284,21 @@ def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame, selector_g
         title={'text': 'Cumulative Resistance Output', 'fontSize': 24, 'dx': dx_offset})
 
     return chart
+
+
+def get_sidebar_age_filter(recent_data: pd.DataFrame) -> None:
+    """Generates a sidebar filter for filtering by gender."""
+
+    filtered_data = recent_data.copy()
+
+    genders = filtered_data['gender'].unique()
+    with st.sidebar:
+        genders_selected = st.multiselect(
+            'Select genders', genders, default=genders)
+
+    # mask to filter DataFrame
+    mask_genders = filtered_data['gender'].isin(genders_selected)
+
+    filtered_data = filtered_data[mask_genders]
+
+    return filtered_data
