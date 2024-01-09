@@ -9,7 +9,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from utilities import calculate_age, round_up, round_down, get_y_axis_domain_ends
+from utilities import calculate_age
 
 
 def get_dashboard_title() -> None:
@@ -17,8 +17,7 @@ def get_dashboard_title() -> None:
     st.title("DELOTON Bike Analysis")
 
 
-# CURRENT RIDE
-# @st.cache_data(show_spinner="Retrieving current ride...")
+# -------------- CURRENT RIDE -----------------
 def get_current_ride_header(rider_name: str) -> None:
     """Generates a header for the current ride and the rider's name."""
     st.header(f"CURRENT RIDE: {rider_name}", divider='green')
@@ -35,7 +34,6 @@ def get_last_updated_current_ride(last_update_time: datetime,
         f"Last updated: {time_delta} seconds ago")
 
 
-# @st.cache_data(show_spinner="Retrieving personal info...")
 def get_current_ride_header_personal_info(user_details: list) -> None:
     """
     Gets the main header personal_info for the current ride and displays them.
@@ -73,7 +71,6 @@ def get_heart_rate_warning(heart_rate: int) -> None:
             PLEASE SLOW DOWN OR SEEK ASSISTANCE!""", icon="⚠️")
 
 
-# @st.cache_data(show_spinner="Retrieving ride metrics...")
 def get_current_ride_metrics(user_details: list) -> None:
     """
     Generates the header metrics for the current ride and displays them.
@@ -97,7 +94,6 @@ def get_current_ride_metrics(user_details: list) -> None:
         st.metric("Resistance", resistance)
 
 
-# @st.cache_data(show_spinner="Retrieving personal bests...")
 def get_current_ride_personal_best_metrics(user_best_details: list) -> None:
     """
     Generates the main header metric personal bests for the current ride and displays them.
@@ -106,8 +102,7 @@ def get_current_ride_personal_best_metrics(user_best_details: list) -> None:
         get_current_ride_metrics(user_best_details)
 
 
-# RECENT RIDES
-# @st.cache_data(show_spinner="Retrieving recent rides...")
+# -------------- RECENT RIDES -----------------
 def get_recent_rides_header() -> None:
     """Generates a header for the recent rides section."""
     st.header("RECENT RIDES", divider='green')
@@ -124,7 +119,8 @@ def get_last_updated_recent_rides(last_update_time: datetime,
         f"Last updated: {time_delta} seconds ago")
 
 
-def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame, selector_gender, selector_age) -> alt.Chart:
+def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame,
+                                        selector_gender, selector_age) -> alt.Chart:
     """
     Generates a bar chart for the total elapsed_time grouped by gender
     over the past 12 hours.
@@ -153,7 +149,8 @@ def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame, selector_gend
     return chart
 
 
-def get_total_ride_count_gender_bar_chart(recent_rides: pd.DataFrame, selector_gender, selector_age) -> alt.Chart:
+def get_total_ride_count_gender_bar_chart(recent_rides: pd.DataFrame,
+                                          selector_gender, selector_age) -> alt.Chart:
     """
     Generates a bar chart for the total number of rides grouped by gender
     over the past 12 hours.
@@ -174,7 +171,8 @@ def get_total_ride_count_gender_bar_chart(recent_rides: pd.DataFrame, selector_g
     return chart
 
 
-def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame, selector_gender, selector_age) -> alt.Chart:
+def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame,
+                                       selector_gender, selector_age) -> alt.Chart:
     """
     Generates a bar chart for the total number of rides grouped by age brackets
     over the past 12 hours.
@@ -196,7 +194,8 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame, selector_gende
     return chart
 
 
-def get_power_output_avg_line_chart(recent_data: pd.DataFrame, selector_gender, selector_age) -> alt.Chart:
+def get_power_output_avg_line_chart(recent_data: pd.DataFrame,
+                                    selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the average power output over the past 12 hours."""
 
     chart_width = 850
@@ -220,7 +219,8 @@ def get_power_output_avg_line_chart(recent_data: pd.DataFrame, selector_gender, 
     return chart
 
 
-def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame, selector_gender, selector_age) -> alt.Chart:
+def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame,
+                                         selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the average resistance output over the past 12 hours."""
 
     chart_width = 850
@@ -242,7 +242,8 @@ def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame, selector_gen
     return chart
 
 
-def get_power_output_cumul_line_chart(recent_data: pd.DataFrame, selector_gender, selector_age) -> alt.Chart:
+def get_power_output_cumul_line_chart(recent_data: pd.DataFrame,
+                                      selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the cumulative power output over the past 12 hours."""
 
     chart_width = 850
@@ -265,7 +266,8 @@ def get_power_output_cumul_line_chart(recent_data: pd.DataFrame, selector_gender
     return chart
 
 
-def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame, selector_gender, selector_age) -> alt.Chart:
+def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame,
+                                           selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the cumulative resistance output over the past 12 hours."""
 
     chart_width = 850

@@ -103,7 +103,8 @@ def get_reading_time(user_details: list) -> datetime:
     return start_time + timedelta(seconds=elapsed_time)
 
 
-def verify_reading_time(reading_time: datetime, delay: int, time_now: datetime = datetime.now()) -> bool:
+def verify_reading_time(reading_time: datetime, delay: int,
+                        time_now: datetime = datetime.now()) -> bool:
     """Returns True if reading time is within the allowed delay from the current time."""
 
     return reading_time < time_now - timedelta(seconds=delay)
