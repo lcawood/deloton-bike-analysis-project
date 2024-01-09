@@ -9,7 +9,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from utilities import calculate_age
+from utilities import calculate_age, round_up, round_down, get_y_axis_domain_ends
 
 
 def get_dashboard_title() -> None:
@@ -204,13 +204,16 @@ def get_power_output_avg_line_chart(recent_data: pd.DataFrame, selector_gender, 
 
     chart = alt.Chart(
         recent_data
-    ).mark_line(interpolate='linear').encode(
-        x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
+    ).mark_line(
+        interpolate='linear'
+    ).transform_filter(
+        selector_gender & selector_age
+    ).encode(
+        x=alt.X('reading_time:T', axis=alt.Axis(title='Time', grid=False)),
         y=alt.Y('mean(power):Q', title='Average Power (W)'),
         tooltip=[alt.Tooltip('reading_time:N', title='Reading Time'), alt.Tooltip(
             'mean(power):Q', title='Average Power')]
-    ).transform_filter(
-        selector_gender & selector_age).properties(
+    ).properties(
         width=chart_width,
         title={'text': 'Average Power Output', 'fontSize': 24, 'dx': dx_offset})
 
@@ -225,11 +228,14 @@ def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame, selector_gen
 
     chart = alt.Chart(
         recent_data
-    ).mark_line(interpolate='linear').encode(
+    ).mark_line(
+        interpolate='linear'
+    ).transform_filter(
+        selector_gender & selector_age
+    ).encode(
         x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
         y=alt.Y('mean(resistance):Q', title='Average Resistance'),
-    ).transform_filter(
-        selector_gender & selector_age).properties(
+    ).properties(
         width=chart_width,
         title={'text': 'Average Resistance Output', 'fontSize': 24, 'dx': dx_offset})
 
@@ -244,14 +250,15 @@ def get_power_output_cumul_line_chart(recent_data: pd.DataFrame, selector_gender
 
     recent_data['kilowatt_power'] = recent_data['power']/1000
 
-    chart = alt.Chart(recent_data).mark_line().encode(
+    chart = alt.Chart(recent_data).mark_line().transform_filter(
+        selector_gender & selector_age
+    ).encode(
         x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
         y=alt.Y('cumulative_power:Q', title='Cumulative Power (kW)'),
     ).transform_window(
         cumulative_power='sum(kilowatt_power)',
         sort=[{"field": 'reading_time'}]
-    ).transform_filter(
-        selector_gender & selector_age).properties(
+    ).properties(
         width=chart_width,
         title={'text': 'Cumulative Power Output', 'fontSize': 24, 'dx': dx_offset})
 
@@ -264,14 +271,15 @@ def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame, selector_g
     chart_width = 850
     dx_offset = 320
 
-    chart = alt.Chart(recent_data).mark_line().encode(
+    chart = alt.Chart(recent_data).mark_line().transform_filter(
+        selector_gender & selector_age
+    ).encode(
         x=alt.X('reading_time:T', axis=alt.Axis(title='Time')),
         y=alt.Y('cumulative_resistance:Q', title='Cumulative Resistance'),
     ).transform_window(
         cumulative_resistance='sum(resistance)',
         sort=[{"field": 'reading_time'}]
-    ).transform_filter(
-        selector_gender & selector_age).properties(
+    ).properties(
         width=chart_width,
         title={'text': 'Cumulative Resistance Output', 'fontSize': 24, 'dx': dx_offset})
 

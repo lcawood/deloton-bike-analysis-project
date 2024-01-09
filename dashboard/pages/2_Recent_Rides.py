@@ -67,7 +67,7 @@ def generate_line_charts(recent_rides: pd.DataFrame, selector_gender, selector_a
     cumul_resistance_chart = get_resistance_output_cumul_line_chart(
         recent_rides, selector_gender, selector_age)
 
-    # try to add empty bar joining to space horizontally
+    # Join graphs for widget
 
     widget_mid_row = alt.hconcat(
         avg_power_chart, avg_resistance_chart, spacing=50)
@@ -114,7 +114,10 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
             recent_rides, selector_gender, selector_age)
 
         # concatenate charts in widget to allow interactive filtering
-        widget = alt.vconcat(bar_charts, line_charts, spacing=75)
+        widget = alt.vconcat(bar_charts, line_charts,
+                             spacing=75).configure_axis(gridColor='#6ecc89', gridOpacity=0.3)
+
+        # possible colours: darkseagreen,
 
         st.altair_chart(widget)
 

@@ -4,6 +4,7 @@
 # pylint: disable = E0401
 
 from datetime import datetime, timedelta
+import math
 
 import pandas as pd
 
@@ -109,6 +110,36 @@ def verify_reading_time(reading_time: datetime, delay: int, time_now: datetime =
 
 
 # --------------   RECENT RIDES   -------------------
+
+
+def round_up(reading: int, round_number: int) -> int:
+    """
+    Rounds the given value up to the nearest round_number for setting line chart y-axis domains.
+    """
+    return math.ceil(reading / float(round_number)) * round_number
+
+
+def round_down(reading: int, round_number: int) -> int:
+    """
+    Rounds the given value down to the nearest round_number for setting line chart y-axis domains.
+    """
+    return math.floor(reading / float(round_number)) * round_number
+
+
+def get_y_axis_domain_ends(df: pd.DataFrame, x_axis: str, y_axis: str) -> tuple:
+    """
+    Returns a tuple (y_min, y_max) of the given reading to use as line chart y-domain.
+    """
+
+    min_reading = df.groupby(x_axis)[
+        y_axis].mean().min()
+    max_reading = df.groupby(x_axis)[
+        y_axis].mean().max()
+
+    y_min = round_down(min_reading, 10)
+    y_max = round_up(max_reading, 10)
+
+    return y_min, y_max
 
 
 def ceil_dt(dt, delta):
