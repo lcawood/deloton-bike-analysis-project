@@ -4,15 +4,13 @@ This folder should contain all code and resources required to handle the Databas
 # 📝 Project Description
 - This folder contains all the Database instructions and details that are needed to setup the Database required in our project.
 
-## :hammer_and_wrench: Getting Setup
-
-`.env` keys used:
-
-- `DATABASE_USERNAME`
-- `DATABASE_PASSWORD`
-- `DATABASE_IP`
-- `DATABASE_PORT`
-- `DATABASE_NAME`
+## 🔐 Environment Variables
+- Create a `.env` file with the following information:
+- `DATABASE_IP` -> ARN to your AWS RDS.
+- `DATABASE_NAME` -> Name of your database.
+- `DATABASE_USERNAME` -> Your database username.
+- `DATABASE_PASSWORD` -> Password to access your database.
+- `DATABASE_PORT` -> Port used to access the database.
 
 ## 🏃 Running the script
 
