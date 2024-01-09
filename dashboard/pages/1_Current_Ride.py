@@ -18,7 +18,7 @@ from database import (get_database_connection,
                       get_current_ride_data, get_current_ride_data_highest)
 from utilities import (get_current_rider_name, verify_reading_time,
                        is_heart_rate_abnormal, get_reading_time)
-from visualisations import (get_current_ride_header, get_dashboard_title,
+from visualisations import (get_current_ride_header,
                             get_current_ride_header_personal_info, get_current_ride_metrics,
                             get_current_ride_personal_best_metrics, get_last_updated_current_ride,
                             get_heart_rate_warning)
@@ -84,8 +84,6 @@ if __name__ == "__main__":
     load_dotenv()
 
     conn = get_database_connection()
-
-    get_dashboard_title()
 
     while True:
         # Auto-refresh the current ride section

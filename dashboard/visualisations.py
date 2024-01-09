@@ -12,11 +12,6 @@ import streamlit as st
 from utilities import calculate_age
 
 
-def get_dashboard_title() -> None:
-    """Generates a title for the dashboard."""
-    st.title("DELOTON Bike Analysis")
-
-
 # -------------- CURRENT RIDE -----------------
 def get_current_ride_header(rider_name: str) -> None:
     """Generates a header for the current ride and the rider's name."""

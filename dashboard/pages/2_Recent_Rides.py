@@ -19,7 +19,7 @@ from streamlit_dynamic_filters import DynamicFilters
 
 from database import (get_database_connection, get_recent_12hr_data)
 from utilities import (process_dataframe)
-from visualisations import (get_dashboard_title, get_total_ride_count_age_bar_chart,
+from visualisations import (get_total_ride_count_age_bar_chart,
                             get_recent_rides_header, get_last_updated_recent_rides,
                             get_total_duration_gender_bar_chart,
                             get_total_ride_count_gender_bar_chart,
@@ -150,8 +150,6 @@ if __name__ == "__main__":
     load_dotenv()
 
     conn = get_database_connection()
-
-    get_dashboard_title()
 
     while True:
         # Auto-refresh the page
