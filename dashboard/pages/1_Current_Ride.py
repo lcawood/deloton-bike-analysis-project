@@ -27,7 +27,7 @@ from visualisations import (get_current_ride_header, get_current_rider_info_head
 
 CURRENT_RIDE_REFRESH_RATE = 1
 LAST_UPDATED_COUNT_INCREMENT = 1
-READING_TIME_LAG_DELAY = 10000
+READING_TIME_LAG_DELAY = 30
 
 
 def main_current_ride(db_connection: extensions.connection) -> None:

@@ -145,28 +145,28 @@ def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame, selector_gend
     over the past 12 hours.
     """
 
-    chart_width = 300
-    dx_offset = 150
+    chart_width = 220
+    dx_offset = 100
 
     chart = alt.Chart(recent_data).add_selection(selector_gender).transform_filter(
         selector_gender & selector_age).transform_aggregate(
         max_elapsed_time='max(elapsed_time)',
-        groupby=['ride_id', 'gender']
+        groupby=['ride_id', 'Gender']
     ).transform_aggregate(
         total_elapsed_time='sum(max_elapsed_time)',
-        groupby=['gender']
+        groupby=['Gender']
     ).transform_calculate(
         total_elapsed_time_minutes='datum.total_elapsed_time / 60'
     ).mark_bar().encode(
-        x=alt.X('gender:N', title='Gender'),
+        x=alt.X('Gender:N', title='Gender'),
         y=alt.Y('total_elapsed_time_minutes:Q',
                 title='Total Elapsed Time (minutes)'),
-        tooltip=[alt.Tooltip('gender:N', title='Gender'), alt.Tooltip(
+        tooltip=[alt.Tooltip('Gender:N', title='Gender'), alt.Tooltip(
             'total_elapsed_time_minutes:Q', title='Total Elapsed Time', format=".1f")],
         opacity=alt.condition(selector_gender, alt.value(1), alt.value(0.25))
     ).properties(
         width=chart_width,
-        title={'text': 'Total Duration', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Total Duration', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 
@@ -178,17 +178,17 @@ def get_total_ride_count_gender_bar_chart(recent_rides: pd.DataFrame,
     over the past 12 hours.
     """
 
-    chart_width = 300
-    dx_offset = 50
+    chart_width = 220
+    dx_offset = 60
 
     chart = alt.Chart(recent_rides).mark_bar().encode(
-        x=alt.X('gender:N', title='Gender'),
+        x=alt.X('Gender:N', title='Gender'),
         y=alt.Y('distinct(ride_id):Q', title='Number of Rides'),
         opacity=alt.condition(selector_gender, alt.value(1), alt.value(0.25))
     ).add_selection(selector_gender).transform_filter(
         selector_gender & selector_age).properties(
         width=chart_width,
-        title={'text': 'Total Number of Rides (by gender)', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Total Rides (by gender)', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 
@@ -200,18 +200,18 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame,
     over the past 12 hours.
     """
 
-    chart_width = 800
-    dx_offset = 300
+    chart_width = 540
+    dx_offset = 225
 
     chart = alt.Chart(ride_counts).mark_bar().encode(
-        x=alt.X('age_bracket:N', title='Ages'),
+        x=alt.X('Age Bracket:N', title='Ages'),
         y=alt.Y('distinct(ride_id):Q', title='Number of Rides'),
-        tooltip=[alt.Tooltip('age_bracket:N', title='Age Bracket'), alt.Tooltip(
+        tooltip=[alt.Tooltip('Age Bracket:N', title='Age Bracket'), alt.Tooltip(
             'count():Q', title='Total Number of Rides')],
     ).add_selection(selector_age).transform_filter(
         selector_gender & selector_age).properties(
         width=chart_width,
-        title={'text': 'Total Number of Rides (by age)', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Total Rides (by age)', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 
@@ -220,8 +220,8 @@ def get_power_output_avg_line_chart(recent_data: pd.DataFrame,
                                     selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the average power output over the past 12 hours."""
 
-    chart_width = 850
-    dx_offset = 330
+    chart_width = 600
+    dx_offset = 250
 
     chart = alt.Chart(
         recent_data
@@ -236,7 +236,7 @@ def get_power_output_avg_line_chart(recent_data: pd.DataFrame,
             'mean(power):Q', title='Average Power')]
     ).properties(
         width=chart_width,
-        title={'text': 'Average Power Output', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Average Power Output', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 
@@ -245,8 +245,8 @@ def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame,
                                          selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the average resistance output over the past 12 hours."""
 
-    chart_width = 850
-    dx_offset = 330
+    chart_width = 600
+    dx_offset = 250
 
     chart = alt.Chart(
         recent_data
@@ -259,7 +259,7 @@ def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame,
         y=alt.Y('mean(resistance):Q', title='Average Resistance'),
     ).properties(
         width=chart_width,
-        title={'text': 'Average Resistance Output', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Average Resistance Output', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 
@@ -268,8 +268,8 @@ def get_power_output_cumul_line_chart(recent_data: pd.DataFrame,
                                       selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the cumulative power output over the past 12 hours."""
 
-    chart_width = 850
-    dx_offset = 320
+    chart_width = 600
+    dx_offset = 250
 
     recent_data['kilowatt_power'] = recent_data['power']/1000
 
@@ -283,7 +283,7 @@ def get_power_output_cumul_line_chart(recent_data: pd.DataFrame,
         sort=[{"field": 'reading_time'}]
     ).properties(
         width=chart_width,
-        title={'text': 'Cumulative Power Output', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Cumulative Power Output', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 
@@ -292,8 +292,8 @@ def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame,
                                            selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the cumulative resistance output over the past 12 hours."""
 
-    chart_width = 850
-    dx_offset = 320
+    chart_width = 600
+    dx_offset = 250
 
     chart = alt.Chart(recent_data).mark_line().transform_filter(
         selector_gender & selector_age
@@ -305,7 +305,7 @@ def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame,
         sort=[{"field": 'reading_time'}]
     ).properties(
         width=chart_width,
-        title={'text': 'Cumulative Resistance Output', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Cumulative Resistance Output', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 

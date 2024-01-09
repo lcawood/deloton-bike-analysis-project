@@ -89,8 +89,8 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
     """
 
     with st.sidebar:
-        st.subheader("Date resolution")
-        date_resolution = st.slider('Select a resolution (minutes):',
+        st.subheader("Group by minutes")
+        date_resolution = st.slider('Select resolution (minutes):',
                                     1, 60, 10)
 
     with st.container():
@@ -103,7 +103,7 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
 
         # generate sidebar filters
         dynamic_filters = DynamicFilters(
-            recent_rides, filters=['age_bracket', 'gender'])
+            recent_rides, filters=['Age Bracket', 'Gender'])
 
         with st.sidebar:
             st.write("Apply filters in any order:")
@@ -117,9 +117,9 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
 
         # create selectors
         selector_gender = alt.selection_single(
-            fields=['gender'], empty='all', name='GenderSelector')
+            fields=['Gender'], empty='all', name='GenderSelector')
         selector_age = alt.selection_single(
-            fields=['age_bracket'], empty='all', name='AgeSelector')
+            fields=['Age Bracket'], empty='all', name='AgeSelector')
 
         # generate charts
         bar_charts = generate_bar_charts(
@@ -131,8 +131,6 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
         # concatenate charts in widget to allow interactive filtering
         widget = alt.vconcat(bar_charts, line_charts,
                              spacing=75).configure_axis(gridColor='#6ecc89', gridOpacity=0.3)
-
-        # possible colours: darkseagreen,
 
         st.altair_chart(widget)
 

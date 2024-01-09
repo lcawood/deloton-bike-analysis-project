@@ -157,7 +157,7 @@ def add_age_bracket_column(df: pd.DataFrame) -> None:
     labels = ['Under 18', '18-24', '25-34',
               '35-44', '45-54', '55-64', '65-74', '75+']
 
-    df['age_bracket'] = pd.cut(
+    df['Age Bracket'] = pd.cut(
         df['age'], bins=bins, labels=labels, right=False, include_lowest=True)
 
     df.drop('age', axis=1, inplace=True)
@@ -171,6 +171,13 @@ def process_dataframe(df: pd.DataFrame, date_resolution) -> pd.DataFrame:
 
     # Add age_bracket column
     add_age_bracket_column(df)
+
+    # Title case genders
+    df['gender'] = df['gender'].apply(lambda x: x.title() if x else x)
+
+    # Title case gender for sidebar appearance
+    df.columns = [col.title() if col ==
+                  'gender' else col for col in df.columns]
 
     # Calculate reading_time
     df["reading_time"] = df.apply(
