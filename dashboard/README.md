@@ -10,6 +10,9 @@ This folder contains all code and resources required to create a Streamlit dashb
 
 - Install all requirements for this folder by running `pip3 install -r requirements.txt`.
 
+- You need a database called `postgres`.
+
+## Environment Variables 🔐
 - Create a `.env` file with the following information:
 - `DATABASE_IP` -> ARN to your AWS RDS.
 - `DATABASE_NAME` -> Name of your database.
@@ -17,7 +20,6 @@ This folder contains all code and resources required to create a Streamlit dashb
 - `DATABASE_PASSWORD` -> Password to access your database.
 - `DATABASE_PORT` -> Port used to access the database.
 
-- You need a database called `postgres`.
 
 ## 🏃 Running the dashboard locally
 

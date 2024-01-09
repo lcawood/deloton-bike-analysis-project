@@ -5,21 +5,23 @@ User's max and min heart rates are calculated using functions from `validate_hea
 
 ## 🛠️ Getting Setup
 - Install requirements using `pip3 install -r requirements.txt`
+
+## Environment Variables 🔐
 - Create a `.env` file with the following information:
-    - `AWS_ACCESS_KEY_ID_ `= xxxxxxxxxx
-    - `AWS_SECRET_ACCESS_KEY_` = xxxxxxxx
-    - `DATABASE_USERNAME` = xxxxxxxx
-    - `DATABASE_PASSWORD` = xxxxxxxx
-    - `DATABASE_IP` = xxxxxxxxx
-    - `DATABASE_PORT` = xxxxxxxx
-    - `DATABASE_NAME` = xxxxxxxx
-    - `KAFKA_TOPIC` = xxxxxxxx
-    - `BOOTSTRAP_SERVERS` = xxxxxxxx
-    - `SECURITY_PROTOCOL` = xxxxxxxx
-    - `SASL_MECHANISM` = xxxxxxxx
-    - `USERNAME` = xxxxxxxx
-    - `PASSWORD` = xxxxxxxx
-    - `BUCKET_NAME` = xxxxxxxx
+- `DATABASE_IP` -> ARN to your AWS RDS.
+- `DATABASE_NAME` -> Name of your database.
+- `DATABASE_USERNAME` -> Your database username.
+- `DATABASE_PASSWORD` -> Password to access your database.
+- `DATABASE_PORT` -> Port used to access the database.
+- `AWS_ACCESS_KEY_ID_ `  -> Personal AWS ACCESS KEY available on AWS.
+- `AWS_SECRET_ACCESS_KEY_` -> Personal AWS SECRET ACCESS KEY available on AWS.
+- `KAFKA_TOPIC` -> The current kafka topic to subscribe to.
+- `BOOTSTRAP_SERVERS` -> Name of the kafka server.
+- `SECURITY_PROTOCOL` -> Name of the security protocol for the kafka stream.
+- `SASL_MECHANISM` -> Name of the simple username/password authentication mechanism for the kafka stream.
+- `USERNAME` -> Username for kafka account to access the input stream.
+- `PASSWORD` -> Password for kafka account to access the input stream.
+- `BUCKET_NAME` -> Name of the S3 Bucket all data gets sent to.
 
 ## 🏃 Running the pipeline locally
 

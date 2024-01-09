@@ -5,18 +5,19 @@ Files in this folder are used in the production of a RESTful API implemented usi
 
 1. `pip install -r requirements.txt` - command to install all necessary requirements to working directory
 
-## 🏃 Running the api locally
-
-Run the command `python3 api.py`
-
-# Environment Variables
+## Environment Variables 🔐
+- Create a `.env` file with the following information:
 - `DATABASE_IP` -> ARN to your AWS RDS.
 - `DATABASE_NAME` -> Name of your database.
 - `DATABASE_USERNAME` -> Your database username.
 - `DATABASE_PASSWORD` -> Password to access your database.
 - `DATABASE_PORT` -> Port used to access the database.
 
-# API endpoints
+## 🏃 Running the api locally
+
+Run the command `python3 api.py`
+
+## API endpoints
 
 API endpoints (note query parameters are to be conjoined with `&` and appended to their root URL following a `?`, as required):
  - `GET /ride` - HTML text instructions on how to use below endpoint:
