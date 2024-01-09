@@ -10,5 +10,5 @@ This directory contains all the relevant diagrams for the architecture, database
 * ERD.png
   * Outlines the different tables used to form our database, including the relationships between the tables and the datatypes for values.
 
-* Deleton_Architecture_Diagram.png
+* Deloton_Architecture_Diagram.png
   * Details the architecture diagram designed for the project including all the relevant cloud-based services (AWS) and how they work together.
