@@ -143,17 +143,17 @@ class Pipeline():
     def _address_pipeline(self):
         """
         Protected function to extract address information from log line, add (or locate) it in the
-        db, and save the resultant address_id in the class variables.
+        db, and save the resultant address_id in the instance variables.
         """
         address = transform.get_address_from_log_line(self._log_line)
         self._address_id = load.add_address(self._db_connection, address)
 
 
-    def _rider_pipeline(self) -> dict:
+    def _rider_pipeline(self):
         """
         Protected function to extract rider information from log_line, add it to the db, and save
         the resultant rider dictionary (with max and min heart rate fields, and address_id) to the
-        class variables.
+        instance variables.
         """
         self._rider = transform.get_rider_from_log_line(self._log_line)
         self._rider['address_id'] = self._address_id
@@ -174,7 +174,7 @@ class Pipeline():
         self._bike_id = load.add_bike(self._db_connection, bike_serial_number)
 
 
-    def _ride_pipeline(self) -> dict:
+    def _ride_pipeline(self):
         """
         Function to extract ride info from the given log line, upload it to the db, and return the
         id of the ride.
@@ -184,7 +184,7 @@ class Pipeline():
         self._ride['ride_id'] = load.add_ride(self._db_connection, self._ride)
 
 
-    def _reading_pipeline(self) -> dict:
+    def _reading_pipeline(self):
         """
         Protected function to extract reading data from class variable log_line (which should be a
         pair of reading lines), add it to reading dict, upload this to the db, and alert the rider
@@ -311,7 +311,7 @@ class BackfillPipeline(Pipeline):
         """
 
         self._log_line = ""
-        p = None
+        r_process = None
 
         if os.path.exists(self._readings_csv_file):
             load.add_readings_from_csv(self._db_connection, self._readings_csv_file)
@@ -342,18 +342,18 @@ class BackfillPipeline(Pipeline):
 
                 # Each batch of reading uploads to db use the same .csv file, so each must be
                 # allowed to finish before the next begins.
-                if p:
-                    p.join()
-                    p.close()
+                if r_process:
+                    r_process.join()
+                    r_process.close()
 
                     print("Start time of ride last processed: ", self._ride['start_time'])
 
                 # Multiprocessing used to cycle around and retrieve the next ride's Kafka messages
                 # while the last batch of readings are being processed and uploaded to the db.
-                p = Process(target=self._process_readings,
+                r_process = Process(target=self._process_readings,
                             args=(self._db_connection, reading_line_pairs, self._ride['ride_id'],
                                   self._ride['start_time'], self._readings_csv_file))
-                p.start()
+                r_process.start()
 
             else:
                 # Skips over lines which contain neither [SYSTEM] nor [INFO] data.

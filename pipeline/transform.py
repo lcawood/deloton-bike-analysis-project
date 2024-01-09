@@ -130,8 +130,8 @@ def get_ride_data_from_log_line(log_line: str) -> dict:
 
 def get_data_from_reading_line_pair(reading_line_pair: str, start_time: datetime) -> dict:
     """
-    Takes in a kafka log line, and transforms and appends reading data
-    contained within it to the given reading dictionary.
+    Takes in a pair of Kafka reading lines (that have been string concatenated), and extracts and
+    transforms reading data from it, returning this as a dictionary.
     """
 
     reading_lines = reading_line_pair.split('\n')
