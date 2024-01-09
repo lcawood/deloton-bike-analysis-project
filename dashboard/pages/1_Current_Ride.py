@@ -7,7 +7,7 @@ using functions from the `database.py`, `visualisations.py` and `utilities.pyz f
 # 'Unable to import' errors
 # pylint: disable = E0401
 
-from datetime import datetime, timedelta
+from datetime import datetime
 import time
 
 from dotenv import load_dotenv

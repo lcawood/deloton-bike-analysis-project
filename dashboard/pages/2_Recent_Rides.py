@@ -26,8 +26,7 @@ from visualisations import (get_dashboard_title, get_total_ride_count_age_bar_ch
                             get_power_output_avg_line_chart,
                             get_resistance_output_avg_line_chart,
                             get_power_output_cumul_line_chart,
-                            get_resistance_output_cumul_line_chart,
-                            get_sidebar_age_filter)
+                            get_resistance_output_cumul_line_chart)
 
 
 RECENT_RIDE_REFRESH_RATE = 20
@@ -46,10 +45,12 @@ def generate_bar_charts(recent_rides: pd.DataFrame, selector_gender, selector_ag
     ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
         recent_rides, selector_gender, selector_age)
 
-    # widget_top_row = total_duration_gender_chart | ride_count_by_gender_chart | ride_count_by_age_chart
-
     widget_top_row = alt.hconcat(
-        total_duration_gender_chart, ride_count_by_gender_chart, ride_count_by_age_chart, spacing=100)
+        total_duration_gender_chart,
+        ride_count_by_gender_chart,
+        ride_count_by_age_chart,
+        spacing=100
+    )
 
     return widget_top_row
 
