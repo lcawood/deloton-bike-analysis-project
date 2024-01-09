@@ -32,8 +32,8 @@ def get_database_connection() -> extensions.connection:
 # CURRENT RIDE
 
 
-def get_current_ride_data(db_connection: extensions.connection) -> int:
-    """Fetched the details of the current ride from the database using an SQL Select Query."""
+def get_current_ride_data(db_connection: extensions.connection) -> list:
+    """Fetches the details of the current ride from the database using an SQL Select Query."""
 
     with db_connection.cursor() as db_cur:
 
@@ -58,7 +58,7 @@ def get_current_ride_data(db_connection: extensions.connection) -> int:
 
         user_details = db_cur.fetchone()
 
-        return user_details
+        return list(user_details)
 
 
 def get_current_rider_highest_duration(db_cur: extensions.connection.cursor, rider_id: int):

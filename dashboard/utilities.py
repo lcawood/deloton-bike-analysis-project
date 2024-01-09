@@ -4,10 +4,12 @@
 # pylint: disable = E0401
 
 from datetime import datetime, timedelta
+import math
 
 import pandas as pd
 
 
+# --------------   CURRENT RIDES   -------------------
 def get_current_rider_name(current_ride: list) -> str:
     """Returns a string containing the rider first and last name."""
     first_name = current_ride[1]
@@ -92,6 +94,55 @@ def is_heart_rate_abnormal(user_details: list) -> bool:
     return (heart_rate == 0) or not (min_heart_rate <= heart_rate <= max_heart_rate)
 
 
+def get_reading_time(user_details: list) -> datetime:
+    """Returns the reading time from the given user_details."""
+
+    elapsed_time = user_details[10]
+    start_time = user_details[11]
+
+    return start_time + timedelta(seconds=elapsed_time)
+
+
+def verify_reading_time(reading_time: datetime, delay: int,
+                        time_now: datetime = datetime.now()) -> bool:
+    """Returns True if reading time is within the allowed delay from the current time."""
+
+    return reading_time < time_now - timedelta(seconds=delay)
+
+
+# --------------   RECENT RIDES   -------------------
+
+
+def round_up(reading: int, round_number: int) -> int:
+    """
+    Rounds the given value up to the nearest round_number for setting line chart y-axis domains.
+    """
+    return math.ceil(reading / float(round_number)) * round_number
+
+
+def round_down(reading: int, round_number: int) -> int:
+    """
+    Rounds the given value down to the nearest round_number for setting line chart y-axis domains.
+    """
+    return math.floor(reading / float(round_number)) * round_number
+
+
+def get_y_axis_domain_ends(df: pd.DataFrame, x_axis: str, y_axis: str) -> tuple:
+    """
+    Returns a tuple (y_min, y_max) of the given reading to use as line chart y-domain.
+    """
+
+    min_reading = df.groupby(x_axis)[
+        y_axis].mean().min()
+    max_reading = df.groupby(x_axis)[
+        y_axis].mean().max()
+
+    y_min = round_down(min_reading, 10)
+    y_max = round_up(max_reading, 10)
+
+    return y_min, y_max
+
+
 def ceil_dt(dt, delta):
     """Round datetime up to the nearest delta minutes"""
     return dt + (datetime.min - dt) % delta
@@ -104,7 +155,7 @@ def add_age_bracket_column(df: pd.DataFrame) -> None:
 
     bins = [0, 18, 25, 35, 45, 55, 65, 75, float('inf')]
     labels = ['Under 18', '18-24', '25-34',
-              '35-44', '45-54', '55-64', '65-74', '65-74', '75+']
+              '35-44', '45-54', '55-64', '65-74', '75+']
 
     df['age_bracket'] = pd.cut(
         df['age'], bins=bins, labels=labels, right=False, include_lowest=True)
@@ -134,80 +185,3 @@ def process_dataframe(df: pd.DataFrame, date_resolution) -> pd.DataFrame:
     add_age_bracket_column(df)
 
     return df
-
-
-def get_dataframe_columns_for_line_charts(recent_rides: pd.DataFrame,
-                                          date_resolution: int) -> pd.DataFrame:
-    """
-    Calculates the reading_time from the start_time and elapsed_time columns,
-    and returns the resulting DataFrame containing only relevant columns
-    to speed up aggregation of data.
-    """
-
-    df = recent_rides[['elapsed_time',
-                       'start_time', 'power', 'resistance']].copy()
-
-    delta = timedelta(minutes=date_resolution)
-
-    df["reading_time"] = df.apply(
-        lambda x: (
-            pd.to_datetime(x['start_time']) +
-            pd.to_timedelta(x['elapsed_time'], unit='s')
-        ).round('min'), axis=1)
-
-    df["reading_time"] = df['reading_time'].apply(
-        lambda dt: ceil_dt(dt, delta))
-
-    return df
-
-
-def process_dataframe_power_output_avg(ride_data: pd.DataFrame) -> pd.DataFrame:
-    """Returns a DataFrame that average power output per minute."""
-
-    grouped_df = ride_data.groupby(
-        ['reading_time'])['power'].mean().astype(int)
-
-    grouped_df = grouped_df.reset_index()
-
-    grouped_df.columns = ['reading_time', 'power']
-
-    return grouped_df
-
-
-def process_dataframe_resistance_output_avg(ride_data: pd.DataFrame) -> pd.DataFrame:
-    """Returns a DataFrame that average resistance per minute."""
-
-    grouped_df = ride_data.groupby(
-        ['reading_time'])['resistance'].mean().astype(int)
-
-    grouped_df = grouped_df.reset_index()
-
-    grouped_df.columns = ['reading_time', 'resistance']
-
-    return grouped_df
-
-
-def process_dataframe_power_output_cumul(ride_data: pd.DataFrame) -> pd.DataFrame:
-    """Returns a DataFrame that cumulative power output per minute."""
-
-    grouped_df = ride_data.groupby(
-        ['reading_time'])['power'].cumsum().astype(int)
-
-    grouped_df = grouped_df.reset_index()
-
-    grouped_df.columns = ['reading_time', 'power']
-
-    return grouped_df
-
-
-def process_dataframe_resistance_output_cumul(ride_data: pd.DataFrame) -> pd.DataFrame:
-    """Returns a DataFrame that cumulative resistance per minute."""
-
-    grouped_df = ride_data.groupby(
-        ['reading_time'])['resistance'].cumsum().astype(int)
-
-    grouped_df = grouped_df.reset_index()
-
-    grouped_df.columns = ['reading_time', 'resistance']
-
-    return grouped_df
