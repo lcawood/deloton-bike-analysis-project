@@ -1,4 +1,4 @@
-"""Unit tests for the dashboard.py file"""
+"""Unit test file for the Dashboard.py file to pass workflows."""
 
 from Dashboard import main_homepage
 
