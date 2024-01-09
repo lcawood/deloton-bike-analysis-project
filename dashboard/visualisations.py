@@ -15,7 +15,30 @@ from utilities import calculate_age
 # -------------- CURRENT RIDE -----------------
 def get_current_ride_header(rider_name: str) -> None:
     """Generates a header for the current ride and the rider's name."""
-    st.header(f"CURRENT RIDE: {rider_name}", divider='green')
+    st.title(f"CURRENT RIDE: {rider_name}")
+    st.markdown('<hr style="border: 1px solid green; margin-top: 0em; margin-bottom: 0.5em;">',
+                unsafe_allow_html=True)
+
+
+def get_current_rider_info_header() -> None:
+    """Generates a header for the current rider's personal info and personal bests."""
+    st.header("RIDER INFO", divider='green')
+
+
+def get_personal_info_subheader() -> None:
+    """Generates a subheader for the current rider's personal info."""
+    st.markdown(" ")
+    st.markdown(" ")
+    st.markdown(" ")
+    st.subheader("Personal Info", divider='green')
+
+
+def get_personal_best_subheader() -> None:
+    """Generates a subheader for the current rider's personal bests."""
+    st.markdown(" ")
+    st.markdown(" ")
+    st.markdown(" ")
+    st.subheader("Personal Best", divider='green')
 
 
 def get_last_updated_current_ride(last_update_time: datetime,
@@ -33,25 +56,25 @@ def get_current_ride_header_personal_info(user_details: list) -> None:
     """
     Gets the main header personal_info for the current ride and displays them.
     """
-    with st.expander('Personal Info ⛛'):
-        # get metrics
-        height = user_details[3]
-        weight = user_details[4]
-        gender = user_details[5]
-        gender_emoji = "♂" if gender == "male" else "♀"
-        birthdate = user_details[6]
-        age = calculate_age(birthdate)
 
-        # create visualisation
-        head_cols = st.columns(4)
-        with head_cols[0]:
-            st.metric("Gender", f"{gender_emoji} {gender.title()}")
-        with head_cols[1]:
-            st.metric("Age", age)
-        with head_cols[2]:
-            st.metric("Height", f"{height} cm")
-        with head_cols[3]:
-            st.metric("Weight", f"{weight} kg")
+    # get metrics
+    height = user_details[3]
+    weight = user_details[4]
+    gender = user_details[5]
+    gender_emoji = "♂" if gender == "male" else "♀"
+    birthdate = user_details[6]
+    age = calculate_age(birthdate)
+
+    # create visualisation
+    head_cols = st.columns(4)
+    with head_cols[0]:
+        st.metric("Gender", f"{gender_emoji} {gender.title()}")
+    with head_cols[1]:
+        st.metric("Age", age)
+    with head_cols[2]:
+        st.metric("Height", f"{height} cm")
+    with head_cols[3]:
+        st.metric("Weight", f"{weight} kg")
 
 
 def get_heart_rate_warning(heart_rate: int) -> None:
@@ -93,14 +116,16 @@ def get_current_ride_personal_best_metrics(user_best_details: list) -> None:
     """
     Generates the main header metric personal bests for the current ride and displays them.
     """
-    with st.expander('Personal Best ⛛'):
+    with st.container():
         get_current_ride_metrics(user_best_details)
 
 
 # -------------- RECENT RIDES -----------------
 def get_recent_rides_header() -> None:
     """Generates a header for the recent rides section."""
-    st.header("RECENT RIDES", divider='green')
+    st.title(f"RECENT RIDES")
+    st.markdown('<hr style="border: 1px solid green; margin-top: 0em; margin-bottom: 0.5em;">',
+                unsafe_allow_html=True)
 
 
 def get_last_updated_recent_rides(last_update_time: datetime,
