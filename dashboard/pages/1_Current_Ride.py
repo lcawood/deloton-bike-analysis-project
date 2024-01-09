@@ -42,10 +42,6 @@ def main_current_ride(db_connection: extensions.connection) -> None:
         reading_time = get_reading_time(current_ride)
 
         if verify_reading_time(reading_time, READING_TIME_LAG_DELAY):
-
-            # Placeholder for last updated time caption
-            empty_last_updated_placeholder = st.empty()
-
             st.header("⚠️ Bike not in use.")
 
         else:
@@ -53,9 +49,6 @@ def main_current_ride(db_connection: extensions.connection) -> None:
             rider_name = get_current_rider_name(current_ride)
 
             get_current_ride_header(rider_name)
-
-            # Placeholder for last updated time caption
-            empty_last_updated_placeholder = st.empty()
 
             get_current_ride_header_personal_info(current_ride)
 
@@ -69,8 +62,6 @@ def main_current_ride(db_connection: extensions.connection) -> None:
                 get_heart_rate_warning(heart_rate)
 
             get_current_ride_personal_best_metrics(current_ride_personal_best)
-
-        return empty_last_updated_placeholder
 
 
 if __name__ == "__main__":
@@ -87,12 +78,10 @@ if __name__ == "__main__":
 
     while True:
         # Auto-refresh the current ride section
-        last_updated_placeholder_current = main_current_ride(conn)
+        main_current_ride(conn)
         update_time = datetime.now()
 
         for i in range(CURRENT_RIDE_REFRESH_RATE):
-            get_last_updated_current_ride(
-                update_time, last_updated_placeholder_current)
             time.sleep(LAST_UPDATED_COUNT_INCREMENT)
 
         st.rerun()
