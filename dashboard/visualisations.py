@@ -135,12 +135,14 @@ def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame, selector_gend
     ).transform_aggregate(
         total_elapsed_time='sum(max_elapsed_time)',
         groupby=['gender']
+    ).transform_calculate(
+        total_elapsed_time_minutes='datum.total_elapsed_time / 60'
     ).mark_bar().encode(
         x=alt.X('gender:N', title='Gender'),
-        y=alt.Y('total_elapsed_time:Q',
-                title='Total Elapsed Time (seconds)'),
+        y=alt.Y('total_elapsed_time_minutes:Q',
+                title='Total Elapsed Time (minutes)'),
         tooltip=[alt.Tooltip('gender:N', title='Gender'), alt.Tooltip(
-            'total_elapsed_time:Q', title='Total Elapsed Time')],
+            'total_elapsed_time_minutes:Q', title='Total Elapsed Time', format=".1f")],
         opacity=alt.condition(selector_gender, alt.value(1), alt.value(0.25))
     ).properties(
         width=chart_width,
