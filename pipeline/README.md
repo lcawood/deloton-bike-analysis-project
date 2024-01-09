@@ -3,23 +3,21 @@ Pipeline script to establish connection to Kafka stream, retrieve log lines, and
 
 User's max and min heart rates are calculated using functions from `validate_heart_rate.py`, and their heart rate given in the readings compared against them; if it above or below the healthy range too many times in a row (`EXTREME_HR_COUNT_THRESHOLD`), the `validate_heart_rate` function send_email is used to alert the user.
 
-### To Run:
-`python pipeline.py`
+## 🛠️ Getting Setup
+- Install requirements using `pip3 install -r requirements.txt`
+- Create a `.env` file with the following information:
+    - `AWS_ACCESS_KEY_ID_ `= xxxxxxxxxx
+    - `AWS_SECRET_ACCESS_KEY_` = xxxxxxxx
+    - `DATABASE_USERNAME` = xxxxxxxx
+    - `DATABASE_PASSWORD` = xxxxxxxx
+    - `DATABASE_IP` = xxxxxxxxx
+    - `DATABASE_PORT` = xxxxxxxx
+    - `DATABASE_NAME` = xxxxxxxx
 
-### Requirements:
- - Python modules (as listed in `requirements.txt`):
-    - confluent-kafka
-    - python-dotenv
- - Environment variables (in `.env` file or otherwise):
-    - KAFKA_TOPIC
-    - BOOTSTRAP_SERVERS
-    - SECURITY_PROTOCOL
-    - SASL_MECHANISM
-    - USERNAME
-    - PASSWORD
-    - AWS_ACCESS_KEY_ID_
-    - AWS_SECRET_ACCESS_KEY_
-    - BUCKET_NAME
+
+## 🏃 Running the pipeline locally
+
+Run the command `python3 pipeline.py`
 
 ### Dependencies:
  - `transform.py`
@@ -34,14 +32,3 @@ User's max and min heart rates are calculated using functions from `validate_hea
  - `validate_heart_rate`
     - `calculate_max_heart_rate`
     - `calculate_min_heart_rate`
-
-
-## load.py
-
-### Requirements:
- - Environment variables (in `.env` file or otherwise):
-   - DATABASE_IP
-   - DATABASE_USERNAME
-   - DATABASE_NAME
-   - DATABASE_PASSWORD
-   - DATABASE_PORT
