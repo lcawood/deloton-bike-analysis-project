@@ -6,4 +6,4 @@ backgroundColor = '#343434'
 # secondary background colour.
 secondaryBackgroundColor = '#F3F3DD'
 textColor="#90d1a2"
-font="arial bold"
+font="sans serif"
