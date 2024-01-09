@@ -4,10 +4,8 @@ This folder should contain all code and resources required to handle the infrast
 # 📝 Project Description
 - This folder contains all the terraform code and details that are needed to setup the cloud services required in our project.
 
-## :hammer_and_wrench: Getting Setup
-
+## 🔐 Terraform Variables
 `.tfvars` keys used:
-
 - `DATABASE_IP` -> ARN to your AWS RDS.
 - `DATABASE_NAME` -> Name of your database.
 - `DATABASE_USERNAME` -> Your database username.

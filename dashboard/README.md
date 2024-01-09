@@ -12,7 +12,7 @@ This folder contains all code and resources required to create a Streamlit dashb
 
 - You need a database called `postgres`.
 
-## Environment Variables 🔐
+## 🔐 Environment Variables
 - Create a `.env` file with the following information:
 - `DATABASE_IP` -> ARN to your AWS RDS.
 - `DATABASE_NAME` -> Name of your database.

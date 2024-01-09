@@ -11,7 +11,7 @@ This folder contains all the code and resources used for creating the daily repo
 ## 🛠️ Getting Setup
 - Install requirements using `pip3 install -r requirements.txt`
 
-## Environment Variables 🔐
+## 🔐 Environment Variables
 - Create a `.env` file with the following information:
 - `DATABASE_IP` -> ARN to your AWS RDS.
 - `DATABASE_NAME` -> Name of your database.

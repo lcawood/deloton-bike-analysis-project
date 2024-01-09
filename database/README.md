@@ -4,7 +4,7 @@ This folder should contain all code and resources required to handle the Databas
 # 📝 Project Description
 - This folder contains all the Database instructions and details that are needed to setup the Database required in our project.
 
-## Environment Variables 🔐
+## 🔐 Environment Variables
 - Create a `.env` file with the following information:
 - `DATABASE_IP` -> ARN to your AWS RDS.
 - `DATABASE_NAME` -> Name of your database.

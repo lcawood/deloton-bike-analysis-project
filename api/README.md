@@ -5,7 +5,7 @@ Files in this folder are used in the production of a RESTful API implemented usi
 
 1. `pip install -r requirements.txt` - command to install all necessary requirements to working directory
 
-## Environment Variables 🔐
+## 🔐 Environment Variables
 - Create a `.env` file with the following information:
 - `DATABASE_IP` -> ARN to your AWS RDS.
 - `DATABASE_NAME` -> Name of your database.

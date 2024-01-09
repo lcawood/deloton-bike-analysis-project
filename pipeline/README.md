@@ -6,7 +6,7 @@ User's max and min heart rates are calculated using functions from `validate_hea
 ## 🛠️ Getting Setup
 - Install requirements using `pip3 install -r requirements.txt`
 
-## Environment Variables 🔐
+## 🔐 Environment Variables
 - Create a `.env` file with the following information:
 - `DATABASE_IP` -> ARN to your AWS RDS.
 - `DATABASE_NAME` -> Name of your database.
