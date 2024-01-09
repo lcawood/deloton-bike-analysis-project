@@ -5,7 +5,13 @@ Entry point home page for the dashboard.
 # 'Unable to import' errors
 # pylint: disable = E0401
 
+
+from dotenv import load_dotenv
 import streamlit as st
+
+from database import (get_database_connection,
+                      get_total_ride_count, get_max_readings)
+from visualisations import get_summary_statistics
 
 
 def main_homepage():
@@ -17,14 +23,6 @@ def main_homepage():
     )
 
     st.write("# DELOTON Bike Analysis🚴")
-
-    st.markdown('''
-    <style>
-    .st-b7 {
-        color: #90d1a2;
-    }
-    </style>
-    ''', unsafe_allow_html=True)
 
     st.sidebar.success("Select a page above.")
 
@@ -40,3 +38,16 @@ def main_homepage():
 if __name__ == "__main__":
 
     main_homepage()
+
+    load_dotenv()
+
+    conn = get_database_connection()
+
+    total_ride_count = get_total_ride_count(conn)
+    max_elapsed_time, max_power, max_resistance = get_max_readings(conn)
+
+    st.markdown(" ")
+    st.subheader("Summary Statistics:", divider='green')
+
+    get_summary_statistics(
+        total_ride_count, max_elapsed_time, max_power, max_resistance)

@@ -11,16 +11,51 @@ import streamlit as st
 
 from utilities import calculate_age
 
+# ------------------ HOME ----------------------
 
-def get_dashboard_title() -> None:
-    """Generates a title for the dashboard."""
-    st.title("DELOTON Bike Analysis")
+
+def get_summary_statistics(total_ride_count: int, max_elapsed_time: int,
+                           max_power: float, max_resistance: int) -> None:
+    """Generates a header with historical summary statistics."""
+
+    head_cols = st.columns(4)
+    with head_cols[0]:
+        st.metric("Total Rides", total_ride_count)
+    with head_cols[1]:
+        st.metric("Max Elapsed Time", f"{max_elapsed_time} secs")
+    with head_cols[2]:
+        st.metric("Power", f"{round(max_power, 1)} W")
+    with head_cols[3]:
+        st.metric("Resistance", max_resistance)
 
 
 # -------------- CURRENT RIDE -----------------
 def get_current_ride_header(rider_name: str) -> None:
     """Generates a header for the current ride and the rider's name."""
-    st.header(f"CURRENT RIDE: {rider_name}", divider='green')
+    st.title(f"CURRENT RIDE: {rider_name}")
+    st.markdown('<hr style="border: 1px solid green; margin-top: 0em; margin-bottom: 0.5em;">',
+                unsafe_allow_html=True)
+
+
+def get_current_rider_info_header() -> None:
+    """Generates a header for the current rider's personal info and personal bests."""
+    st.header("RIDER INFO", divider='green')
+
+
+def get_personal_info_subheader() -> None:
+    """Generates a subheader for the current rider's personal info."""
+    st.markdown(" ")
+    st.markdown(" ")
+    st.markdown(" ")
+    st.subheader("Personal Info", divider='green')
+
+
+def get_personal_best_subheader() -> None:
+    """Generates a subheader for the current rider's personal bests."""
+    st.markdown(" ")
+    st.markdown(" ")
+    st.markdown(" ")
+    st.subheader("Personal Best", divider='green')
 
 
 def get_last_updated_current_ride(last_update_time: datetime,
@@ -38,25 +73,25 @@ def get_current_ride_header_personal_info(user_details: list) -> None:
     """
     Gets the main header personal_info for the current ride and displays them.
     """
-    with st.expander('Personal Info ⛛'):
-        # get metrics
-        height = user_details[3]
-        weight = user_details[4]
-        gender = user_details[5]
-        gender_emoji = "♂" if gender == "male" else "♀"
-        birthdate = user_details[6]
-        age = calculate_age(birthdate)
 
-        # create visualisation
-        head_cols = st.columns(4)
-        with head_cols[0]:
-            st.metric("Gender", f"{gender_emoji} {gender.title()}")
-        with head_cols[1]:
-            st.metric("Age", age)
-        with head_cols[2]:
-            st.metric("Height", f"{height} cm")
-        with head_cols[3]:
-            st.metric("Weight", f"{weight} kg")
+    # get metrics
+    height = user_details[3]
+    weight = user_details[4]
+    gender = user_details[5]
+    gender_emoji = "♂" if gender == "male" else "♀"
+    birthdate = user_details[6]
+    age = calculate_age(birthdate)
+
+    # create visualisation
+    head_cols = st.columns(4)
+    with head_cols[0]:
+        st.metric("Gender", f"{gender_emoji} {gender.title()}")
+    with head_cols[1]:
+        st.metric("Age", age)
+    with head_cols[2]:
+        st.metric("Height", f"{height} cm")
+    with head_cols[3]:
+        st.metric("Weight", f"{weight} kg")
 
 
 def get_heart_rate_warning(heart_rate: int) -> None:
@@ -98,14 +133,16 @@ def get_current_ride_personal_best_metrics(user_best_details: list) -> None:
     """
     Generates the main header metric personal bests for the current ride and displays them.
     """
-    with st.expander('Personal Best ⛛'):
+    with st.container():
         get_current_ride_metrics(user_best_details)
 
 
 # -------------- RECENT RIDES -----------------
 def get_recent_rides_header() -> None:
     """Generates a header for the recent rides section."""
-    st.header("RECENT RIDES", divider='green')
+    st.title("RECENT RIDES")
+    st.markdown('<hr style="border: 1px solid green; margin-top: 0em; margin-bottom: 0.5em;">',
+                unsafe_allow_html=True)
 
 
 def get_last_updated_recent_rides(last_update_time: datetime,
@@ -126,25 +163,28 @@ def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame,
     over the past 12 hours.
     """
 
-    chart_width = 300
-    dx_offset = 150
+    chart_width = 220
+    dx_offset = 100
 
     chart = alt.Chart(recent_data).add_selection(selector_gender).transform_filter(
         selector_gender & selector_age).transform_aggregate(
-        total_elapsed_time='sum(elapsed_time)',
-        groupby=['gender']
+        max_elapsed_time='max(elapsed_time)',
+        groupby=['ride_id', 'Gender']
+    ).transform_aggregate(
+        total_elapsed_time='sum(max_elapsed_time)',
+        groupby=['Gender']
     ).transform_calculate(
-        total_elapsed_time_hours='datum.total_elapsed_time / 3600'
+        total_elapsed_time_minutes='datum.total_elapsed_time / 60'
     ).mark_bar().encode(
-        x=alt.X('gender:N', title='Gender'),
-        y=alt.Y('total_elapsed_time_hours:Q',
-                title='Total Elapsed Time (hours)'),
-        tooltip=[alt.Tooltip('gender:N', title='Gender'), alt.Tooltip(
-            'total_elapsed_time_hours:Q', title='Total Elapsed Time')],
+        x=alt.X('Gender:N', title='Gender'),
+        y=alt.Y('total_elapsed_time_minutes:Q',
+                title='Total Elapsed Time (minutes)'),
+        tooltip=[alt.Tooltip('Gender:N', title='Gender'), alt.Tooltip(
+            'total_elapsed_time_minutes:Q', title='Total Elapsed Time', format=".1f")],
         opacity=alt.condition(selector_gender, alt.value(1), alt.value(0.25))
     ).properties(
         width=chart_width,
-        title={'text': 'Total Duration', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Total Duration', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 
@@ -156,17 +196,17 @@ def get_total_ride_count_gender_bar_chart(recent_rides: pd.DataFrame,
     over the past 12 hours.
     """
 
-    chart_width = 300
-    dx_offset = 50
+    chart_width = 220
+    dx_offset = 60
 
     chart = alt.Chart(recent_rides).mark_bar().encode(
-        x=alt.X('gender:N', title='Gender'),
-        y=alt.Y('count():Q', title='Number of Rides'),
+        x=alt.X('Gender:N', title='Gender'),
+        y=alt.Y('distinct(ride_id):Q', title='Number of Rides'),
         opacity=alt.condition(selector_gender, alt.value(1), alt.value(0.25))
     ).add_selection(selector_gender).transform_filter(
         selector_gender & selector_age).properties(
         width=chart_width,
-        title={'text': 'Total Number of Rides (by gender)', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Total Rides (by gender)', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 
@@ -178,18 +218,18 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame,
     over the past 12 hours.
     """
 
-    chart_width = 800
-    dx_offset = 300
+    chart_width = 540
+    dx_offset = 225
 
     chart = alt.Chart(ride_counts).mark_bar().encode(
-        x=alt.X('age_bracket:N', title='Ages'),
-        y=alt.Y('count():Q', title='Number of Rides'),
-        tooltip=[alt.Tooltip('age_bracket:N', title='Age Bracket'), alt.Tooltip(
+        x=alt.X('Age Bracket:N', title='Ages'),
+        y=alt.Y('distinct(ride_id):Q', title='Number of Rides'),
+        tooltip=[alt.Tooltip('Age Bracket:N', title='Age Bracket'), alt.Tooltip(
             'count():Q', title='Total Number of Rides')],
     ).add_selection(selector_age).transform_filter(
         selector_gender & selector_age).properties(
         width=chart_width,
-        title={'text': 'Total Number of Rides (by age)', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Total Rides (by age)', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 
@@ -198,8 +238,8 @@ def get_power_output_avg_line_chart(recent_data: pd.DataFrame,
                                     selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the average power output over the past 12 hours."""
 
-    chart_width = 850
-    dx_offset = 330
+    chart_width = 600
+    dx_offset = 250
 
     chart = alt.Chart(
         recent_data
@@ -214,7 +254,7 @@ def get_power_output_avg_line_chart(recent_data: pd.DataFrame,
             'mean(power):Q', title='Average Power')]
     ).properties(
         width=chart_width,
-        title={'text': 'Average Power Output', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Average Power Output', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 
@@ -223,8 +263,8 @@ def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame,
                                          selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the average resistance output over the past 12 hours."""
 
-    chart_width = 850
-    dx_offset = 330
+    chart_width = 600
+    dx_offset = 250
 
     chart = alt.Chart(
         recent_data
@@ -237,7 +277,7 @@ def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame,
         y=alt.Y('mean(resistance):Q', title='Average Resistance'),
     ).properties(
         width=chart_width,
-        title={'text': 'Average Resistance Output', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Average Resistance Output', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 
@@ -246,8 +286,8 @@ def get_power_output_cumul_line_chart(recent_data: pd.DataFrame,
                                       selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the cumulative power output over the past 12 hours."""
 
-    chart_width = 850
-    dx_offset = 320
+    chart_width = 600
+    dx_offset = 250
 
     recent_data['kilowatt_power'] = recent_data['power']/1000
 
@@ -261,7 +301,7 @@ def get_power_output_cumul_line_chart(recent_data: pd.DataFrame,
         sort=[{"field": 'reading_time'}]
     ).properties(
         width=chart_width,
-        title={'text': 'Cumulative Power Output', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Cumulative Power Output', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 
@@ -270,8 +310,8 @@ def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame,
                                            selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the cumulative resistance output over the past 12 hours."""
 
-    chart_width = 850
-    dx_offset = 320
+    chart_width = 600
+    dx_offset = 250
 
     chart = alt.Chart(recent_data).mark_line().transform_filter(
         selector_gender & selector_age
@@ -283,7 +323,7 @@ def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame,
         sort=[{"field": 'reading_time'}]
     ).properties(
         width=chart_width,
-        title={'text': 'Cumulative Resistance Output', 'fontSize': 24, 'dx': dx_offset})
+        title={'text': 'Cumulative Resistance Output', 'fontSize': 20, 'dx': dx_offset})
 
     return chart
 
