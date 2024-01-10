@@ -101,10 +101,9 @@ def calculate_min_heart_rate(rider_details: dict) -> int:
 
 def get_ses_client():
     """Function to create and return ses client."""
-    config = Config(retries = {'max_attempts': 1, 'mode': 'standard'})
     return boto3.client("ses", aws_access_key_id=environ['AWS_ACCESS_KEY_ID_'],
                               aws_secret_access_key=environ['AWS_SECRET_ACCESS_KEY_'],
-                              region_name="eu-west-2", config=config)
+                              region_name="eu-west-2")
 
 
 def send_email(rider_details: dict, extreme_hr_counts: list[int]) -> None:
@@ -114,7 +113,7 @@ def send_email(rider_details: dict, extreme_hr_counts: list[int]) -> None:
     """
 
     ses_client = get_ses_client()
-    
+
     rider_email = rider_details.get("email")
     first_name = rider_details.get("first_name")
     last_name = rider_details.get("last_name")
