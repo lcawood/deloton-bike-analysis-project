@@ -176,6 +176,8 @@ class TestPipeline():
                  'power': 100},
                 {'duration': 2, 'resistance': 42, 'elapsed_time': 6, 'heart_rate': 201, 'rpm': 36,
                  'power': 140},
+                {'duration': 4, 'resistance': 42, 'elapsed_time': 6, 'heart_rate': 201, 'rpm': 36,
+                 'power': 140},
                 {'duration': 3, 'resistance': 10, 'elapsed_time': 6, 'heart_rate': 163, 'rpm': 14,
                  'power': 28}
             ]
@@ -200,10 +202,13 @@ class TestPipeline():
                                               'rpm': 36, 'power': 140, 'ride_id': 1})
         mock_send_email.assert_called_once_with(test_pipeline._rider,
                                                 test_pipeline._consecutive_extreme_hrs)
-        assert test_pipeline._consecutive_extreme_hrs == []
+        assert test_pipeline._consecutive_extreme_hrs == [46, 196, 201, -1]
+
+        test_pipeline._reading_pipeline()
+        assert mock_send_email.call_count == 1
+        assert test_pipeline._consecutive_extreme_hrs == [46, 196, 201, -1]
 
         test_pipeline._consecutive_extreme_hrs = [46, 196]
-
         test_pipeline._reading_pipeline()
         assert mock_send_email.call_count == 1
         assert test_pipeline._consecutive_extreme_hrs == []
