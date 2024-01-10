@@ -35,17 +35,17 @@ class TestKafkaConnection():
         test_kafka_conn = KafkaConnection("testing")
 
         assert test_kafka_conn.get_next_log_line() == 'this is a log line'
-        assert test_kafka_conn._pre_system_messages == None
+        assert test_kafka_conn._pre_system_messages == [None, None]
         assert test_kafka_conn._last_message == {'log': 'this is a log line'}
         test_consumer.commit.assert_not_called()
 
         assert test_kafka_conn.get_next_log_line() == 'this is a [SYSTEM] log line'
-        assert test_kafka_conn._pre_system_messages == {'log': 'this is a log line'}
+        assert test_kafka_conn._pre_system_messages == [None, {'log': 'this is a log line'}]
         test_consumer.commit.assert_called_once_with({'log': 'this is a log line'},
                                                      asynchronous=False)
 
         assert test_kafka_conn.get_next_log_line() == 'this, too, is a log line'
-        assert test_kafka_conn._pre_system_messages == {'log': 'this is a log line'}
+        assert test_kafka_conn._pre_system_messages == [None, {'log': 'this is a log line'}]
         assert test_consumer.commit.call_count == 1
 
 

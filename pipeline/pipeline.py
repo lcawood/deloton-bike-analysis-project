@@ -21,8 +21,7 @@ from dotenv import load_dotenv
 import load
 import transform
 import validate_heart_rate
-from database_functions import get_database_connection
-
+from database_functions import local_db
 
 GROUP_ID = "pipeline_zeta"
 READINGS_CSV = "readings.csv"
@@ -111,6 +110,7 @@ class KafkaConnection():
         the message before last, if system_message_before_last is True) fetched the next time the
         partition is accessed.
         """
+        print('saving')
         if system_message_before_last:
             message = self._pre_system_messages[-2]
         else:
@@ -397,11 +397,11 @@ def main():
     Runs first the backfill pipeline, and then the live pipeline until fatal error or user
     interrupt.
     """
-    db_conn = get_database_connection()
+    db_conn = local_db()
 
     logging.info("Running backfill pipeline...")
     # Distinct Kafka connections must be used to ensure offsetting works.
-    BackfillPipeline(KafkaConnection(), db_conn).pipeline()
+    BackfillPipeline(KafkaConnection(), db_conn, datetime(year=2024, month=1, day=2, hour=1)).pipeline()
     logging.info("Backfill pipeline finished.")
 
     logging.info("Running live pipeline...")
@@ -409,8 +409,10 @@ def main():
 
 
 if __name__ == "__main__":
+
     load_dotenv()
     logging.basicConfig(
         level=logging.INFO
     )
     main()
+
