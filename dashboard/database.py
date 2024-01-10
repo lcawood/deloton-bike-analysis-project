@@ -29,7 +29,49 @@ def get_database_connection() -> extensions.connection:
         print("Error connecting to database. %s", err)
         return None
 
-# CURRENT RIDE
+
+def get_total_ride_count(db_connection: extensions.connection) -> int:
+    """Returns the total number of rides from the database."""
+
+    with db_connection.cursor() as db_cur:
+
+        query = """
+        SELECT count(ride_id)
+        FROM Ride
+        ;
+        """
+
+        db_cur.execute(query)
+
+        total_ride_count = db_cur.fetchone()[0]
+
+        return total_ride_count
+
+
+def get_max_readings(db_connection: extensions.connection) -> tuple:
+    """Returns the max readings (elapsed_time, power, resistance) from the database."""
+
+    with db_connection.cursor() as db_cur:
+
+        query = """
+        SELECT
+            max(elapsed_time) as max_elapsed_time,
+            max(power) as max_power,
+            max(resistance) as max_resistance
+        FROM Reading
+        ;
+        """
+
+        db_cur.execute(query)
+
+        result = db_cur.fetchone()
+
+        elapsed_time, power, resistance = result
+
+        return elapsed_time, power, resistance
+
+
+# -------------- CURRENT RIDE ----------------
 
 
 def get_current_ride_data(db_connection: extensions.connection) -> list:
@@ -58,7 +100,7 @@ def get_current_ride_data(db_connection: extensions.connection) -> list:
 
         user_details = db_cur.fetchone()
 
-        return list(user_details)
+        return list(user_details) if user_details else []
 
 
 def get_current_rider_highest_duration(db_cur: extensions.connection.cursor, rider_id: int):
@@ -173,7 +215,7 @@ def get_current_ride_data_highest(db_connection: extensions.connection, rider_de
         return user_base_details
 
 
-# RECENT RIDES
+# --------------- RECENT RIDES -------------
 def get_recent_12hr_data(db_connection: extensions.connection) -> pd.DataFrame:
     """
     Retrieves data from the last 12 hours (by attribute 'start_time') from the database

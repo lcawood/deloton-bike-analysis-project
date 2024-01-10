@@ -18,6 +18,18 @@ def get_current_rider_name(current_ride: list) -> str:
     return rider_name
 
 
+def get_gender_emoji(gender: str) -> str:
+    """Return an emoji appropriate to the given gender."""
+
+    if gender == "male":
+        return "♂"
+
+    if gender == "female":
+        return "♀"
+
+    return ""
+
+
 def calculate_age(birthdate: datetime, current_date: datetime = datetime.utcnow()) -> int:
     """
     Returns the age in years for the given date as a datetime object
@@ -157,7 +169,7 @@ def add_age_bracket_column(df: pd.DataFrame) -> None:
     labels = ['Under 18', '18-24', '25-34',
               '35-44', '45-54', '55-64', '65-74', '75+']
 
-    df['age_bracket'] = pd.cut(
+    df['Age Bracket'] = pd.cut(
         df['age'], bins=bins, labels=labels, right=False, include_lowest=True)
 
     df.drop('age', axis=1, inplace=True)
@@ -168,6 +180,16 @@ def process_dataframe(df: pd.DataFrame, date_resolution) -> pd.DataFrame:
 
     # Ensure elapsed time is numeric to calculate reading_time
     df['elapsed_time'] = pd.to_numeric(df['elapsed_time'])
+
+    # Add age_bracket column
+    add_age_bracket_column(df)
+
+    # Title case genders
+    df['gender'] = df['gender'].str.title()
+
+    # Title case gender for sidebar appearance
+    df.columns = [col.title() if col ==
+                  'gender' else col for col in df.columns]
 
     # Calculate reading_time
     df["reading_time"] = df.apply(
@@ -180,8 +202,5 @@ def process_dataframe(df: pd.DataFrame, date_resolution) -> pd.DataFrame:
     delta = timedelta(minutes=date_resolution)
     df["reading_time"] = df['reading_time'].apply(
         lambda dt: ceil_dt(dt, delta))
-
-    # Add age_bracket column
-    add_age_bracket_column(df)
 
     return df
