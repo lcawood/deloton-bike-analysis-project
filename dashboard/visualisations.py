@@ -9,7 +9,7 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from utilities import calculate_age
+from utilities import calculate_age, get_gender_emoji
 
 # ------------------ HOME ----------------------
 
@@ -76,7 +76,9 @@ def get_current_ride_header_personal_info(user_details: list) -> None:
     height = user_details[3]
     weight = user_details[4]
     gender = user_details[5]
-    gender_emoji = "♂" if gender == "male" else "♀"
+
+    gender_emoji = get_gender_emoji(gender)
+
     birthdate = user_details[6]
     age = calculate_age(birthdate)
 

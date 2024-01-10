@@ -18,6 +18,18 @@ def get_current_rider_name(current_ride: list) -> str:
     return rider_name
 
 
+def get_gender_emoji(gender: str) -> str:
+    """Return an emoji appropriate to the given gender."""
+
+    if gender == "male":
+        return "♂"
+
+    if gender == "female":
+        return "♀"
+
+    return ""
+
+
 def calculate_age(birthdate: datetime, current_date: datetime = datetime.utcnow()) -> int:
     """
     Returns the age in years for the given date as a datetime object
