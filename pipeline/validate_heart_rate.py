@@ -27,6 +27,7 @@ These are:
 from datetime import datetime
 
 import boto3
+from botocore.config import Config
 
 
 CHARSET = "UTF-8"
@@ -103,7 +104,10 @@ def send_email(rider_details: dict, extreme_hr_counts: list[int]) -> None:
     Sends an email to the relevant email address using AWS SES,
     assuming the rider email address is already verified.
     """
-    ses_client = boto3.client("ses", region_name="us-west-2")
+
+    config = Config(retries = {'max_attempts': 1, 'mode': 'standard'})
+
+    ses_client = boto3.client("ses", region_name="eu-west-2", config=config)
 
     rider_email = rider_details.get("email")
     first_name = rider_details.get("first_name")
@@ -113,6 +117,7 @@ def send_email(rider_details: dict, extreme_hr_counts: list[int]) -> None:
         Destination={
             "ToAddresses": [
                 rider_email,
+                "trainee.hugh.morris@sigmalabs.co.uk"
             ],
         },
         Message={
@@ -129,5 +134,5 @@ def send_email(rider_details: dict, extreme_hr_counts: list[int]) -> None:
                 "Data": "Deloton Heart Rate Alert",
             },
         },
-        Source="trainee.dawid.dawidowski@sigmalabs.co.uk",
+        Source="trainee.hugh.morris@sigmalabs.co.uk",
     )

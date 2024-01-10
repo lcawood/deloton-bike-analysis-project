@@ -15,7 +15,7 @@ def add_address(db_connection: connection, address : dict) -> int:
 
     try:
         address_id = database_functions.load_address_into_database(db_connection, address)
-        db_connection.c
+        db_connection.commit()
         return address_id
 
     except errors.UniqueViolation:

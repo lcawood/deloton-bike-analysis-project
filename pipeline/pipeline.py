@@ -44,6 +44,7 @@ import transform
 import validate_heart_rate
 from database_functions import get_database_connection
 
+
 GROUP_ID = "pipeline_zeta"
 READINGS_CSV = "readings.csv"
 EXTREME_HR_COUNT_THRESHOLD = 3
@@ -51,7 +52,7 @@ EXTREME_HR_COUNT_THRESHOLD = 3
 
 
 class KafkaConnection():
-    """Class to groups functions used to interact with the Kafka consumer object."""
+    """Class to group functions used to interact with the Kafka consumer object."""
 
     def __init__(self, group_id: int = GROUP_ID):
         """
@@ -59,7 +60,8 @@ class KafkaConnection():
         None.
         """
         self._consumer = self._get_kafka_consumer(group_id)
-        self._message = None
+        self._last_message = None
+        self._pre_system_message = None
 
 
     @staticmethod
@@ -99,13 +101,13 @@ class KafkaConnection():
         return message
 
 
-    def get_next_log_line(self) -> str:
+    def get_next_log_line(self, commit_on_system_line: bool = True) -> str:
         """
         Public function to retrieve and return the next non-null log line from kafka stream;
         
-        Stores last message retrieved as class variable, which is used to manually set the
-        (group_id specific) offset in the Kafka partition being accessed when a [SYSTEM] log line
-        is retrieved.
+        Stores last message retrieved as class variable, which (if commit_on_system_line == True)
+        is used to manually set the (group_id specific) offset in the Kafka partition being
+        accessed when a [SYSTEM] log line is retrieved.
         """
 
         log_line = None
@@ -113,12 +115,22 @@ class KafkaConnection():
             message = self._consumer.poll(1)
             log_line = self._get_log_line_from_message(message)
 
-        if self._message and ('[SYSTEM]' in log_line):
-            self._consumer.commit(self._message, asynchronous=False)
+        if ('[SYSTEM]' in log_line) and self._last_message:
+            self._pre_system_message = self._last_message
+            if commit_on_system_line:
+                self.save_stream_position()
 
-        self._message = message
+        self._last_message = message
 
         return log_line
+    
+
+    def save_stream_position(self):
+        """
+        Function to use self._message to save the stream to return the message last fetched the
+        next time the partition is accessed.
+        """
+        self._consumer.commit(self._pre_system_message, asynchronous=False)
 
 
 
@@ -207,8 +219,8 @@ class Pipeline():
         if len(self._consecutive_extreme_hrs) == self._extreme_hr_count_threshold:
             try:
                 validate_heart_rate.send_email(self._rider, self._consecutive_extreme_hrs)
-            except ClientError:
-                logging.error('Unable to send email.')
+            except ClientError as e:
+                logging.error('Unable to send email; ' + str(e))
 
             self._consecutive_extreme_hrs.clear()
 
@@ -230,6 +242,9 @@ class Pipeline():
                 self._rider_pipeline()
                 self._bike_pipeline()
                 self._ride_pipeline()
+
+                logging.info(f"Processing ride with id {self._ride['ride_id']}, " + \
+                             "starting on {self._ride['start_time']}...")
 
             if ('[INFO]: Ride' in self._log_line) and self._rider:
                 log_line = self._kafka_connection.get_next_log_line()
@@ -283,8 +298,8 @@ class BackfillPipeline(Pipeline):
 
 
     @classmethod
-    def _process_readings(cls, db_connection: connection, reading_line_pairs: list[str],
-                          ride_id: int, start_time: datetime, readings_csv_file: str):
+    def _process_readings(cls, reading_line_pairs: list[str], ride_id: int, start_time: datetime,
+                          readings_csv_file: str):
         """
         Protected function to process a list of reading_line_pairs (where each string is two halves
         of a reading concatenated), save the resultant dataframe to a csv, and then copy said csv
@@ -300,7 +315,24 @@ class BackfillPipeline(Pipeline):
             readings = pd.DataFrame(pool.map(partial_reading_pipeline, reading_line_pairs))
 
         readings.to_csv(readings_csv_file, index=False)
-        load.add_readings_from_csv(db_connection, readings_csv_file)
+
+
+    def _check_pipeline_stop_conditions(self) -> bool:
+        """
+        Helper function for pipeline() to determine if the pipeline should (start to or continue
+        to) stop.
+        """
+        if self._ride is None:
+            return False
+        
+        if self._stop_date and (self._stop_date < self._ride['start_time']):
+            return True
+        
+        if datetime.now().strftime('%Y-%m-%d %H') == \
+            self._ride['start_time'].strftime('%Y-%m-%d %H'):
+            return True
+        
+        return False
 
 
     def pipeline(self):
@@ -310,54 +342,65 @@ class BackfillPipeline(Pipeline):
         module to upload to the db; it does this in batches using multiprocessing.
         """
 
-        self._log_line = ""
         r_process = None
+        stop_pipeline = False
 
         if os.path.exists(self._readings_csv_file):
             load.add_readings_from_csv(self._db_connection, self._readings_csv_file)
 
-        while True:
+        while not stop_pipeline:
 
-            if '[SYSTEM]' in self._log_line:
+            stop_pipeline = self._check_pipeline_stop_conditions()
+
+            if stop_pipeline:
+                # Finishes processing, and uploads final batch.
+                if r_process:
+                    r_process.join()
+                    r_process.close()
+                    load.add_readings_from_csv(self._db_connection, self._readings_csv_file)
+            
+            elif '[SYSTEM]' in self._log_line:
+                # Handles next ride
                 self._address_pipeline()
                 self._rider_pipeline()
                 self._bike_pipeline()
                 self._ride_pipeline()
 
-                # Stops historical_pipeline automatically if caught up to specified datetime.
-                if self._stop_date:
-                    if self._stop_date < self._ride['start_time']:
-                        return None
-                elif datetime.now().strftime('%Y-%m-%d %H') in self._log_line:
-                    return None
+                logging.info(f"Processing ride with id {self._ride['ride_id']}, " + \
+                             "starting on {self._ride['start_time']}...")
 
                 # Concatenates each pair of [INFO] log lines and adds to list
                 # until [SYSTEM] log line is hit.
                 reading_line_pairs = []
-                log_line = self._kafka_connection.get_next_log_line()
-                while '[INFO]' in log_line:
-                    log_line += self._kafka_connection.get_next_log_line()
-                    reading_line_pairs.append(log_line)
-                    log_line = self._kafka_connection.get_next_log_line()
+                self._log_line = self._kafka_connection.get_next_log_line(False)
+                while '[INFO]' in self._log_line:
+                    self._log_line += self._kafka_connection.get_next_log_line(False)
+                    reading_line_pairs.append(self._log_line)
+                    self._log_line = self._kafka_connection.get_next_log_line(False)
 
                 # Each batch of reading uploads to db use the same .csv file, so each must be
                 # allowed to finish before the next begins.
                 if r_process:
                     r_process.join()
                     r_process.close()
+                    load.add_readings_from_csv(self._db_connection, self._readings_csv_file)
 
-                    print("Start time of ride last processed: ", self._ride['start_time'])
+                    self._kafka_connection.save_stream_position()
 
                 # Multiprocessing used to cycle around and retrieve the next ride's Kafka messages
                 # while the last batch of readings are being processed and uploaded to the db.
                 r_process = Process(target=self._process_readings,
-                            args=(self._db_connection, reading_line_pairs, self._ride['ride_id'],
-                                  self._ride['start_time'], self._readings_csv_file))
+                            args=(reading_line_pairs, self._ride['ride_id'],
+                                self._ride['start_time'], self._readings_csv_file))
                 r_process.start()
 
             else:
                 # Skips over lines which contain neither [SYSTEM] nor [INFO] data.
-                self._log_line = self._kafka_connection.get_next_log_line()
+                self._log_line = self._kafka_connection.get_next_log_line(False)
+            
+        # Removes utility csv file.
+        if os.path.exists(self._readings_csv_file):
+            os.remove(self._readings_csv_file)
 
 
 
@@ -366,17 +409,20 @@ def main():
     Runs first the backfill pipeline, and then the live pipeline until fatal error or user
     interrupt.
     """
-    kafka_conn = KafkaConnection()
     db_conn = get_database_connection()
 
-    logging.info("Running backfill_pipeline...")
-    BackfillPipeline(kafka_conn, db_conn).pipeline()
-    logging.info("backfill_pipeline finished.")
+    logging.info("Running backfill pipeline...")
+    # Distinct Kafka connections must be used to ensure offsetting works.
+    BackfillPipeline(KafkaConnection(), db_conn).pipeline()
+    logging.info("Backfill pipeline finished.")
 
-    logging.info("Running live_pipeline...")
-    Pipeline(kafka_conn, db_conn).pipeline()
+    logging.info("Running live pipeline...")
+    Pipeline(KafkaConnection(), db_conn).pipeline()
 
 
 if __name__ == "__main__":
     load_dotenv()
+    logging.basicConfig(
+        level=logging.INFO
+    )
     main()

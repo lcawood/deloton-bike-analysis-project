@@ -35,16 +35,17 @@ class TestKafkaConnection():
         test_kafka_conn = KafkaConnection("testing")
 
         assert test_kafka_conn.get_next_log_line() == 'this is a log line'
-        assert test_kafka_conn._message == {'log': 'this is a log line'}
+        assert test_kafka_conn._pre_system_message == None
+        assert test_kafka_conn._last_message == {'log': 'this is a log line'}
         test_consumer.commit.assert_not_called()
 
         assert test_kafka_conn.get_next_log_line() == 'this is a [SYSTEM] log line'
-        assert test_kafka_conn._message == {'log': 'this is a [SYSTEM] log line'}
+        assert test_kafka_conn._pre_system_message == {'log': 'this is a log line'}
         test_consumer.commit.assert_called_once_with({'log': 'this is a log line'},
                                                      asynchronous=False)
 
         assert test_kafka_conn.get_next_log_line() == 'this, too, is a log line'
-        assert test_kafka_conn._message == {'log': 'this, too, is a log line'}
+        assert test_kafka_conn._pre_system_message == {'log': 'this is a log line'}
         assert test_consumer.commit.call_count == 1
 
 
@@ -309,6 +310,7 @@ class TestPipeline():
             ValueError
         ]
         test_pipeline._rider = MagicMock()
+        test_pipeline._ride = MagicMock()
 
         try:
             test_pipeline.pipeline()
