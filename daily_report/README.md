@@ -10,14 +10,21 @@ This folder contains all the code and resources used for creating the daily repo
 
 ## 🛠️ Getting Setup
 - Install requirements using `pip3 install -r requirements.txt`
+
+## 🔐 Environment Variables
 - Create a `.env` file with the following information:
-    - `AWS_ACCESS_KEY_ID `= xxxxxxxxxx
-    - `AWS_SECRET_ACCESS_KEY` = xxxxxxxx
-    - `DATABASE_USERNAME` = xxxxxxxx
-    - `DATABASE_PASSWORD` = xxxxxxxx
-    - `DATABASE_IP` = xxxxxxxxx
-    - `DATABASE_PORT` = xxxxxxxx
-    - `DATABASE_NAME` = xxxxxxxx
+- `DATABASE_IP` -> ARN to your AWS RDS.
+- `DATABASE_NAME` -> Name of your database.
+- `DATABASE_USERNAME` -> Your database username.
+- `DATABASE_PASSWORD` -> Password to access your database.
+- `DATABASE_PORT` -> Port used to access the database.
+- `AWS_ACCESS_KEY_ID_ `  -> Personal AWS ACCESS KEY available on AWS.
+- `AWS_SECRET_ACCESS_KEY_` -> Personal AWS SECRET ACCESS KEY available on AWS.
+
+
+## 🏃 Running the daily report locally
+
+Run the command `python3 report.py`
 
 ## 🗂️ Files Explained
 - `report.py`

@@ -23,6 +23,7 @@ import transform
 import validate_heart_rate
 from database_functions import get_database_connection
 
+
 GROUP_ID = "pipeline_zeta"
 READINGS_CSV = "readings.csv"
 EXTREME_HR_COUNT_THRESHOLD = 3
@@ -199,6 +200,7 @@ class Pipeline():
             (self._rider['min_heart_rate'] <= reading['heart_rate'] \
              <= self._rider['max_heart_rate']):
             self._consecutive_extreme_hrs.clear()
+
         else:
             self._consecutive_extreme_hrs.append(reading['heart_rate'])
 

@@ -65,7 +65,7 @@ def get_rider_from_log_line(log_line: str) -> dict:
     # Obtain rider data from the log line directly
     rider['rider_id'] = int(log_line_data.get('user_id', -1))
 
-    name =log_line_data.get('name')
+    name = log_line_data.get('name')
     if name:
         name_parts = name.split()
         if name_parts[0].lower() in PREFIXES:

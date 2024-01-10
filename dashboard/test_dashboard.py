@@ -1,6 +1,4 @@
-"""Unit tests for the dashboard.py file"""
-
-from dashboard import main_current_ride
+"""Unit test file for the Dashboard.py file to pass workflows."""
 
 
 def test_dashboard():

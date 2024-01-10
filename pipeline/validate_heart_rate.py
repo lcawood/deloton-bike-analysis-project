@@ -25,7 +25,7 @@ These are:
 """
 
 from datetime import datetime
-
+from os import environ
 import boto3
 from botocore.config import Config
 
