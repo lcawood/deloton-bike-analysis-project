@@ -44,17 +44,15 @@ def get_current_rider_info_header() -> None:
 
 def get_personal_info_subheader() -> None:
     """Generates a subheader for the current rider's personal info."""
-    st.markdown(" ")
-    st.markdown(" ")
-    st.markdown(" ")
+    for i in range(2):
+        st.markdown(" ")
     st.subheader("Personal Info", divider='green')
 
 
 def get_personal_best_subheader() -> None:
     """Generates a subheader for the current rider's personal bests."""
-    st.markdown(" ")
-    st.markdown(" ")
-    st.markdown(" ")
+    for i in range(2):
+        st.markdown(" ")
     st.subheader("Personal Best", divider='green')
 
 
