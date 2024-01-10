@@ -45,11 +45,15 @@ def generate_bar_charts(recent_rides: pd.DataFrame, selector_gender, selector_ag
     ride_count_by_age_chart = get_total_ride_count_age_bar_chart(
         recent_rides, selector_gender, selector_age)
 
-    widget_top_row = alt.hconcat(
+    duration_charts = alt.vconcat(
         total_duration_gender_chart,
         ride_count_by_gender_chart,
+        spacing=125)
+
+    widget_top_row = alt.hconcat(
+        duration_charts,
         ride_count_by_age_chart,
-        spacing=100
+        spacing=20
     )
 
     return widget_top_row
@@ -71,7 +75,6 @@ def generate_line_charts(recent_rides: pd.DataFrame, selector_gender, selector_a
         recent_rides, selector_gender, selector_age)
 
     # Join graphs for widget
-
     widget_mid_row = alt.hconcat(
         avg_power_chart, avg_resistance_chart, spacing=50)
     widget_bot_row = alt.hconcat(
@@ -129,10 +132,21 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
             filtered_data, selector_gender, selector_age)
 
         # concatenate charts in widget to allow interactive filtering
-        widget = alt.vconcat(bar_charts, line_charts,
-                             spacing=75).configure_axis(gridColor='#6ecc89', gridOpacity=0.3)
+        widget = alt.vconcat(
+            bar_charts, line_charts,
+            spacing=75,
+            autosize='fit'
+        ).configure_axis(
+            gridColor='#6ecc89',
+            gridOpacity=0.3
+        ).configure_legend(
+            orient='right',
+            direction='vertical',
+            offset=-100,
+            symbolDirection='vertical'
+        )
 
-        st.altair_chart(widget)
+        st.altair_chart(widget, use_container_width=True)
 
         return empty_last_updated_placeholder
 
