@@ -43,7 +43,9 @@ def get_total_ride_count(db_connection: extensions.connection) -> int:
 
         db_cur.execute(query)
 
-        return db_cur.fetchone()[0]
+        total_ride_count = db_cur.fetchone()[0]
+
+        return total_ride_count
 
 
 def get_max_readings(db_connection: extensions.connection) -> tuple:
@@ -64,7 +66,9 @@ def get_max_readings(db_connection: extensions.connection) -> tuple:
 
         result = db_cur.fetchone()
 
-        return result[0], result[1], result[2]
+        elapsed_time, power, resistance = result
+
+        return elapsed_time, power, resistance
 
 
 # -------------- CURRENT RIDE ----------------
