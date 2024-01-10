@@ -165,9 +165,6 @@ def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame,
     over the past 12 hours.
     """
 
-    # chart_width = 220
-    # dx_offset = 100
-
     chart = alt.Chart(recent_data).add_selection(selector_gender).transform_filter(
         selector_gender & selector_age).transform_aggregate(
         max_elapsed_time='max(elapsed_time)',
@@ -196,9 +193,6 @@ def get_total_ride_count_gender_bar_chart(recent_rides: pd.DataFrame,
     Generates a bar chart for the total number of rides grouped by gender
     over the past 12 hours.
     """
-
-    # chart_width = 220
-    # dx_offset = 60
 
     chart = alt.Chart(recent_rides).mark_bar().encode(
         y=alt.X('Gender:N', title='Gender'),
@@ -235,9 +229,6 @@ def get_power_output_avg_line_chart(recent_data: pd.DataFrame,
                                     selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the average power output over the past 12 hours."""
 
-    chart_width = 600
-    dx_offset = 250
-
     chart = alt.Chart(
         recent_data
     ).mark_line(
@@ -259,9 +250,6 @@ def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame,
                                          selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the average resistance output over the past 12 hours."""
 
-    chart_width = 600
-    dx_offset = 250
-
     chart = alt.Chart(
         recent_data
     ).mark_line(
@@ -280,9 +268,6 @@ def get_resistance_output_avg_line_chart(recent_data: pd.DataFrame,
 def get_power_output_cumul_line_chart(recent_data: pd.DataFrame,
                                       selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the cumulative power output over the past 12 hours."""
-
-    # chart_width = 600
-    # dx_offset = 250
 
     recent_data['kilowatt_power'] = recent_data['power']/1000
 
@@ -303,9 +288,6 @@ def get_power_output_cumul_line_chart(recent_data: pd.DataFrame,
 def get_resistance_output_cumul_line_chart(recent_data: pd.DataFrame,
                                            selector_gender, selector_age) -> alt.Chart:
     """Generates a line chart for the cumulative resistance output over the past 12 hours."""
-
-    chart_width = 600
-    dx_offset = 250
 
     chart = alt.Chart(recent_data).mark_line().transform_filter(
         selector_gender & selector_age

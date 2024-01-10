@@ -22,14 +22,14 @@ def main_homepage():
         layout="wide"
     )
 
-    st.write("# DELOTON Bike Analysis🚴")
+    st.write("# DELOTON Bike Analysis 🚴")
 
     st.sidebar.success("Select a page above.")
 
     st.markdown(
         """
-        Realtime dashboard to give the business visibility on the
-        current and recent behaviour of riders.\n
+        A dynamic, real-time dashboard that offers comprehensive statistics and visualisations,
+        providing insights into the current and recent behavior of riders.\n
 
         **👈 Select a page from the sidebar** to see the current or recent rides.
         """)
