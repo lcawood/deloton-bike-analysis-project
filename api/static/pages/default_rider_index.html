@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Deloton Ride Data API</title>
+    </head>
+    <body>
+        <div>
+            <p>Enter a rider number to see their details:</p>
+            <ul>
+                <li> Follow this with <i>/rides</i> to see all of their logged rides: </li>
+                <ul>
+                    <li> Follow this with <i>?</i> and: </li>
+                    <ul>
+                        <li> <i>expanded=True</i> to see all the readings from each ride; </li>
+                        <li> <i>summary=True</i> to see a summary of the readings from each ride; </li>
+                        <li> <i>expanded=True&summary=True</i> to see all the readings, with a summary, from each ride. </li>
+                    </ul>
+                </ul>
+            </ul>
+            <br>
+            <p>Example:</p>
+            <pre><i>    /rider/1/rides?expanded=True&summary=True</i></pre>
+        </div>
+    </body>
+
+</html>

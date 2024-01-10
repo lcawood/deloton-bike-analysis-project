@@ -31,7 +31,9 @@ ERROR_MESSAGES = {
         'rider': 'Rider with id {} could not be found.',
         'rider_rides': 'Unable to locate any rides belonging to a rider with id {}.',
         'daily_rides': 'Unable to locate any rides starting on {}.'
-    }
+    },
+    'server error': 'Oops! There has been a problem on our end; \
+please be patient while we reset our database connection (if this problem persists, please contact IT support).'
 }
 
 
@@ -43,12 +45,20 @@ def get_ride(db_conn: connection, ride_id: int, expanded: str = 'False',
     and an error dict with appropriate status code if not.
     """
     if not is_positive_integer(ride_id):
-        return {'error': ERROR_MESSAGES['bad request']['id'].format('ride_id')}, \
+        return {'error': {
+            'code': STATUS_CODES['bad request'],
+            'type': 'bad request'
+            },
+            'message': ERROR_MESSAGES['bad request']['id'].format('ride_id')}, \
             STATUS_CODES['bad request']
 
     for name, value in [('expanded', expanded), ('summary', summary)]:
         if not is_string_boolean(value):
-            return {'error': ERROR_MESSAGES['bad request']['boolean'].format(name)}, \
+            return {'error': {
+                'code': STATUS_CODES['bad request'],
+                'type': 'bad request'
+            },
+            'message': ERROR_MESSAGES['bad request']['boolean'].format(name)}, \
                 STATUS_CODES['bad request']
 
     try:
@@ -65,13 +75,21 @@ def get_ride(db_conn: connection, ride_id: int, expanded: str = 'False',
                 ride['reading_summary']['duration'])
 
     except Error as e:
-        return {'error': str(e)}, STATUS_CODES['server error']
+        return {'error': {
+            'code': STATUS_CODES['server error'],
+            'type': 'server error'
+            },
+            'message': ERROR_MESSAGES['server error']
+        }, STATUS_CODES['server error']
 
     if ride:
         return ride, STATUS_CODES['success']
 
-    return {'error': ERROR_MESSAGES['not found']['ride'].format(ride_id)}, \
-        STATUS_CODES['not found']
+    return {'error': {
+        'code': STATUS_CODES['not found'],
+        'type': 'not found'
+        },
+        'message': ERROR_MESSAGES['not found']['ride'].format(ride_id)}, STATUS_CODES['not found']
 
 
 def get_rider(db_conn: connection, rider_id: int) -> (dict, int):
@@ -81,19 +99,32 @@ def get_rider(db_conn: connection, rider_id: int) -> (dict, int):
     successful, and an error dict with appropriate status code if not.
     """
     if not is_positive_integer(rider_id):
-        return {'error': ERROR_MESSAGES['bad request']['id'].format('rider_id')}, \
+        return {'error': {
+            'code': STATUS_CODES['bad request'],
+            'type': 'bad request'
+            },
+            'message': ERROR_MESSAGES['bad request']['id'].format('rider_id')}, \
             STATUS_CODES['bad request']
 
     try:
         rider = database_functions.get_rider_by_id(db_conn, rider_id)
     except Error as e:
-        return {'error': str(e)}, STATUS_CODES['server error']
+        return {'error': {
+            'code': STATUS_CODES['server error'],
+            'type': 'server error'
+            },
+            'message': ERROR_MESSAGES['server error']
+        }, STATUS_CODES['server error']
 
     if rider:
         return rider, STATUS_CODES['success']
 
-    return {'error': ERROR_MESSAGES['not found']['rider'].format(rider_id)}, \
-        STATUS_CODES['not found']
+    return {'error': {
+        'code': STATUS_CODES['not found'],
+        'type': 'not found'
+        },
+        'message': ERROR_MESSAGES['not found']['rider'].format(rider_id)}, \
+            STATUS_CODES['not found']
 
 
 def get_rider_rides(db_conn: connection, rider_id: int, expanded: str = 'False',
@@ -105,17 +136,24 @@ def get_rider_rides(db_conn: connection, rider_id: int, expanded: str = 'False',
     not.
     """
     if not is_positive_integer(rider_id):
-        return {'error': ERROR_MESSAGES['bad request']['id'].format('rider_id')}, \
+        return {'error': {
+            'code': STATUS_CODES['bad request'],
+            'type': 'bad request'
+        },
+        'message': ERROR_MESSAGES['bad request']['id'].format('rider_id')}, \
             STATUS_CODES['bad request']
 
     for name, value in [('expanded', expanded), ('summary', summary)]:
         if not is_string_boolean(value):
-            return {'error': ERROR_MESSAGES['bad request']['boolean'].format(name)}, \
-                STATUS_CODES['bad request']
+            return {'error': {
+                'code': STATUS_CODES['bad request'],
+                'type': 'bad request'
+                },
+                'message': ERROR_MESSAGES['bad request']['boolean'].format(name)
+                }, STATUS_CODES['bad request']
 
     try:
         rides = database_functions.get_rider_rides_by_id(db_conn, rider_id)
-
         if expanded == 'True':
             for i, ride in enumerate(rides):
                 rides[i]['readings'] = database_functions.get_readings_by_ride_id(
@@ -129,12 +167,21 @@ def get_rider_rides(db_conn: connection, rider_id: int, expanded: str = 'False',
                     rides[i]['reading_summary']['duration'])
 
     except Error as e:
-        return {'error': str(e)}, STATUS_CODES['server error']
+        return {'error': {
+            'code': STATUS_CODES['server error'],
+            'type': 'server error'
+            },
+            'message': ERROR_MESSAGES['server error']
+        }, STATUS_CODES['server error']
 
     if rides:
         return rides, STATUS_CODES['success']
 
-    return {'error': ERROR_MESSAGES['not found']['rider_rides'].format(rider_id)}, \
+    return {'error': {
+        'code': STATUS_CODES['not found'],
+        'type': 'not found'
+        },
+        'message': ERROR_MESSAGES['not found']['rider_rides'].format(rider_id)}, \
         STATUS_CODES['not found']
 
 
@@ -149,13 +196,20 @@ def get_daily_rides(db_conn: connection, date: str = datetime.today().strftime("
     try:
         date = datetime.strptime(date, "%d-%m-%Y").date()
     except (TypeError, ValueError):
-        return {
-            'error': ERROR_MESSAGES['bad request']['datetime'].format('date')
+        return {'error': {
+            'code': STATUS_CODES['bad request'],
+            'type': 'bad request'
+            },
+            'message':  ERROR_MESSAGES['bad request']['datetime'].format('date')
             }, STATUS_CODES['bad request']
 
     for name, value in [('expanded', expanded), ('summary', summary)]:
         if not is_string_boolean(value):
-            return {'error': ERROR_MESSAGES['bad request']['boolean'].format(name)}, \
+            return {'error': {
+                'code': STATUS_CODES['bad request'],
+                'type': 'bad request'
+                },
+                'message': ERROR_MESSAGES['bad request']['boolean'].format(name)}, \
                 STATUS_CODES['bad request']
 
     try:
@@ -174,15 +228,22 @@ def get_daily_rides(db_conn: connection, date: str = datetime.today().strftime("
                     rides[i]['reading_summary']['duration'])
 
     except Error as e:
-        return {'error': str(e)}, STATUS_CODES['server error']
+        return {'error': {
+            'code': STATUS_CODES['server error'],
+            'type': 'server error'
+            },
+            'message': ERROR_MESSAGES['server error']
+        }, STATUS_CODES['server error']
 
     if rides:
         return rides, STATUS_CODES['success']
 
-    return {
-        'error': ERROR_MESSAGES['not found']['daily_rides'].format(date.strftime("%d-%m-%Y"))
-        }, \
-        STATUS_CODES['not found']
+    return {'error': {
+        'code': STATUS_CODES['not found'],
+        'type': 'not found'
+        },
+        'message': ERROR_MESSAGES['not found']['daily_rides'].format(date.strftime("%d-%m-%Y"))
+        }, STATUS_CODES['not found']
 
 
 def delete_ride(db_conn: connection, ride_id: int) -> (dict, int):
@@ -192,16 +253,28 @@ def delete_ride(db_conn: connection, ride_id: int) -> (dict, int):
     and an error dict with appropriate status code if not.
     """
     if not is_positive_integer(ride_id):
-        return {'error': ERROR_MESSAGES['bad request']['id'].format('ride_id')}, \
+        return {'error': {
+            'code': STATUS_CODES['bad request'],
+            'type': 'bad request'
+            },
+            'message': ERROR_MESSAGES['bad request']['id'].format('ride_id')}, \
             STATUS_CODES['bad request']
 
     try:
         ride = database_functions.delete_ride_by_id(db_conn, ride_id)
     except Error as e:
-        return {'error': str(e)}, STATUS_CODES['server error']
+        return {'error': {
+            'code': STATUS_CODES['server error'],
+            'type': 'server error'
+            },
+            'message': ERROR_MESSAGES['server error']
+        }, STATUS_CODES['server error']
 
     if ride:
         return ride, STATUS_CODES['success']
 
-    return {'error': ERROR_MESSAGES['not found']['ride'].format(ride_id)}, \
-        STATUS_CODES['not found']
+    return {'error': {
+        'code': STATUS_CODES['not found'],
+        'type': 'not found'
+        },
+        'message': ERROR_MESSAGES['not found']['ride'].format(ride_id)}, STATUS_CODES['not found']
