@@ -1,50 +1,25 @@
 """Module to contain and run the endpoints for the Deloton staff API"""
 
 from datetime import datetime
-from flask import Flask, request,current_app
+from flask import Flask, request,current_app, abort, Response
 from flask_caching import Cache
 
 import api_functions
 from database_functions import get_database_connection
 
-DEFAULT_RIDE_HTML = """
-Enter a ride number to see its details:
-<ul>
-    <li> Follow this with <i>?</i> and: </li>
-    <ul>
-        <li> <i>expanded=True</i> to see all the readings for the ride; </li>
-        <li> <i>summary=True</i> to see a summary of the readings for the ride; </li>
-        <li> <i>expanded=True&summary=True</i> to see all the readings and a summary for the ride. </li>
-    </ul>
-</ul>
-<br>
-Example:
-<pre><i>    /ride/1?expanded=True&summary=True</i></pre>
-"""
-DEFAULT_RIDER_HTML = """
-Enter a rider number to see their details:
-<ul>
-    <li> Follow this with <i>/rides</i> to see all of their logged rides: </li>
-    <ul>
-        <li> Follow this with <i>?</i> and: </li>
-        <ul>
-            <li> <i>expanded=True</i> to see all the readings from each ride; </li>
-            <li> <i>summary=True</i> to see a summary of the readings from each ride; </li>
-            <li> <i>expanded=True&summary=True</i> to see all the readings, with a summary, from each ride. </li>
-        </ul>
-    </ul>
-</ul>
-<br>
-Example:
-<pre><i>    /rider/1/rides?expanded=True&summary=True</i></pre>
-"""
-
 
 app = Flask(__name__)
 app.json.sort_keys = False
-cache = Cache(config={'CACHE_TYPE': 'SimpleCache', 'CACHE_DEFAULT_TIMEOUT': 1})
+cache = Cache(config={'CACHE_TYPE': 'SimpleCache', 'CACHE_DEFAULT_TIMEOUT': 4})
 cache.init_app(app)
 db_conn = get_database_connection()
+
+
+def reset_database_connection():
+    """Function to reset database connection."""
+    global db_conn
+    db_conn.close()
+    db_conn = get_database_connection()
 
 
 def is_not_get_request(*args, **kwargs) -> bool:
@@ -56,16 +31,17 @@ def is_not_get_request(*args, **kwargs) -> bool:
         return False
     return True
 
+
 @app.route("/", methods=["GET"])
 def index():
     """ Creates an index route with an index page for the API """
-    return current_app.send_static_file('./pages/index.html')
+    return current_app.send_static_file('./pages/main_index.html')
+
 
 @app.route("/ride", methods=["GET"])
-@cache.cached(query_string=True)
 def default_ride_endpoint():
     """Default ride endpoint"""
-    return DEFAULT_RIDE_HTML, api_functions.STATUS_CODES['success']
+    return current_app.send_static_file('./pages/default_ride_index.html')
         
 
 @app.route("/ride/<int:ride_id>", methods=["GET", "DELETE"])
@@ -76,23 +52,34 @@ def ride_endpoint(ride_id: int):
         case "GET":
             expanded = request.args.get('expanded', 'False').title()
             summary = request.args.get('summary', 'False').title()
-            return api_functions.get_ride(db_conn, ride_id, expanded, summary)
+            response = api_functions.get_ride(db_conn, ride_id, expanded, summary)
         case "DELETE":
-            return api_functions.delete_ride(db_conn, ride_id)
+            response = api_functions.delete_ride(db_conn, ride_id)
+        
+    # Resets db_conn if server error
+    if response[0] == api_functions.STATUS_CODES['server error']:
+        reset_database_connection()
+
+    return response
 
 
 @app.route("/rider", methods=["GET"])
-@cache.cached(query_string=True)
 def default_rider_endpoint():
     """Default rider endpoint"""
-    return DEFAULT_RIDER_HTML, api_functions.STATUS_CODES['success']
+    return current_app.send_static_file('./pages/default_rider_index.html')
 
 
 @app.route("/rider/<int:rider_id>", methods=["GET"])
 @cache.cached(query_string=True)
 def rider_endpoint(rider_id: int):
     """Endpoint to return a rider information JSON by id."""
-    return api_functions.get_rider(db_conn, rider_id)
+    response = api_functions.get_rider(db_conn, rider_id)
+
+    # Resets db_conn if server error
+    if response[0] == api_functions.STATUS_CODES['server error']:
+        reset_database_connection()
+
+    return response
 
 
 @app.route("/rider/<int:rider_id>/rides", methods=["GET"])
@@ -101,7 +88,12 @@ def rider_rides_endpoint(rider_id: int):
     """Endpoint to return a JSON of all rides belonging to a rider of specified id."""
     expanded = request.args.get('expanded', 'False').title()
     summary = request.args.get('summary', 'False').title()
-    return api_functions.get_rider_rides(db_conn, rider_id, expanded, summary)
+    response = api_functions.get_rider_rides(db_conn, rider_id, expanded, summary)
+
+    # Resets db_conn if server error
+    if response[0] == api_functions.STATUS_CODES['server error']:
+        reset_database_connection()
+    return response
 
 
 @app.route("/daily", methods=["GET"])
@@ -111,8 +103,12 @@ def daily_rides_endpoint():
     date = request.args.get('date', datetime.today().strftime("%d-%m-%Y"))
     expanded = request.args.get('expanded', 'False').title()
     summary = request.args.get('summary', 'False').title()
+    response = api_functions.get_daily_rides(db_conn, date, expanded, summary)
 
-    return api_functions.get_daily_rides(db_conn, date, expanded, summary)
+    # Resets db_conn if server error
+    if response[0] == api_functions.STATUS_CODES['server error']:
+        reset_database_connection()
+    return response
 
 
 if __name__ == "__main__":
