@@ -5,7 +5,7 @@ The global constant ages are valid as of January 2024.
 """
 
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -83,12 +83,13 @@ def test_calculate_min_heart_rate_valid(user_details: dict, threshold: int):
     assert calculate_min_heart_rate(user_details) == threshold
 
 
-@patch('validate_heart_rate.boto3.client')
-def test_ses_send_email(mock_boto_client):
+@patch('validate_heart_rate.get_ses_client')
+def test_ses_send_email(mock_get_client):
     """send_email() should call .send_email once to send an SES email."""
 
-    mock_boto_client.return_value = mock_boto_client
-    mock_boto_client.get_parameter.return_value = {}
+    mock_ses_client = MagicMock()
+
+    mock_get_client.return_value = mock_ses_client
 
     fake_user_details = {
         "first_name": "John",
@@ -100,4 +101,4 @@ def test_ses_send_email(mock_boto_client):
 
     send_email(fake_user_details, fake_hr_counts)
 
-    mock_boto_client.send_email.assert_called_once()
+    mock_ses_client.send_email.assert_called_once()
