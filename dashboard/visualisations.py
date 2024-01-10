@@ -99,11 +99,11 @@ def get_heart_rate_warning(heart_rate: int) -> None:
     if heart_rate == 0:
         st.warning(
             """WARNING! HEART RATE IS ZERO: \n
-            PLEASE PLACE HANDS ON HANDLE BARS OR SEEK ASSISTANCE!""", icon="⚠️")
+            PLEASE PLACE HANDS ON HANDLE BARS OR SEEK ASSISTANCE!""", icon="❤️‍🔥")
     else:
         st.warning(
             """WARNING! HEART RATE IS OUTSIDE THE HEALTHY RANGE: \n
-            PLEASE SLOW DOWN OR SEEK ASSISTANCE!""", icon="⚠️")
+            PLEASE SLOW DOWN OR SEEK ASSISTANCE!""", icon="❤️‍🔥")
 
 
 def get_current_ride_metrics(user_details: list) -> None:
