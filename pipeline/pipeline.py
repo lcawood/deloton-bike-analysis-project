@@ -116,7 +116,7 @@ class KafkaConnection():
         else:
             message = self._pre_system_messages[-1]
         if message:
-            self._consumer.commit(message, asynchronous=False)
+            self._consumer.commit(message, asynchronous=True)
 
 
 
@@ -401,7 +401,7 @@ def main():
 
     logging.info("Running backfill pipeline...")
     # Distinct Kafka connections must be used to ensure offsetting works.
-    BackfillPipeline(KafkaConnection(), db_conn, datetime(year=2024, month=1, day=2, hour=1)).pipeline()
+    BackfillPipeline(KafkaConnection(), db_conn).pipeline()
     logging.info("Backfill pipeline finished.")
 
     logging.info("Running live pipeline...")
