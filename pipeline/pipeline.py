@@ -183,6 +183,33 @@ class Pipeline():
         self._ride['ride_id'] = load.add_ride(self._db_connection, self._ride)
 
 
+    def _check_heart_rate(self, heart_rate: int):
+        """
+        Function to check if someone's heart rate is extreme, and trigger an email alert if it has
+        been extreme for a number of consecutive times.
+        """
+
+        # If an email has already been sent.
+        if len(self._consecutive_extreme_hrs) > self._extreme_hr_count_threshold:
+            return None
+
+        if (heart_rate == 0) or \
+            (self._rider['min_heart_rate'] <= heart_rate \
+             <= self._rider['max_heart_rate']):
+            self._consecutive_extreme_hrs.clear()
+
+        else:
+            self._consecutive_extreme_hrs.append(heart_rate)
+
+        if len(self._consecutive_extreme_hrs) == self._extreme_hr_count_threshold:
+            try:
+                validate_heart_rate.send_email(self._rider, self._consecutive_extreme_hrs)
+            except ClientError as e:
+                logging.error('Unable to send email; %s', str(e))
+
+            self._consecutive_extreme_hrs.append(-1)
+
+
     def _reading_pipeline(self):
         """
         Protected function to extract reading data from class variable log_line (which should be a
@@ -196,21 +223,7 @@ class Pipeline():
 
         load.add_reading(self._db_connection, reading)
 
-        if (reading['heart_rate'] == 0) or \
-            (self._rider['min_heart_rate'] <= reading['heart_rate'] \
-             <= self._rider['max_heart_rate']):
-            self._consecutive_extreme_hrs.clear()
-
-        else:
-            self._consecutive_extreme_hrs.append(reading['heart_rate'])
-
-        if len(self._consecutive_extreme_hrs) == self._extreme_hr_count_threshold:
-            try:
-                validate_heart_rate.send_email(self._rider, self._consecutive_extreme_hrs)
-            except ClientError as e:
-                logging.error('Unable to send email; %s', str(e))
-
-            self._consecutive_extreme_hrs.clear()
+        self._check_heart_rate(reading['heart_rate'])
 
 
     def pipeline(self):
