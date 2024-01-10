@@ -29,7 +29,7 @@ from visualisations import (get_total_ride_count_age_bar_chart,
                             get_resistance_output_cumul_line_chart)
 
 
-RECENT_RIDE_REFRESH_RATE = 20
+RECENT_RIDE_REFRESH_RATE = 300
 LAST_UPDATED_COUNT_INCREMENT = 1
 
 
