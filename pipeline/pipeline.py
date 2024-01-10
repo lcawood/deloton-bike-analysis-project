@@ -40,7 +40,7 @@ class KafkaConnection():
         """
         self._consumer = self._get_kafka_consumer(group_id)
         self._last_message = None
-        self._pre_system_message = None
+        self._pre_system_messages = [None, None]
 
 
     @staticmethod
@@ -95,7 +95,8 @@ class KafkaConnection():
             log_line = self._get_log_line_from_message(message)
 
         if ('[SYSTEM]' in log_line) and self._last_message:
-            self._pre_system_message = self._last_message
+            self._pre_system_messages.pop(0)
+            self._pre_system_messages.append(self._last_message)
             if commit_on_system_line:
                 self.save_stream_position()
 
@@ -104,12 +105,18 @@ class KafkaConnection():
         return log_line
     
 
-    def save_stream_position(self):
+    def save_stream_position(self, system_message_before_last: bool = False):
         """
-        Function to use self._message to save the stream to return the message last fetched the
-        next time the partition is accessed.
+        Function to use self._pre_system_messages to save the stream to return the last message (or
+        the message before last, if system_message_before_last is True) fetched the next time the
+        partition is accessed.
         """
-        self._consumer.commit(self._pre_system_message, asynchronous=False)
+        if system_message_before_last:
+            message = self._pre_system_messages[-2]
+        else:
+            message = self._pre_system_messages[-1]
+        if message:
+            self._consumer.commit(message, asynchronous=False)
 
 
 
@@ -366,7 +373,7 @@ class BackfillPipeline(Pipeline):
                     r_process.close()
                     load.add_readings_from_csv(self._db_connection, self._readings_csv_file)
 
-                    self._kafka_connection.save_stream_position()
+                    self._kafka_connection.save_stream_position(True)
 
                 # Multiprocessing used to cycle around and retrieve the next ride's Kafka messages
                 # while the last batch of readings are being processed and uploaded to the db.
