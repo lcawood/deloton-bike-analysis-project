@@ -3,27 +3,6 @@ Pipeline script to fetch data from the kafka, extract and process bike, address,
 reading data from it, and upload this to the database. This is done in two main swathes; first, any
 backlog of data in the Kafka stream is processed as efficiently as possible, and then a different
 script (with real time (ish) heart rate alerts) is used to process the live data.
-
-The entire functionality of the module is contained within the main() function (which is called by
-default), which roughly follows the following steps:
-
- - Establish a connection to the Kafka stream;
-
- - first run pipeline() from the class BackfillPipeline to catch up on historic data from the kafka
- stream;
-    - this class inherits from Pipeline, and is a special implementation of it's
-    functionality without the heart rate alert system, and optimised for speed.
-     - Operates in batches of log messages grouped by ride.
-
- - run pipeline() from the class Pipeline to retrieve log lines, and then transform
- and upload the relevant data to the database (using functions from the `transform.py` and
- `load.py` files as necessary). Also within this pipeline:
-    - User's max and min heart rates are calculated using functions from `validate_heart_rate.py`,
-    and their heart rate in the readings compared against them; if it lies outside the healthy
-    range too many times in a row (EXTREME_HR_COUNT_THRESHOLD), the validate_heart_rate function
-    send_email is used to alert the rider;
-    - This function handles one log line at a time.
-
 """
 
 from datetime import datetime
