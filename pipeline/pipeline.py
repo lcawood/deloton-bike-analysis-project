@@ -11,17 +11,17 @@ import json
 import logging
 from multiprocessing import Pool, Process
 import os
-import pandas as pd
-from psycopg2.extensions import connection
 
 from botocore.exceptions import ClientError
 from confluent_kafka import Consumer, KafkaException, Message
 from dotenv import load_dotenv
+import pandas as pd
+from psycopg2.extensions import connection
 
 import load
 import transform
 import validate_heart_rate
-from database_functions import local_db
+from database_functions import get_database_connection
 
 GROUP_ID = "pipeline_zeta"
 READINGS_CSV = "readings.csv"
@@ -206,7 +206,7 @@ class Pipeline():
             try:
                 validate_heart_rate.send_email(self._rider, self._consecutive_extreme_hrs)
             except ClientError as e:
-                logging.error('Unable to send email; ' + str(e))
+                logging.error('Unable to send email; %s', str(e))
 
             self._consecutive_extreme_hrs.clear()
 
