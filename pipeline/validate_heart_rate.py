@@ -27,7 +27,13 @@ These are:
 from datetime import datetime
 from os import environ
 import boto3
-from botocore.config import Config
+
+
+GENDER_TITLES = {
+    'male': 'Mr',
+    'female': 'Ms',
+    'other': 'Mx'
+}
 
 
 CHARSET = "UTF-8"
@@ -115,28 +121,36 @@ def send_email(rider_details: dict, extreme_hr_counts: list[int]) -> None:
     ses_client = get_ses_client()
 
     rider_email = rider_details.get("email")
-    first_name = rider_details.get("first_name")
     last_name = rider_details.get("last_name")
+    gender = rider_details.get('gender')
 
     ses_client.send_email(
         Destination={
             "ToAddresses": [
-                rider_email,
-                "trainee.hugh.morris@sigmalabs.co.uk"
+                # rider_email,  (removed because they are currently unverified through AWS)
+                "trainee.dawid.dawidowski@sigmalabs.co.uk"
             ],
         },
         Message={
             "Body": {
-                "Text": {
-                    "Charset": CHARSET,
-                    "Data": f"""{first_name} {last_name}, your detected heart rate is abnormal!
-                    Your heart rate readings are {extreme_hr_counts}.
-                    Please rest or seek some help.""",
+                'Html': {
+                    'Data': f"""
+<h2>Deloton Heart Rate Alert</h2>
+<p style="color:red;"><b>Extreme heart rates detected - please seek medical advice.</b></p>
+<p>
+Dear {GENDER_TITLES[gender]} {last_name}, we have detected {len(extreme_hr_counts)} heart rates \
+in a row lying outside of our estimated healthy range for you. These readings were: {", ".join([str(hr) for hr in extreme_hr_counts])}.
+This may be an indicator of a variety of health conditions; please rest, and, if necessary, seek medical advice.
+<br>
+<br>
+<a href="https://www.bhf.org.uk/informationsupport/how-a-healthy-heart-works/your-heart-rate">British Heart Foundation - Your Heart Rate</a>
+</p>
+"""
                 }
             },
             "Subject": {
                 "Charset": CHARSET,
-                "Data": "Deloton Heart Rate Alert",
+                "Data": "Abnormal Heart Rates Detected",
             },
         },
         Source="trainee.hugh.morris@sigmalabs.co.uk",
