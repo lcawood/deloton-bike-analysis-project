@@ -138,12 +138,16 @@ def send_email(rider_details: dict, extreme_hr_counts: list[int]) -> None:
 <h2>Deloton Heart Rate Alert</h2>
 <p style="color:red;"><b>Extreme heart rates detected - please seek medical advice.</b></p>
 <p>
-Dear {GENDER_TITLES[gender]} {last_name}, we have detected {len(extreme_hr_counts)} heart rates \
+Dear {GENDER_TITLES[gender]} {last_name}, <br> <br>
+We have detected {len(extreme_hr_counts)} heart rates \
 in a row lying outside of our estimated healthy range for you. These readings were: {", ".join([str(hr) for hr in extreme_hr_counts])}.
 This may be an indicator of a variety of health conditions; please rest, and, if necessary, seek medical advice.
 <br>
 <br>
 <a href="https://www.bhf.org.uk/informationsupport/how-a-healthy-heart-works/your-heart-rate">British Heart Foundation - Your Heart Rate</a>
+<br> <br>
+Kind regards, <br>
+Deloton Team
 </p>
 """
                 }
