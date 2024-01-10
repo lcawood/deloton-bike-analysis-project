@@ -40,6 +40,7 @@ def main_current_ride(db_connection: extensions.connection) -> None:
 
     if not current_ride:
         st.header("⚠️ Bike not in use.")
+        return
 
     current_ride_personal_best = get_current_ride_data_highest(
         db_connection, current_ride)
