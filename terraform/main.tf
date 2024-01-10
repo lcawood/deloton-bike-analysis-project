@@ -369,7 +369,7 @@ data "aws_ecs_cluster" "existing_cluster" {
 
 # Logging messages
 resource "aws_cloudwatch_log_group" "ecs_log_group" {
-  name = "c9-deloton-log"
+  name = "c9-pipeline-deloton-log"
 }
 
 # Task definition for pipeline service
@@ -444,10 +444,6 @@ resource "aws_ecs_task_definition" "pipeline_task_def" {
       {
         name = "PASSWORD"
         value = var.PASSWORD
-      },
-      {
-        name = "BUCKET_NAME"
-        value = var.BUCKET_NAME
       }
     ]
   }])
