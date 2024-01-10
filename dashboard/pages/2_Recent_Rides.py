@@ -76,9 +76,9 @@ def generate_line_charts(recent_rides: pd.DataFrame, selector_gender, selector_a
 
     # Join graphs for widget
     widget_mid_row = alt.hconcat(
-        avg_power_chart, avg_resistance_chart, spacing=50)
+        avg_power_chart, avg_resistance_chart, spacing=30)
     widget_bot_row = alt.hconcat(
-        cumul_power_chart, cumul_resistance_chart, spacing=50)
+        cumul_power_chart, cumul_resistance_chart, spacing=30)
     widget_line_graphs = alt.vconcat(
         widget_mid_row, widget_bot_row, spacing=50)
 
