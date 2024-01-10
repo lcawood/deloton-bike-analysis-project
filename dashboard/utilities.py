@@ -173,7 +173,7 @@ def process_dataframe(df: pd.DataFrame, date_resolution) -> pd.DataFrame:
     add_age_bracket_column(df)
 
     # Title case genders
-    df['gender'] = df['gender'].apply(lambda x: x.title() if x else x)
+    df['gender'] = df['gender'].str.title()
 
     # Title case gender for sidebar appearance
     df.columns = [col.title() if col ==
