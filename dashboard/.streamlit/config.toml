@@ -1,10 +1,10 @@
 [theme]
-# primary accent colour for side bar.7CC37B
+# primary accent colour for side bar (dark gray).
 primaryColor = '#343434'
-# background colour for main content area.343434
+# background colour for main content area (dark_gray).
 backgroundColor = '#343434'
-# secondary background colour. F3F3DD
+# secondary background colour (forest green).
 secondaryBackgroundColor = '#477346'
+# font colour (white).
 textColor="#ffffff"
 font="sans serif"
-# text 6ecc89
