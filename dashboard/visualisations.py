@@ -155,6 +155,8 @@ def get_last_updated_recent_rides(last_update_time: datetime,
     _last_updated_placeholder.caption(
         f"Last updated: {time_delta} seconds ago")
 
+    st.markdown(" ")
+
 
 def get_total_duration_gender_bar_chart(recent_data: pd.DataFrame,
                                         selector_gender, selector_age) -> alt.Chart:
@@ -216,19 +218,6 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame,
     over the past 12 hours.
     """
 
-    # chart_width = 540
-    # dx_offset = 225
-
-    # chart = alt.Chart(ride_counts).mark_bar().encode(
-    #     y=alt.X('Age Bracket:N', title='Ages'),
-    #     x=alt.Y('distinct(ride_id):Q', title='Number of Rides'),
-    #     tooltip=[alt.Tooltip('Age Bracket:N', title='Age Bracket'), alt.Tooltip(
-    #         'count():Q', title='Total Number of Rides')],
-    # ).add_selection(selector_age).transform_filter(
-    #     selector_gender & selector_age).properties(
-    #     title={'text': 'Total Rides (by age)', 'fontSize': 20},
-    #     autosize='fit')
-
     pie_chart = alt.Chart(ride_counts).mark_arc(radius=150).encode(
         color=alt.Color('Age Bracket:N', title='Age Brackets'),
         theta=alt.Theta('distinct(ride_id):Q',
@@ -239,21 +228,7 @@ def get_total_ride_count_age_bar_chart(ride_counts: pd.DataFrame,
         selector_gender & selector_age).properties(
         title={'text': 'Total Rides (by Age Bracket)', 'fontSize': 20})
 
-#
-    # title={'text': 'Total Rides (by Age Bracket)', 'fontSize': 20, })
-
-    text = pie_chart.mark_text(
-        align="center",
-        outerRadius=175,
-        fontSize=14).encode(
-        text='Age Bracket:N',
-        theta=alt.Theta('distinct(ride_id):Q',
-                        title='Number of rides', stack=True)
-    )
-
-    chart = alt.layer(pie_chart, text)
-
-    return chart
+    return pie_chart
 
 
 def get_power_output_avg_line_chart(recent_data: pd.DataFrame,
