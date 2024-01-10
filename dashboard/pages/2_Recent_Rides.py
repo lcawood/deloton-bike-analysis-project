@@ -48,7 +48,7 @@ def generate_bar_charts(recent_rides: pd.DataFrame, selector_gender, selector_ag
     duration_charts = alt.vconcat(
         total_duration_gender_chart,
         ride_count_by_gender_chart,
-        spacing=125)
+        spacing=75)
 
     widget_top_row = alt.hconcat(
         duration_charts,
@@ -142,7 +142,7 @@ def main_recent_rides(db_connection: extensions.connection) -> None:
         ).configure_legend(
             orient='right',
             direction='vertical',
-            offset=-100,
+            offset=-125,
             symbolDirection='vertical'
         )
 
