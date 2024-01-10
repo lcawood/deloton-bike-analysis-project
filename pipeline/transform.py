@@ -2,7 +2,6 @@
 
 from ast import literal_eval
 from datetime import datetime, timedelta
-import re
 
 
 INVALID_DATE_THRESHOLD = datetime(1900, 1, 1, 0, 0, 0)
@@ -129,33 +128,39 @@ def get_ride_data_from_log_line(log_line: str) -> dict:
     return ride
 
 
-def get_reading_data_from_log_line(reading: dict, log_line: str, start_time: datetime) -> dict:
+def get_data_from_reading_line_pair(reading_line_pair: str, start_time: datetime) -> dict:
     """
-    Takes in a kafka log line, and transforms and appends reading data
-    contained within it to the given reading dictionary.
+    Takes in a pair of Kafka reading lines (that have been string concatenated), and extracts and
+    transforms reading data from it, returning this as a dictionary.
     """
 
-    if 'Ride' in log_line:
-        try:
-            reading['resistance'] = int(
-                log_line.split(';')[-1].split('=')[1].strip())
-        except IndexError:
-            reading['resistance'] = None
+    reading_lines = reading_line_pair.split('\n')
+    reading = {'resistance': None, 'elapsed_time': None, 'heart_rate': None,
+               'power': None, 'rpm': None}
 
-        log_datetime = extract_datetime_from_string(log_line)
-        if log_datetime and log_datetime > start_time:
-            reading['elapsed_time'] = int(
-                (log_datetime - start_time).total_seconds())
-        else:
-            reading['elapsed_time'] = None
+    # '[INFO]: Ride' line
+    try:
+        reading['resistance'] = int(
+            reading_lines[0].split(';')[-1].split('=')[1].strip())
+    except IndexError:
+        reading['resistance'] = None
+    
+    log_datetime = extract_datetime_from_string(reading_lines[0])
+    if log_datetime and log_datetime > start_time:
+        reading['elapsed_time'] = int((log_datetime - start_time).total_seconds())
+    else:
+        reading['elapsed_time'] = None
 
-    elif 'Telemetry' in log_line:
-        str_attributes = log_line.split(';')
-        reading['heart_rate'] = int(
-            str_attributes[0].split('=')[1].strip())
-        reading['power'] = float(log_line.split('=')[-1].strip())
-        reading['rpm'] = int(str_attributes[1].split('=')[1].strip())
-
+    if len(reading_lines) == 1:
+        return reading
+    
+    # '[INFO]: Telemetry' line
+    str_attributes = reading_lines[1].split(';')
+    reading['heart_rate'] = int(
+        str_attributes[0].split('=')[1].strip())
+    reading['power'] = float(reading_lines[1].split('=')[-1].strip())
+    reading['rpm'] = int(str_attributes[1].split('=')[1].strip())
+        
     return reading
 
 

@@ -1,6 +1,6 @@
 """Module containing functions used to interact with the RDS database."""
 
-from os import environ, remove
+from os import environ
 
 from dotenv import load_dotenv
 import psycopg2
@@ -8,8 +8,9 @@ from psycopg2 import extensions
 
 load_dotenv()
 
+
 def get_database_connection() -> extensions.connection:
-    """Return a connection our database."""
+    """Return a connection to RDS database."""
 
     return psycopg2.connect(user=environ["DATABASE_USERNAME"],
                             password=environ["DATABASE_PASSWORD"],
@@ -155,7 +156,7 @@ def load_readings_into_database_from_csv(db_connection : extensions.connection, 
                 file,
                 'reading',
                 sep=',',
-                columns=('ride_id', 'resistance', 'elapsed_time', 'heart_rate', 'power', 'rpm')
+                columns=('resistance', 'elapsed_time', 'heart_rate', 'power', 'rpm', 'ride_id')
                 )
 
         db_connection.commit()

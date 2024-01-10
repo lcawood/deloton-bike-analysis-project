@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from transform import timestamp_to_date, check_datetime_is_valid, extract_datetime_from_string, \
     get_bike_serial_number_from_log_line, get_email_from_log_line, get_rider_from_log_line, \
-    get_ride_data_from_log_line, get_reading_data_from_log_line, get_address_from_log_line
+    get_ride_data_from_log_line, get_data_from_reading_line_pair, get_address_from_log_line
 
 
 def test_convert_epoch_to_datetime():
@@ -175,44 +175,53 @@ def test_invalid_ride_data_from_log_line():
 def test_valid_reading_data_from_log_line():
     """Tests for the get_reading_data_from_log_line function where all fields are present."""
 
-    assert get_reading_data_from_log_line({}, "2022-07-25 16:13:37.709125 mendoza v9: \
-                                          [INFO]: Ride - duration = 1.0; resistance = 30\n",
-                                          datetime(2022, 7, 25, 16,
-                                                   13, 30, 709125)
-                                          ) == {'resistance': 30, 'elapsed_time': 7}
+    reading_line_pair = """\
+2022-07-25 16:13:37.709125 mendoza v9: [INFO]: Ride - duration = 1.0; resistance = 30
+2022-07-25 16:13:41.209157 mendoza v9: [INFO]: Telemetry - hrt = 84; rpm = 27; power = 5.092422057
+"""
 
-    assert get_reading_data_from_log_line({}, "2022-07-25 16:13:41.209157 mendoza v9: [INFO]:\
-                                           Telemetry - hrt = 84; rpm = 27; power = 5.092422057\n",
+    assert get_data_from_reading_line_pair(reading_line_pair,
                                           datetime(2022, 7, 25, 16,
                                                    13, 30, 709125)
-                                          ) == {'heart_rate': 84, 'rpm': 27, 'power': 5.092422057}
+                                          ) == {'resistance': 30, 'elapsed_time': 7, 'heart_rate': 84, 'rpm': 27, 'power': 5.092422057}
 
 
 def test_invalid_reading_data_from_log_line():
     """Tests for the get_reading_data_from_log_line function where all fields are not present."""
 
-    assert get_reading_data_from_log_line({}, "2022-07-25 16:13:37.709125 mendoza v9: \
-                                          [INFO]: Ride - duration = 1.0;",
-                                          datetime(2022, 7, 25, 16,
-                                                   13, 30, 709125)
-                                          ) == {'resistance': None, 'elapsed_time': 7}
+    reading_line_pair = """\
+2022-07-25 16:13:37.709125 mendoza v9: [INFO]: Ride - duration = 1.0; resistance = 30
+2022-07-25 16:13:41.209157 mendoza v9: [INFO]: Telemetry - hrt = 84; rpm = 27; power = 5.092422057
+"""
 
-    assert get_reading_data_from_log_line({}, "mendoza v9: \
-                                          [INFO]: Ride - duration = 1.0; resistance = 30\n",
+    assert get_data_from_reading_line_pair(reading_line_pair.split('\n')[0],
                                           datetime(2022, 7, 25, 16,
                                                    13, 30, 709125)
-                                          ) == {'resistance': 30, 'elapsed_time': None}
+                                          ) == {'resistance': 30, 'elapsed_time': 7, 'heart_rate': None, 'rpm': None, 'power': None}
+
+    reading_line_pair = """\
+2022-07-25 16:13:37.709125 mendoza v9: [INFO]: Ride - duration = 1.0; resistance
+2022-07-25 16:13:41.209157 mendoza v9: [INFO]: Telemetry - hrt = 84; rpm = 27; power = 5.092422057
+"""
+    assert get_data_from_reading_line_pair(reading_line_pair,
+                                          datetime(2022, 7, 25, 16,
+                                                   13, 30, 709125)
+                                          ) == {'resistance': None, 'elapsed_time': 7, 'heart_rate': 84, 'rpm': 27, 'power': 5.092422057}
 
 
 def test_start_time_after_reading_time_in_log_line():
     """Test for the get_reading_data_from_log_line function
     where the reading time is after the start time."""
 
-    assert get_reading_data_from_log_line({}, "2022-07-25 16:13:37.709125 mendoza v9: \
-                                          [INFO]: Ride - duration = 1.0; resistance = 30\n",
+    reading_line_pair = """\
+2022-07-25 16:13:37.709125 mendoza v9: [INFO]: Ride - duration = 1.0; resistance = 30
+2022-07-25 16:13:41.209157 mendoza v9: [INFO]: Telemetry - hrt = 84; rpm = 27; power = 5.092422057
+"""
+
+    assert get_data_from_reading_line_pair(reading_line_pair,
                                           datetime(2100, 7, 25, 16,
                                                    13, 30, 709125)
-                                          ) == {'resistance': 30, 'elapsed_time': None}
+                                          ) == {'resistance': 30, 'elapsed_time': None, 'heart_rate': 84, 'rpm': 27, 'power': 5.092422057}
 
 
 def test_get_valid_address_from_log_line():
