@@ -412,7 +412,7 @@ def main():
     Runs first the backfill pipeline, and then the live pipeline until fatal error or user
     interrupt.
     """
-    db_conn = local_db()
+    db_conn = get_database_connection()
 
     logging.info("Running backfill pipeline...")
     # Distinct Kafka connections must be used to ensure offsetting works.
