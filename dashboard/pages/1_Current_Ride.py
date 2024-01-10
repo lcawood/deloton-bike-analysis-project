@@ -60,18 +60,16 @@ def main_current_ride(db_connection: extensions.connection) -> None:
 
             get_current_ride_metrics(current_ride)
 
-            # get_current_rider_info_header()
-
-            get_personal_info_subheader()
-
-            get_current_ride_header_personal_info(current_ride)
-
             # readings to monitor for heart rate warning
             heart_rate = current_ride[7]
             elapsed_time = current_ride[10]
 
             if is_heart_rate_abnormal(current_ride) and elapsed_time > 10:
                 get_heart_rate_warning(heart_rate)
+
+            get_personal_info_subheader()
+
+            get_current_ride_header_personal_info(current_ride)
 
             get_personal_best_subheader()
 
