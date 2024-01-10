@@ -65,5 +65,3 @@ CREATE TABLE Reading(
     UNIQUE (ride_id,elapsed_time)
 );
 
-
-COMMIT;
