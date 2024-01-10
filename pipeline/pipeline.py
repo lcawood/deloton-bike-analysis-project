@@ -243,8 +243,9 @@ class Pipeline():
                 self._bike_pipeline()
                 self._ride_pipeline()
 
-                logging.info(f"Processing ride with id {self._ride['ride_id']}, " + \
-                             "starting on {self._ride['start_time']}...")
+                logging.info("Processing ride with id %s, starting on %s...",
+                             str(self._ride['ride_id']),
+                             str(self._ride['start_time']))
 
             if ('[INFO]: Ride' in self._log_line) and self._rider:
                 log_line = self._kafka_connection.get_next_log_line()
@@ -366,8 +367,9 @@ class BackfillPipeline(Pipeline):
                 self._bike_pipeline()
                 self._ride_pipeline()
 
-                logging.info(f"Processing ride with id {self._ride['ride_id']}, " + \
-                             "starting on {self._ride['start_time']}...")
+                logging.info("Processing ride with id %s, starting on %s...",
+                             str(self._ride['ride_id']), 
+                             str(self._ride['start_time']))
 
                 # Concatenates each pair of [INFO] log lines and adds to list
                 # until [SYSTEM] log line is hit.
