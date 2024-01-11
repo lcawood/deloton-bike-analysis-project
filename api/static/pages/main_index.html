@@ -56,21 +56,21 @@
         <p>Retrieve information about rides.</p>
 
         <h2>/ride/:id</h2>
-        <p>Get a ride with a specific ID.</p>
+        <p><b>GET</b> a ride with a specific ID.</p>
         <p>Query Parameters:</p>
         <ul>
             <li><code>expanded=true</code> - Fetch all readings associated with ride.</li>
             <li><code>summary=true</code> - Summarise all readings associated with ride.</li>
         </ul>
-
+        <p><b>DELETE</b> a ride with a specific ID.</p>
         <h2>/rider</h2>
         <p>Retrieve information about riders.</p>
 
         <h2>/rider/:user_id</h2>
-        <p>Get rider information (e.g., name, gender, age, avg. heart rate, number of rides).</p>
+        <p><b>GET</b> rider information (e.g., name, gender, age, avg. heart rate, number of rides).</p>
 
         <h2>/rider/:user_id/rides</h2>
-        <p>Get all rides for a rider with a specific ID.</p>
+        <p><b>GET</b> all rides for a rider with a specific ID.</p>
         <p>Query Parameters:</p>
         <ul>
             <li><code>expanded=true</code> - Fetch all readings associated with each ride.</li>
@@ -78,7 +78,7 @@
         </ul>
 
         <h2>/daily</h2>
-        <p>Get all rides in the current day.</p>
+        <p><b>GET</b> all rides in the current day.</p>
         <p>Query Parameters:</p>
         <ul>
             <li><code>expanded=true</code> - Fetch all readings associated with each ride.</li>
