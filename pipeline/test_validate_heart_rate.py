@@ -94,6 +94,7 @@ def test_ses_send_email(mock_get_client):
     fake_user_details = {
         "first_name": "John",
         "last_name": "Doe",
+        'gender': 'male',
         "email": "fake_email@hotmail.com"
     }
 
