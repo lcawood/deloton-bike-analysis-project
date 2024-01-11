@@ -26,8 +26,8 @@ API endpoints (note query parameters are to be conjoined with `&` and appended t
         - `summary=true` - Summarise all readings associated with ride.
  - `DELETE /ride/:id` - Delete a with a specific ID
  - `GET /rider` - HTML text instructions on how to use the following two endpoints:
-    - `GET /rider/:user_id` - Get rider information (e.g. name, gender, age, avg. heart rate, number of rides)
-    - `GET /rider/:user_id/rides` - Get all rides for a rider with a specific ID; query params:
+    - `GET /rider/:rider_id` - Get rider information (e.g. name, gender, age, avg. heart rate, number of rides)
+    - `GET /rider/:rider_id/rides` - Get all rides for a rider with a specific ID; query params:
         - `expanded=true` - Fetch all readings associated with each ride;
         - `summary=true` - Summarise all readings associated with each ride.
  - `GET /daily` - Get all of the rides in the current day; query params:
