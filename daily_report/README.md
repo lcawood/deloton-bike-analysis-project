@@ -35,3 +35,7 @@ Run the command `python3 report.py`
     - A file which is used to build a Docker image of the lambda for the `report.py` program
     - To build this image, run the command `docker build -t <image-name> .`
     - To run the container, run the command `docker run --env-file .env <image-name>`
+ 
+## ☁️ Cloud Architecture:
+
+![Daily Report Architecture Diagram](../diagrams/Deloton_Daily_Report_Architecture_Diagram.png)
