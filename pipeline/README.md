@@ -77,3 +77,8 @@ This module contains functions used by the pipeline to upload the extracted and 
 
 ### database_functions.py
 This module contains functions which interact directly with the database, inserting or selecting data. These have been separated into their own module to try to abstract the SQL queries used to interact with the database away from the other parts of the script, as well as with a view to eventually develop this module into a python package that can be used by all the outputs of this project, and to provide a complete and consistent database interface for Deloton.
+
+
+## ☁️ Cloud Architecture:
+
+![Pipeline Architecture Diagram](../diagrams/Deloton_Heart_Rate_Alert_Architecture_Diagram.png)
