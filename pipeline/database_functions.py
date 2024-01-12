@@ -91,7 +91,7 @@ def load_ride_into_database(db_connection : extensions.connection, ride : dict) 
 
         query = """INSERT INTO Ride(rider_id,bike_id,start_time)
           VALUES (%s,%s,%s) RETURNING ride_id;"""
-        
+
         parameters = (ride["rider_id"],ride["bike_id"],ride["start_time"])
 
         db_cur.execute(query,parameters)

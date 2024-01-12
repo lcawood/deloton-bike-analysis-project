@@ -1,6 +1,5 @@
 """Unit tests for the report.py file"""
 
-# pylint: disable=C0301
 # pylint: disable=W0612
 # pylint: disable=R0913
 # pylint: disable=W0613
@@ -11,7 +10,9 @@ from freezegun import freeze_time
 
 import pandas as pd
 
-from report import create_gender_split_table,create_user_stats_table,create_html_string, previous_day_from_database,sql_select_all_useful_data,convert_to_age,extract_report_data,create_report_data,handler
+from report import create_gender_split_table,create_user_stats_table,create_html_string, \
+    previous_day_from_database,sql_select_all_useful_data,convert_to_age,extract_report_data, \
+        create_report_data,handler
 
 EXAMPLE_GENDER_DICT = [{'gender': 'female', 'count': 16}, {'gender': 'male', 'count': 13}]
 EXAMPLE_AGE_DICT = [{'rider_id': 712, 'Age': 70}, {'rider_id': 713, 'Age': 62}]

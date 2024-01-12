@@ -83,7 +83,8 @@ class TestGetRide():
                 'type': 'server error'
             },
             'message': 'Oops! There has been a problem on our end; \
-please be patient while we reset our database connection (if this problem persists, please contact IT support).'}, 500)
+please be patient while we reset our database connection (if this problem persists, please \
+contact IT support).'}, 500)
         mock_db_get_ride.assert_called_once_with(None, 4)
 
 
@@ -164,7 +165,8 @@ class TestGetRider():
                 'type': 'server error'
             },
             'message': 'Oops! There has been a problem on our end; \
-please be patient while we reset our database connection (if this problem persists, please contact IT support).'}, 500)
+please be patient while we reset our database connection (if this problem persists, please \
+contact IT support).'}, 500)
         mock_db_get_rider.assert_called_once_with(None, 4)
 
 
@@ -253,7 +255,8 @@ class TestGetRiderRides():
                 'type': 'server error'
             },
             'message': 'Oops! There has been a problem on our end; \
-please be patient while we reset our database connection (if this problem persists, please contact IT support).'}, 500)
+please be patient while we reset our database connection (if this problem persists, please \
+contact IT support).'}, 500)
         mock_db_get_rider_rides.assert_called_once_with(None, 4)
 
 
@@ -319,7 +322,8 @@ class TestGetDailyRides():
                 'code': 400,
                 'type': 'bad request'
             },
-            'message': 'Invalid url; date must be a datetime string matching the format dd-mm-yyyy.'},
+            'message': 'Invalid url; date must be a datetime string matching the format \
+dd-mm-yyyy.'},
             400
             )
         mock_db_get_daily_rides.assert_not_called()
@@ -362,7 +366,8 @@ class TestGetDailyRides():
                 'type': 'server error'
             },
             'message': 'Oops! There has been a problem on our end; \
-please be patient while we reset our database connection (if this problem persists, please contact IT support).'}, 500)
+please be patient while we reset our database connection (if this problem persists, please \
+contact IT support).'}, 500)
         mock_db_get_daily_rides.assert_called_once_with(
             None, datetime.strptime(test_date, "%d-%m-%Y").date())
 
@@ -463,7 +468,8 @@ class TestDeleteRide():
                 'type': 'server error'
             },
             'message': 'Oops! There has been a problem on our end; \
-please be patient while we reset our database connection (if this problem persists, please contact IT support).'},500)
+please be patient while we reset our database connection (if this problem persists, please \
+contact IT support).'},500)
         mock_db_delete_ride.assert_called_once_with(None, 4)
 
 

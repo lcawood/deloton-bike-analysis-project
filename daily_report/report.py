@@ -5,7 +5,7 @@ The html body is returned in a lambda handler.
 The html document is sent to a S3 Bucket.
 """
 
-# pylint: disable=C0301
+# Disabled as lambda require 'event' and 'context' arguments.
 # pylint: disable=W0613
 
 from os import environ, _Environ
@@ -188,7 +188,8 @@ def sql_select_all_useful_data(db_connection: extensions.connection) -> pd.DataF
     calculate_previous_day = previous_day_from_database(db_connection)
 
     query = f"""SELECT Ride.ride_id,Ride.rider_id,Ride.bike_id,Ride.start_time,
-    Rider.gender,Rider.birthdate,AVG(Reading.heart_rate),AVG(Reading.power) as average_power FROM Ride INNER JOIN
+    Rider.gender,Rider.birthdate,AVG(Reading.heart_rate),AVG(Reading.power) as average_power
+    FROM Ride INNER JOIN
     Rider ON Rider.rider_id = Ride.rider_id INNER JOIN
     Reading ON Reading.ride_id = Ride.ride_id
     WHERE DATE(start_time) = '{calculate_previous_day}'

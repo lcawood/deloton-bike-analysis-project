@@ -121,7 +121,7 @@ def get_ride_data_from_log_line(log_line: str) -> dict:
 
     log_datetime = extract_datetime_from_string(log_line)
     if log_datetime:
-        ride['start_time'] = (log_datetime - timedelta(seconds=0.5))
+        ride['start_time'] = log_datetime - timedelta(seconds=0.5)
     else:
         ride['start_time'] = None
 
@@ -144,7 +144,7 @@ def get_data_from_reading_line_pair(reading_line_pair: str, start_time: datetime
             reading_lines[0].split(';')[-1].split('=')[1].strip())
     except IndexError:
         reading['resistance'] = None
-    
+
     log_datetime = extract_datetime_from_string(reading_lines[0])
     if log_datetime and log_datetime > start_time:
         reading['elapsed_time'] = int((log_datetime - start_time).total_seconds())
@@ -153,14 +153,14 @@ def get_data_from_reading_line_pair(reading_line_pair: str, start_time: datetime
 
     if len(reading_lines) == 1:
         return reading
-    
+
     # '[INFO]: Telemetry' line
     str_attributes = reading_lines[1].split(';')
     reading['heart_rate'] = int(
         str_attributes[0].split('=')[1].strip())
     reading['power'] = float(reading_lines[1].split('=')[-1].strip())
     reading['rpm'] = int(str_attributes[1].split('=')[1].strip())
-        
+
     return reading
 
 
