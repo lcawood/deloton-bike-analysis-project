@@ -62,3 +62,8 @@ Follow the instructions provided in the `README.md` files located in each folder
     - `api`
 2. Navigate to the each of these folders, and follow the `push commands` provided in the ECR repository to build and upload the Docker images
 3. To create the AWS infrastructure required for the pipeline to run on the cloud, navigate to the `terraform` folder and follow the instructions provided in the `README.md` file
+
+### Cloud Architecture:
+
+![alt text](diagrams/Deloton_Cloud_Architecture_diagram.png)
+
