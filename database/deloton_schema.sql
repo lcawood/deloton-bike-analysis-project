@@ -50,6 +50,8 @@ CREATE TABLE Ride(
     UNIQUE (rider_id,bike_id,start_time)
 );
 
+CREATE INDEX idx_ride_time ON ride(start_time DESC);
+
 
 CREATE TABLE Reading(
     reading_id SERIAL PRIMARY KEY,
@@ -65,3 +67,4 @@ CREATE TABLE Reading(
     UNIQUE (ride_id,elapsed_time)
 );
 
+CREATE INDEX idx_ride_id ON reading(ride_id);
