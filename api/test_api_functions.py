@@ -132,11 +132,15 @@ class TestGetRider():
         mock_db_get_rider.assert_not_called()
 
 
-    def test_invalid_rider_id_value(self, mock_db_get_rider):
+    @patch('database_functions.get_rider_avg_hr')
+    @patch('database_functions.get_rider_ride_num')
+    def test_invalid_rider_id_value(self, mock_get_rides_num, mock_get_avg_hr, mock_db_get_rider):
         """
         Tests function get_rider correctly handles a valid type rider_id matching no rider in db.
         """
         mock_db_get_rider.return_value = None
+        mock_get_avg_hr.return_value = None
+        mock_get_rides_num.return_value = None
         assert get_rider(None, 4) == (
             {'error': {
                 'code': 404,
@@ -169,8 +173,9 @@ please be patient while we reset our database connection (if this problem persis
 contact IT support).'}, 500)
         mock_db_get_rider.assert_called_once_with(None, 4)
 
-
-    def test_valid(self, mock_db_get_rider):
+    @patch('database_functions.get_rider_avg_hr')
+    @patch('database_functions.get_rider_ride_num')
+    def test_valid(self, mock_get_rides_num, mock_get_avg_hr, mock_db_get_rider):
         """
         Tests that the function get_rider correctly handles a rider_id of valid type and value, with
         a valid return from the db function get_rider_by_id.
@@ -185,9 +190,13 @@ contact IT support).'}, 500)
             'weight' : 280,
             'email' : "charlie@gmail.com",
             'gender' : "male",
-            'account_created' : "2021-09-27"
+            'account_created' : "2021-09-27",
+            'avg_hr': 86.66,
+            'num_rides': 4
             }
         mock_db_get_rider.return_value = example_rider
+        mock_get_rides_num.return_value = 4
+        mock_get_avg_hr.return_value = 86.66
 
         assert get_rider(None, 1) == (example_rider, 200)
         mock_db_get_rider.assert_called_once_with(None, 1)

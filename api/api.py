@@ -42,7 +42,7 @@ def index():
 def default_ride_endpoint():
     """Default ride endpoint"""
     return current_app.send_static_file('./pages/default_ride_index.html')
-    
+
 
 @app.route("/ride/<int:ride_id>", methods=["GET", "DELETE"])
 @cache.cached(query_string=True, unless = is_not_get_request)
