@@ -81,4 +81,4 @@ This module contains functions which interact directly with the database, insert
 
 ## ☁️ Cloud Architecture:
 
-![Pipeline Architecture Diagram](../diagrams/Deloton_Pipeline_Architecture_Diagram.png)
+![Pipeline Architecture Diagram](../diagrams/Deloton_Heart_Rate_Alert_Architecture_Diagram.png)
