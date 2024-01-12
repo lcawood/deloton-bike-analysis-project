@@ -42,6 +42,10 @@ API endpoints (note query parameters are to be conjoined with `&` and appended t
 - psycopg2-binary
 - pytest
 
+## ☁️ Cloud Architecture:
+
+![API Architecture Diagram](../diagrams/Deloton_API_Architecture_diagram.png)
+
 ## :card_index_dividers: Files Explained
 <br>
 
