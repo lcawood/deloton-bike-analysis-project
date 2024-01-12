@@ -171,5 +171,46 @@ def get_daily_rides(db_connection: connection, date: datetime) -> dict:
         return [dict(row) for row in ride_rows]
 
 
+def get_rider_ride_num(db_connection: connection, rider_id: int) -> int:
+    """
+    Returns the number of rides a rider has.
+    """
+
+    with db_connection.cursor(cursor_factory = RealDictCursor) as db_cur:
+
+        query = """SELECT COUNT(*) as num_rides FROM Ride
+                    WHERE rider_id=%s"""
+        parameters = (rider_id,)
+        db_cur.execute(query,parameters)
+
+        rider_ride_num = db_cur.fetchone()
+
+        if rider_ride_num:
+            return dict(rider_ride_num).get('num_rides')
+
+        return None
+
+
+def get_rider_avg_hr(db_connection: connection, rider_id: int) -> int:
+    """
+    Returns the avg heart rate for a rider across all their readings.
+    """
+
+    with db_connection.cursor(cursor_factory = RealDictCursor) as db_cur:
+
+        query = """SELECT ROUND(AVG(Reading.heart_rate), 2)::float as avg_hr FROM Reading
+                    JOIN Ride ON Reading.ride_id = Ride.ride_id
+                    WHERE rider_id=%s"""
+        parameters = (rider_id,)
+        db_cur.execute(query,parameters)
+
+        rider_hr = db_cur.fetchone()
+
+        if rider_hr:
+            return dict(rider_hr).get('avg_hr')
+
+        return None
+
+
 if __name__ == "__main__":
     db_conn = get_database_connection()

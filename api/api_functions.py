@@ -109,6 +109,11 @@ def get_rider(db_conn: connection, rider_id: int) -> (dict, int):
 
     try:
         rider = database_functions.get_rider_by_id(db_conn, rider_id)
+        avg_hr = database_functions.get_rider_avg_hr(db_conn, rider_id)
+        num_rides = database_functions.get_rider_ride_num(db_conn, rider_id)
+        if rider and (avg_hr is not None) and (num_rides is not None):
+            rider['avg_hr'] = avg_hr
+            rider['num_rides'] = num_rides
     except Error:
         return {'error': {
             'code': STATUS_CODES['server error'],
