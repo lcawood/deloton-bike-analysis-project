@@ -33,7 +33,8 @@ ERROR_MESSAGES = {
         'daily_rides': 'Unable to locate any rides starting on {}.'
     },
     'server error': 'Oops! There has been a problem on our end; \
-please be patient while we reset our database connection (if this problem persists, please contact IT support).'
+please be patient while we reset our database connection (if this problem persists, please \
+contact IT support).'
 }
 
 
@@ -74,7 +75,7 @@ def get_ride(db_conn: connection, ride_id: int, expanded: str = 'False',
             ride['reading_summary']['duration'] = format_seconds_as_readable_time(
                 ride['reading_summary']['duration'])
 
-    except Error as e:
+    except Error:
         return {'error': {
             'code': STATUS_CODES['server error'],
             'type': 'server error'
@@ -108,7 +109,7 @@ def get_rider(db_conn: connection, rider_id: int) -> (dict, int):
 
     try:
         rider = database_functions.get_rider_by_id(db_conn, rider_id)
-    except Error as e:
+    except Error:
         return {'error': {
             'code': STATUS_CODES['server error'],
             'type': 'server error'
@@ -166,7 +167,7 @@ def get_rider_rides(db_conn: connection, rider_id: int, expanded: str = 'False',
                 rides[i]['reading_summary']['duration'] = format_seconds_as_readable_time(
                     rides[i]['reading_summary']['duration'])
 
-    except Error as e:
+    except Error:
         return {'error': {
             'code': STATUS_CODES['server error'],
             'type': 'server error'
@@ -227,7 +228,7 @@ def get_daily_rides(db_conn: connection, date: str = datetime.today().strftime("
                 rides[i]['reading_summary']['duration'] = format_seconds_as_readable_time(
                     rides[i]['reading_summary']['duration'])
 
-    except Error as e:
+    except Error:
         return {'error': {
             'code': STATUS_CODES['server error'],
             'type': 'server error'
@@ -262,7 +263,7 @@ def delete_ride(db_conn: connection, ride_id: int) -> (dict, int):
 
     try:
         ride = database_functions.delete_ride_by_id(db_conn, ride_id)
-    except Error as e:
+    except Error:
         return {'error': {
             'code': STATUS_CODES['server error'],
             'type': 'server error'

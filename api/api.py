@@ -1,7 +1,7 @@
 """Module to contain and run the endpoints for the Deloton staff API"""
 
 from datetime import datetime
-from flask import Flask, request,current_app, abort, Response
+from flask import Flask, request,current_app
 from flask_caching import Cache
 
 import api_functions
@@ -42,7 +42,7 @@ def index():
 def default_ride_endpoint():
     """Default ride endpoint"""
     return current_app.send_static_file('./pages/default_ride_index.html')
-        
+    
 
 @app.route("/ride/<int:ride_id>", methods=["GET", "DELETE"])
 @cache.cached(query_string=True, unless = is_not_get_request)
@@ -55,7 +55,7 @@ def ride_endpoint(ride_id: int):
             response = api_functions.get_ride(db_conn, ride_id, expanded, summary)
         case "DELETE":
             response = api_functions.delete_ride(db_conn, ride_id)
-        
+
     # Resets db_conn if server error
     if response[0] == api_functions.STATUS_CODES['server error']:
         reset_database_connection()
