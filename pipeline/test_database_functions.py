@@ -30,7 +30,7 @@ def test_add_address(mock_load_address_into_database):
     mock_load_address_into_database.return_value = 1
 
     assert add_address(mock_db_conn, EXAMPLE_ADDRESS) == 1
-    
+
 
 def test_load_address_into_database():
     """Tests that a address gets correctly loaded into the database"""

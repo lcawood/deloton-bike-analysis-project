@@ -103,7 +103,7 @@ class KafkaConnection():
         self._last_message = message
 
         return log_line
-    
+
 
     def save_stream_position(self, system_message_before_last: bool = False):
         """
@@ -208,6 +208,8 @@ class Pipeline():
                 logging.error('Unable to send email; %s', str(e))
 
             self._consecutive_extreme_hrs.append(-1)
+
+        return None
 
 
     def _reading_pipeline(self):
@@ -326,14 +328,14 @@ class BackfillPipeline(Pipeline):
         """
         if self._ride is None:
             return False
-        
+
         if self._stop_date and (self._stop_date < self._ride['start_time']):
             return True
-        
+
         if datetime.now().strftime('%Y-%m-%d %H') == \
             self._ride['start_time'].strftime('%Y-%m-%d %H'):
             return True
-        
+
         return False
 
 
@@ -360,7 +362,7 @@ class BackfillPipeline(Pipeline):
                     r_process.join()
                     r_process.close()
                     load.add_readings_from_csv(self._db_connection, self._readings_csv_file)
-            
+
             elif '[SYSTEM]' in self._log_line:
                 # Handles next ride
                 self._address_pipeline()
@@ -369,7 +371,7 @@ class BackfillPipeline(Pipeline):
                 self._ride_pipeline()
 
                 logging.info("Processing ride with id %s, starting on %s...",
-                             str(self._ride['ride_id']), 
+                             str(self._ride['ride_id']),
                              str(self._ride['start_time']))
 
                 # Concatenates each pair of [INFO] log lines and adds to list
@@ -400,7 +402,7 @@ class BackfillPipeline(Pipeline):
             else:
                 # Skips over lines which contain neither [SYSTEM] nor [INFO] data.
                 self._log_line = self._kafka_connection.get_next_log_line(False)
-            
+
         # Removes utility csv file.
         if os.path.exists(self._readings_csv_file):
             os.remove(self._readings_csv_file)
@@ -430,4 +432,3 @@ if __name__ == "__main__":
         level=logging.INFO
     )
     main()
-

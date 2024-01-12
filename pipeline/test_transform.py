@@ -63,7 +63,8 @@ def test_future_date_found_in_log_line():
     """Test for the extract_datetime_from_string function where the date is in the future."""
 
     assert extract_datetime_from_string(
-        f"{(datetime.now() + timedelta(days=50)).strftime('%Y-%m-%d %H:%M:%S.%f')} some text") is None
+        f"{(datetime.now() + timedelta(days=50)).strftime('%Y-%m-%d %H:%M:%S.%f')} \
+            some text") is None
 
 
 def test_invalid_date_found_in_log_line():
@@ -78,7 +79,7 @@ def test_invalid_date_found_in_log_line():
 
 def test_get_serial_number_from_log_line():
     """Test for the get_bike_serial_number_from_log_line
-    function where a serial number is present."""   
+    function where a serial number is present."""
 
     assert get_bike_serial_number_from_log_line(
         "2022-07-25 16:13:37.209120 mendoza v9: [SYSTEM] data = \
@@ -156,7 +157,9 @@ def test_valid_ride_data_from_log_line():
         \"date_of_birth\":-336700800000,\"email_address\":\"wayne_fitzgerald@hotmail.com\",\
         \"height_cm\":187,\"weight_kg\":52,\"account_create_date\":1641254400000,\
         \"bike_serial\":\"SN0000\",\"original_source\":\"offline\"}\n"
-    ) == {'rider_id': 815, 'start_time': datetime.strptime('25/07/2022 16:13:37.209120', "%d/%m/%Y %H:%M:%S.%f") - timedelta(seconds=0.5)}
+    ) == {'rider_id': 815,
+          'start_time': datetime.strptime('25/07/2022 16:13:37.209120', "%d/%m/%Y %H:%M:%S.%f") - \
+          timedelta(seconds=0.5)}
 
 
 def test_invalid_ride_data_from_log_line():
@@ -183,7 +186,8 @@ def test_valid_reading_data_from_log_line():
     assert get_data_from_reading_line_pair(reading_line_pair,
                                           datetime(2022, 7, 25, 16,
                                                    13, 30, 709125)
-                                          ) == {'resistance': 30, 'elapsed_time': 7, 'heart_rate': 84, 'rpm': 27, 'power': 5.092422057}
+                                          ) == {'resistance': 30, 'elapsed_time': 7,
+                                                'heart_rate': 84, 'rpm': 27, 'power': 5.092422057}
 
 
 def test_invalid_reading_data_from_log_line():
@@ -194,10 +198,11 @@ def test_invalid_reading_data_from_log_line():
 2022-07-25 16:13:41.209157 mendoza v9: [INFO]: Telemetry - hrt = 84; rpm = 27; power = 5.092422057
 """
 
-    assert get_data_from_reading_line_pair(reading_line_pair.split('\n')[0],
+    assert get_data_from_reading_line_pair(reading_line_pair.split('\n', maxsplit=1)[0],
                                           datetime(2022, 7, 25, 16,
                                                    13, 30, 709125)
-                                          ) == {'resistance': 30, 'elapsed_time': 7, 'heart_rate': None, 'rpm': None, 'power': None}
+                                          ) == {'resistance': 30, 'elapsed_time': 7,
+                                                'heart_rate': None, 'rpm': None, 'power': None}
 
     reading_line_pair = """\
 2022-07-25 16:13:37.709125 mendoza v9: [INFO]: Ride - duration = 1.0; resistance
@@ -206,7 +211,8 @@ def test_invalid_reading_data_from_log_line():
     assert get_data_from_reading_line_pair(reading_line_pair,
                                           datetime(2022, 7, 25, 16,
                                                    13, 30, 709125)
-                                          ) == {'resistance': None, 'elapsed_time': 7, 'heart_rate': 84, 'rpm': 27, 'power': 5.092422057}
+                                          ) == {'resistance': None, 'elapsed_time': 7,
+                                                'heart_rate': 84, 'rpm': 27, 'power': 5.092422057}
 
 
 def test_start_time_after_reading_time_in_log_line():
@@ -221,7 +227,8 @@ def test_start_time_after_reading_time_in_log_line():
     assert get_data_from_reading_line_pair(reading_line_pair,
                                           datetime(2100, 7, 25, 16,
                                                    13, 30, 709125)
-                                          ) == {'resistance': 30, 'elapsed_time': None, 'heart_rate': 84, 'rpm': 27, 'power': 5.092422057}
+                                          ) == {'resistance': 30, 'elapsed_time': None,
+                                                'heart_rate': 84, 'rpm': 27, 'power': 5.092422057}
 
 
 def test_get_valid_address_from_log_line():
