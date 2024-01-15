@@ -203,7 +203,7 @@ class Pipeline():
         if len(self._consecutive_extreme_hrs) == self._extreme_hr_count_threshold:
             try:
                 validate_heart_rate.send_email(self._rider, self._consecutive_extreme_hrs)
-                logging.info('HR Alert email sent to rider.')
+                logging.info('HR alert email sent to rider.')
             except ClientError as e:
                 logging.error('Unable to send email; %s', str(e))
 
