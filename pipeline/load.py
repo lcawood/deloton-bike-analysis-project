@@ -59,7 +59,7 @@ def add_reading(db_connection: connection, reading: dict) -> int:
         db_connection.commit()
         return reading_id
 
-    except errors.UniqueViolation:
+    except (errors.UniqueViolation, errors.NotNullViolation):
         db_connection.rollback()
         reading_id = database_functions.select_reading_from_database(db_connection, reading)
         return reading_id
