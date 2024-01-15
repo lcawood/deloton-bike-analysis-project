@@ -32,8 +32,14 @@ def extract_datetime_from_string(input_string: str) -> datetime | None:
     a datetime in the format 'YYYY-MM-DD HH:MM:SS.microseconds'."""
     datetime_str = " ".join(input_string.split(" ")[:2])
     try:
+        if '.' in input_string:
+            datetime_format = '%Y-%m-%d %H:%M:%S.%f'
+        else:
+            datetime_format = '%Y-%m-%d %H:%M:%S'
+            
         datetime_obj = datetime.strptime(
-            datetime_str, '%Y-%m-%d %H:%M:%S.%f')
+            datetime_str, datetime_format)
+
         if check_datetime_is_valid(datetime_obj):
             return datetime_obj
     except (ValueError, AttributeError):
