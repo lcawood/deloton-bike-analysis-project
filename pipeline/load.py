@@ -59,7 +59,7 @@ def add_reading(db_connection: connection, reading: dict) -> int:
         db_connection.commit()
         return reading_id
 
-    except errors.UniqueViolation:
+    except (errors.UniqueViolation, errors.NotNullViolation):
         db_connection.rollback()
         reading_id = database_functions.select_reading_from_database(db_connection, reading)
         return reading_id
@@ -89,7 +89,7 @@ def add_readings_from_csv(db_connection: connection, readings_file: str) -> bool
         database_functions.load_readings_into_database_from_csv(db_connection, readings_file)
         db_connection.commit()
 
-    except errors.UniqueViolation:
+    except (errors.UniqueViolation, errors.NotNullViolation):
         db_connection.rollback()
         # We don't know which record caused the unique violation, so have to individually insert all.
         readings = pd.read_csv(readings_file).to_dict("records")

@@ -111,7 +111,6 @@ class KafkaConnection():
         the message before last, if system_message_before_last is True) fetched the next time the
         partition is accessed.
         """
-        print('saving')
         if system_message_before_last:
             message = self._pre_system_messages[-2]
         else:
@@ -204,6 +203,7 @@ class Pipeline():
         if len(self._consecutive_extreme_hrs) == self._extreme_hr_count_threshold:
             try:
                 validate_heart_rate.send_email(self._rider, self._consecutive_extreme_hrs)
+                logging.info('HR alert email sent to rider.')
             except ClientError as e:
                 logging.error('Unable to send email; %s', str(e))
 
@@ -317,6 +317,10 @@ class BackfillPipeline(Pipeline):
 
         with Pool() as pool:
             readings = pd.DataFrame(pool.map(partial_reading_pipeline, reading_line_pairs))
+        
+        readings = readings.dropna()
+        integer_columns = ['heart_rate', 'rpm', 'resistance', 'elapsed_time']
+        readings[integer_columns] = readings[integer_columns].astype(int)
 
         readings.to_csv(readings_csv_file, index=False)
 
